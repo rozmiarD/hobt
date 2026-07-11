@@ -1,0 +1,42 @@
+# OS / editor
+.DS_Store
+Thumbs.db
+*.swp
+*~
+.idea/
+.vscode/
+.cursor/
+*.code-workspace
+
+# Local env / secrets
+.env
+.env.*
+!.env.example
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+.venv/
+venv/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+htmlcov/
+.coverage
+dist/
+build/
+*.egg-info/
+
+# Node / web
+node_modules/
+.npm/
+dist/
+.cache/
+
+# Game / engine build artifacts
+bin/
+obj/
+*.log
+artifacts/
+local/
