@@ -4,7 +4,7 @@ Heroes of Brick & Tactics is a tactics game built around the **LEGO Skirmish** r
 
 [![Pages](https://github.com/rozmiarD/hobt/actions/workflows/pages.yml/badge.svg)](https://github.com/rozmiarD/hobt/actions/workflows/pages.yml)
 
-**Live configurator:** [https://rozmiarD.github.io/hobt/](https://rozmiarD.github.io/hobt/)
+**Live configurator:** [https://rozmiard.github.io/hobt/](https://rozmiard.github.io/hobt/)
 
 ## LEGO Skirmish core
 
