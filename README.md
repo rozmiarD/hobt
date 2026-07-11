@@ -2,6 +2,10 @@
 
 Heroes of Brick & Tactics is a tactics game built around the **LEGO Skirmish** rules engine.
 
+[![Pages](https://github.com/rozmiarD/hobt/actions/workflows/pages.yml/badge.svg)](https://github.com/rozmiarD/hobt/actions/workflows/pages.yml)
+
+**Live configurator:** [https://rozmiarD.github.io/hobt/](https://rozmiarD.github.io/hobt/)
+
 ## LEGO Skirmish core
 
 The first implementation stage delivers a data-driven TypeScript rules engine for:
@@ -58,6 +62,23 @@ const card = buildCharacterCardSnapshot(resolved);
 
 ## Status
 
-Stage 1–2 implemented: model, math, validation, card snapshot foundation. Web configurator and print renderer are planned next.
+Stage 1–2: model, math, validation, card snapshot foundation.
+
+Stage 3: web configurator with live cost/validation, team builder, and card preview.
+
+### Local development
+
+```bash
+npm install
+npm test
+npm run dev:web
+```
+
+Open `http://localhost:5173`.
+
+### GitHub Pages
+
+Pushes to `main` run tests, build `web/dist`, and deploy to GitHub Pages.
+In repository settings, set **Pages → Build and deployment → Source: GitHub Actions** once if the site is not live yet.
 
 Unresolved gameplay topics are explicitly marked `UNRESOLVED` in code and are not hardcoded as rules.

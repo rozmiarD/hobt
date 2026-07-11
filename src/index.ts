@@ -6,6 +6,12 @@ export {
   negativeEffectValue,
 } from "./rules/default-ruleset.js";
 export { DEFAULT_CATALOG } from "./catalog/default-catalog.js";
+export {
+  getItemsForSlot,
+  listAbilities,
+  listItems,
+  localize,
+} from "./catalog/helpers.js";
 export { calculateCharacterCost } from "./cost/calculator.js";
 export {
   testD6,

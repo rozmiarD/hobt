@@ -32,6 +32,7 @@ build/
 node_modules/
 .npm/
 dist/
+web/dist/
 .cache/
 
 # Game / engine build artifacts

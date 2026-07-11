@@ -1,0 +1,533 @@
+:root {
+  color-scheme: light;
+  --bg: #f3efe6;
+  --panel: #fffdf8;
+  --ink: #1f1a14;
+  --muted: #6d6458;
+  --line: #d9cfbf;
+  --accent: #c45c26;
+  --accent-soft: #f4ddc8;
+  --ok: #2f6b3b;
+  --warn: #9a6a12;
+  --bad: #9f2f2f;
+  --shadow: 0 18px 40px rgba(31, 26, 20, 0.08);
+  font-family: "Segoe UI", system-ui, sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background:
+    radial-gradient(circle at top left, #fff8ea 0%, transparent 35%),
+    linear-gradient(180deg, #efe6d7 0%, var(--bg) 100%);
+  color: var(--ink);
+}
+
+button,
+input,
+select {
+  font: inherit;
+}
+
+.app-shell {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 24px;
+}
+
+.app-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: end;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.eyebrow {
+  margin: 0 0 4px;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-size: 0.75rem;
+}
+
+.app-header h1 {
+  margin: 0;
+  font-size: clamp(1.8rem, 3vw, 2.6rem);
+}
+
+.locale-switch {
+  display: flex;
+  gap: 8px;
+}
+
+.locale-switch button,
+.ghost,
+.primary,
+.stepper button {
+  border: 1px solid var(--line);
+  background: var(--panel);
+  color: var(--ink);
+  border-radius: 999px;
+  padding: 8px 14px;
+  cursor: pointer;
+}
+
+.locale-switch button.active,
+.primary {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: white;
+}
+
+.panel {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 20px;
+  box-shadow: var(--shadow);
+  padding: 20px;
+}
+
+.panel-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.panel h2,
+.panel h3,
+.panel h4 {
+  margin: 0 0 12px;
+}
+
+.team-panel {
+  margin-bottom: 20px;
+}
+
+.ruleset-badge,
+.muted,
+.stat-cost,
+.talent-cost {
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
+.team-summary {
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  padding: 16px;
+  margin-bottom: 16px;
+}
+
+.team-summary.ok {
+  border-color: #b7d7bf;
+  background: #f5fbf6;
+}
+
+.team-summary.bad {
+  border-color: #e2b7b7;
+  background: #fff6f6;
+}
+
+.budget-bar {
+  height: 10px;
+  background: #ece4d7;
+  border-radius: 999px;
+  overflow: hidden;
+  margin-bottom: 12px;
+}
+
+.budget-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #d4783f, var(--accent));
+}
+
+.team-metrics {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.team-metrics span,
+.derived-values span,
+.eq-label {
+  display: block;
+  color: var(--muted);
+  font-size: 0.8rem;
+}
+
+.team-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  gap: 8px;
+}
+
+.team-list button {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  border: 1px solid var(--line);
+  background: white;
+  border-radius: 12px;
+  padding: 12px 14px;
+  cursor: pointer;
+}
+
+.team-list li.active button {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+}
+
+.team-list li.invalid button {
+  border-color: #e2b7b7;
+}
+
+.workspace {
+  display: grid;
+  grid-template-columns: 1.1fr 0.9fr;
+  gap: 20px;
+}
+
+.field,
+.inline-field,
+.stat-control {
+  display: grid;
+  gap: 6px;
+}
+
+.field input,
+.field select,
+.inline-field select {
+  width: 100%;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 10px 12px;
+  background: white;
+}
+
+.subsection {
+  margin-top: 18px;
+}
+
+.stat-grid,
+.equipment-grid,
+.talent-grid,
+.derived-values {
+  display: grid;
+  gap: 12px;
+}
+
+.stat-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.equipment-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.stat-control {
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  padding: 12px;
+  background: white;
+}
+
+.stepper {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.stepper button {
+  width: 34px;
+  height: 34px;
+  padding: 0;
+}
+
+.stat-value {
+  min-width: 20px;
+  text-align: center;
+  font-weight: 700;
+}
+
+.talent-option {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  gap: 10px;
+  align-items: center;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 10px 12px;
+  background: white;
+}
+
+.talent-option.negative {
+  background: #fffaf7;
+}
+
+.derived-values {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.derived-values strong {
+  font-size: 1.3rem;
+}
+
+.cost-section h4 {
+  margin-top: 14px;
+  color: var(--muted);
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.cost-row,
+.cost-total {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 6px 0;
+  border-bottom: 1px dashed var(--line);
+}
+
+.cost-total {
+  margin-top: 10px;
+  border-bottom: none;
+  font-size: 1.1rem;
+}
+
+.issue-list {
+  margin: 0;
+  padding-left: 18px;
+}
+
+.issue-list.compact {
+  margin-top: 12px;
+}
+
+.issue-list .error {
+  color: var(--bad);
+}
+
+.issue-list .warning {
+  color: var(--warn);
+}
+
+.ok {
+  color: var(--ok);
+}
+
+.editor-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 18px;
+}
+
+.danger {
+  color: var(--bad);
+}
+
+.preview-panel {
+  position: sticky;
+  top: 20px;
+  align-self: start;
+}
+
+.tarot-card {
+  width: min(100%, 360px);
+  margin: 0 auto;
+  aspect-ratio: 2 / 3;
+  border: 2px solid #2d241c;
+  border-radius: 18px;
+  overflow: hidden;
+  display: grid;
+  grid-template-rows: auto auto auto 1fr 1fr;
+  background: linear-gradient(180deg, #fffdf8 0%, #efe4d2 100%);
+}
+
+.tarot-card.state-invalid {
+  outline: 3px solid rgba(159, 47, 47, 0.35);
+}
+
+.tarot-card.state-warning {
+  outline: 3px solid rgba(154, 106, 18, 0.35);
+}
+
+.card-header,
+.card-section {
+  padding: 12px 14px;
+}
+
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  align-items: baseline;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+.card-header h3 {
+  margin: 0;
+  font-size: 1rem;
+}
+
+.card-cost {
+  font-weight: 700;
+  color: var(--accent);
+}
+
+.card-hero {
+  position: relative;
+  min-height: 150px;
+}
+
+.card-portrait {
+  position: relative;
+  height: 100%;
+  background: linear-gradient(135deg, #d7c4aa, #9f8668);
+}
+
+.portrait-placeholder {
+  display: grid;
+  place-items: center;
+  height: 100%;
+  color: rgba(255, 255, 255, 0.8);
+  font-weight: 800;
+  letter-spacing: 0.2em;
+}
+
+.card-derived-rail {
+  position: absolute;
+  top: 12px;
+  right: 10px;
+  display: grid;
+  gap: 8px;
+}
+
+.derived-pill {
+  min-width: 58px;
+  padding: 8px 10px;
+  border-radius: 12px;
+  background: rgba(20, 16, 12, 0.72);
+  color: white;
+  text-align: center;
+}
+
+.derived-pill span {
+  display: block;
+  font-size: 0.65rem;
+  opacity: 0.8;
+}
+
+.derived-pill strong {
+  font-size: 1.2rem;
+}
+
+.card-stats-row {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 6px;
+  padding: 10px;
+  border-top: 1px solid rgba(0, 0, 0, 0.08);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+.card-stat {
+  text-align: center;
+}
+
+.card-stat-value {
+  font-size: 1.2rem;
+  font-weight: 800;
+}
+
+.card-stat-short {
+  font-size: 0.72rem;
+  font-weight: 700;
+}
+
+.card-stat-label {
+  font-size: 0.62rem;
+  color: var(--muted);
+}
+
+.card-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 6px;
+}
+
+.card-list li {
+  display: grid;
+  grid-template-columns: 24px 1fr;
+  gap: 8px;
+  align-items: start;
+  font-size: 0.82rem;
+}
+
+.equipment-list li {
+  grid-template-columns: 18px 0.9fr 1.1fr;
+}
+
+.slot-index {
+  display: grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 999px;
+  background: rgba(0, 0, 0, 0.06);
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+.eq-icon {
+  width: 14px;
+  height: 14px;
+  border-radius: 4px;
+  background: #8d7a67;
+}
+
+.theme-fantasy {
+  background: linear-gradient(180deg, #f8f1e8 0%, #d9c4a1 100%);
+}
+
+.theme-sci-fi-clean {
+  background: linear-gradient(180deg, #f4f8ff 0%, #c8d7ef 100%);
+}
+
+.theme-gothic {
+  background: linear-gradient(180deg, #f2ecec 0%, #b9a7a7 100%);
+}
+
+@media (max-width: 1080px) {
+  .workspace {
+    grid-template-columns: 1fr;
+  }
+
+  .preview-panel {
+    position: static;
+  }
+}
+
+@media (max-width: 720px) {
+  .app-shell {
+    padding: 16px;
+  }
+
+  .stat-grid,
+  .equipment-grid,
+  .team-metrics,
+  .derived-values {
+    grid-template-columns: 1fr;
+  }
+}
