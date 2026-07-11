@@ -11,12 +11,22 @@ const STORAGE_KEY = "hobt-configurator-state-v2";
 
 export type EditorStep = "identity" | "stats" | "equipment" | "talents";
 
+export type CatalogSort = "cost-asc" | "cost-desc" | "name-asc";
+export type TalentFilter = "all" | "positive" | "negative";
+export type MobilePanel = "none" | "filters" | "team";
+
 export interface AppState {
   locale: Locale;
   team: Team;
   activeCharacterId: string | null;
   activeEditorStep: EditorStep;
   draft: CharacterBuild;
+  searchQuery: string;
+  catalogSort: CatalogSort;
+  equipmentSlotFilter: EquipmentSlot;
+  talentFilter: TalentFilter;
+  maxCostFilter: number;
+  mobilePanel: MobilePanel;
 }
 
 let nextId = 1;
@@ -48,6 +58,12 @@ export function createInitialState(): AppState {
     activeCharacterId: null,
     activeEditorStep: "identity",
     draft,
+    searchQuery: "",
+    catalogSort: "cost-asc",
+    equipmentSlotFilter: "mainWeapon",
+    talentFilter: "all",
+    maxCostFilter: DEFAULT_RULESET.team.budget,
+    mobilePanel: "none",
   };
 }
 
@@ -68,6 +84,12 @@ export function loadState(): AppState {
       ...parsed,
       draft: parsed.draft ?? createEmptyCharacter(),
       activeEditorStep: parsed.activeEditorStep ?? "identity",
+      searchQuery: parsed.searchQuery ?? "",
+      catalogSort: parsed.catalogSort ?? "cost-asc",
+      equipmentSlotFilter: parsed.equipmentSlotFilter ?? "mainWeapon",
+      talentFilter: parsed.talentFilter ?? "all",
+      maxCostFilter: parsed.maxCostFilter ?? DEFAULT_RULESET.team.budget,
+      mobilePanel: "none",
     };
   } catch {
     return createInitialState();
@@ -225,8 +247,46 @@ export function startNewCharacter(state: AppState): AppState {
   return {
     ...state,
     activeCharacterId: null,
+    activeEditorStep: "identity",
     draft: createEmptyCharacter(
       state.locale === "pl" ? "Nowa postać" : "New character",
     ),
   };
+}
+
+export function setSearchQuery(state: AppState, searchQuery: string): AppState {
+  return { ...state, searchQuery };
+}
+
+export function setCatalogSort(state: AppState, catalogSort: CatalogSort): AppState {
+  return { ...state, catalogSort };
+}
+
+export function setEquipmentSlotFilter(
+  state: AppState,
+  equipmentSlotFilter: EquipmentSlot,
+): AppState {
+  return { ...state, equipmentSlotFilter };
+}
+
+export function setTalentFilter(
+  state: AppState,
+  talentFilter: TalentFilter,
+): AppState {
+  return { ...state, talentFilter };
+}
+
+export function setMaxCostFilter(state: AppState, maxCostFilter: number): AppState {
+  return {
+    ...state,
+    maxCostFilter: Math.max(0, Math.min(DEFAULT_RULESET.team.budget, maxCostFilter)),
+  };
+}
+
+export function setMobilePanel(state: AppState, mobilePanel: MobilePanel): AppState {
+  return { ...state, mobilePanel };
+}
+
+export function clearAll(state: AppState): AppState {
+  return { ...createInitialState(), locale: state.locale };
 }

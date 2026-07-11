@@ -23,7 +23,8 @@ export type IconName =
   | "users"
   | "image"
   | "calculator"
-  | "circle-check";
+  | "circle-check"
+  | "search";
 
 const ICON_PATHS: Record<IconName, string> = {
   heart:
@@ -72,6 +73,8 @@ const ICON_PATHS: Record<IconName, string> = {
     '<rect width="16" height="20" x="4" y="2" rx="2"/><line x1="8" x2="16" y1="6" y2="6"/><line x1="16" x2="16" y1="14" y2="18"/><path d="M16 10h.01"/><path d="M12 10h.01"/><path d="M8 10h.01"/><path d="M12 14h.01"/><path d="M8 14h.01"/><path d="M12 18h.01"/><path d="M8 18h.01"/>',
   "circle-check":
     '<circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/>',
+  search:
+    '<circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/>',
 };
 
 export const STAT_ICONS: Record<string, IconName> = {
