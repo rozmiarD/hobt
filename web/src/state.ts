@@ -9,10 +9,13 @@ import type { Locale } from "./i18n.js";
 
 const STORAGE_KEY = "hobt-configurator-state-v2";
 
+export type EditorStep = "identity" | "stats" | "equipment" | "talents";
+
 export interface AppState {
   locale: Locale;
   team: Team;
   activeCharacterId: string | null;
+  activeEditorStep: EditorStep;
   draft: CharacterBuild;
 }
 
@@ -43,6 +46,7 @@ export function createInitialState(): AppState {
       cardTheme: { templateId: "universal-clean", decorLevel: "standard" },
     },
     activeCharacterId: null,
+    activeEditorStep: "identity",
     draft,
   };
 }
@@ -63,6 +67,7 @@ export function loadState(): AppState {
       ...createInitialState(),
       ...parsed,
       draft: parsed.draft ?? createEmptyCharacter(),
+      activeEditorStep: parsed.activeEditorStep ?? "identity",
     };
   } catch {
     return createInitialState();
@@ -71,6 +76,13 @@ export function loadState(): AppState {
 
 export function saveState(state: AppState): void {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+}
+
+export function setActiveEditorStep(
+  state: AppState,
+  step: EditorStep,
+): AppState {
+  return { ...state, activeEditorStep: step };
 }
 
 export function setLocale(state: AppState, locale: Locale): AppState {

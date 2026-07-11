@@ -10,7 +10,7 @@ import { t, type Locale } from "./i18n.js";
 const STAT_ORDER = ["hp", "mp", "ac", "ms", "rs", "ls", "ks"] as const;
 const PORTRAIT_STATS = ["hp", "mp", "ac"] as const;
 const BANNER_STATS = ["ms", "rs", "ls", "ks"] as const;
-const CARD_ICON_SCALE = 1;
+const CARD_ICON_SCALE = 1.3;
 
 function statLabel(locale: Locale, key: (typeof STAT_ORDER)[number]): string {
   const map = {

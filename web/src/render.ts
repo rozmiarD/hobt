@@ -10,7 +10,7 @@ import {
 } from "@hobt/lego-skirmish";
 import type { CharacterBuild, PurchasableStat } from "@hobt/lego-skirmish/types/domain.js";
 import { EQUIPMENT_SLOTS } from "@hobt/lego-skirmish/types/domain.js";
-import type { AppState } from "./state.js";
+import type { AppState, EditorStep } from "./state.js";
 import { renderEmptyStashSlot, renderCharacterCard } from "./card-view.js";
 import { CARD_THEMES, t, type Locale } from "./i18n.js";
 import {
@@ -102,6 +102,70 @@ function escapeHtml(value: string): string {
     .replaceAll('"', "&quot;");
 }
 
+const EDITOR_STEPS: EditorStep[] = [
+  "identity",
+  "stats",
+  "equipment",
+  "talents",
+];
+
+const STEP_LABEL: Record<
+  EditorStep,
+  "stepIdentity" | "stepStats" | "stepEquipment" | "stepTalents"
+> = {
+  identity: "stepIdentity",
+  stats: "stepStats",
+  equipment: "stepEquipment",
+  talents: "stepTalents",
+};
+
+function editorStepVisual(
+  step: EditorStep,
+  draft: CharacterBuild,
+  resolved: ReturnType<typeof resolveCharacter>,
+): "complete" | "error" | "pending" {
+  if (!draft.name.trim()) {
+    return step === "identity" ? "pending" : "pending";
+  }
+  if (!resolved.validation.valid) {
+    return "error";
+  }
+  return "complete";
+}
+
+function renderEditorStepper(
+  locale: Locale,
+  state: AppState,
+  draft: CharacterBuild,
+  resolved: ReturnType<typeof resolveCharacter>,
+): string {
+  return `
+    <nav class="editor-stepper" role="tablist" aria-label="${escapeHtml(t(locale, "character"))}">
+      ${EDITOR_STEPS.map((step, index) => {
+        const visual = editorStepVisual(step, draft, resolved);
+        const isActive = state.activeEditorStep === step;
+        const numContent =
+          visual === "complete"
+            ? uiIcon("circle-check", "ui-icon ui-icon--sm")
+            : `${index + 1}`;
+        return `
+        <button
+          type="button"
+          role="tab"
+          class="stepper-tab is-${visual}${isActive ? " is-active" : ""}"
+          data-action="goto-step"
+          data-step="${step}"
+          aria-selected="${isActive}"
+          aria-controls="step-${step}"
+        >
+          <span class="stepper-num" aria-hidden="true">${numContent}</span>
+          <span class="stepper-label">${t(locale, STEP_LABEL[step])}</span>
+          ${visual === "error" ? `<span class="stepper-error-dot" aria-hidden="true"></span>` : ""}
+        </button>`;
+      }).join("")}
+    </nav>`;
+}
+
 function renderCostRows(
   locale: Locale,
   entries: { label: { pl: string; en: string }; amount: number }[],
@@ -120,7 +184,7 @@ function renderCostRows(
     .join("");
 }
 
-function renderCardStash(state: AppState, draft: CharacterBuild): string {
+function renderSidebar(state: AppState, draft: CharacterBuild): string {
   const locale = state.locale;
   const context = cardContext(state);
   const draftResolved = resolveCharacter(draft, DEFAULT_RULESET, DEFAULT_CATALOG);
@@ -150,23 +214,8 @@ function renderCardStash(state: AppState, draft: CharacterBuild): string {
   ).join("");
 
   return `
-    <section class="panel stash-panel">
-      <div class="panel-head stash-head">
-        <div class="panel-title-with-icon">
-          <span class="panel-title-icon" aria-hidden="true">${uiIcon("image")}</span>
-          <div>
-            <h2>${t(locale, "liveDraft")}</h2>
-            <p class="stash-intro">${t(locale, "liveDraftHint")}</p>
-          </div>
-        </div>
-        ${
-          inStash
-            ? `<span class="stash-badge">${t(locale, "inStash")}</span>`
-            : ""
-        }
-      </div>
-
-      <label class="inline-field theme-field">
+    <aside class="panel sidebar-panel">
+      <label class="inline-field sidebar-theme">
         <span>${t(locale, "theme")}</span>
         <select data-action="card-theme">
           ${CARD_THEMES.map(
@@ -178,12 +227,21 @@ function renderCardStash(state: AppState, draft: CharacterBuild): string {
         </select>
       </label>
 
-      <div class="card-preview-wrap card-preview-compact">
-        ${renderCharacterCard(locale, draftCard, {
-          variant: "full",
-          draft: !inStash,
-        })}
+      <div class="card-preview-wrap card-preview-main">
+        <div class="card-preview-stage">
+          ${
+            inStash
+              ? `<span class="card-overlay-badge">${escapeHtml(t(locale, "inStash"))}</span>`
+              : ""
+          }
+          ${renderCharacterCard(locale, draftCard, {
+            variant: "full",
+            draft: !inStash,
+          })}
+        </div>
       </div>
+
+      <div class="sidebar-divider" aria-hidden="true"></div>
 
       <div class="stash-collection">
         <div class="stash-section-head">
@@ -199,7 +257,7 @@ function renderCardStash(state: AppState, draft: CharacterBuild): string {
             : `<div class="stash-grid">${teamCards.join("")}${emptySlotMarkup}</div>`
         }
       </div>
-    </section>`;
+    </aside>`;
 }
 
 function renderCharacterEditor(state: AppState, draft: CharacterBuild): string {
@@ -212,7 +270,7 @@ function renderCharacterEditor(state: AppState, draft: CharacterBuild): string {
       resolved.cost.attributes.find((entry) => entry.id === `attr:${stat}`)?.amount ??
       0;
     return `
-      <label class="stat-control">
+      <label class="stat-control tile">
         <div class="stat-control-main">
           <span class="stat-code">${stat}</span>
           <span class="stat-label-icon stat-icon-${stat.toLowerCase()}">${uiIcon(PURCHASABLE_STAT_ICONS[stat], "ui-icon ui-icon--stat-lg")}</span>
@@ -232,7 +290,7 @@ function renderCharacterEditor(state: AppState, draft: CharacterBuild): string {
     const current = draft.equipment[slot]?.itemId ?? "";
     const blocked = resolved.blockedSlots.includes(slot);
     return `
-      <label class="field field-with-icon">
+      <label class="field field-with-icon tile equipment-tile">
         <span class="field-label">
           <span class="eq-slot-icon">${uiIcon(EQUIPMENT_ICONS[slot], "ui-icon ui-icon--sm")}</span>
           <span>${t(locale, SLOT_LABEL_KEYS[slot])}${blocked ? ` <span class="slot-locked" title="Locked">🔒</span>` : ""}</span>
@@ -259,7 +317,7 @@ function renderCharacterEditor(state: AppState, draft: CharacterBuild): string {
       const talentIcon =
         ability.polarity === "negative" ? "triangle-alert" : "sparkles";
       return `
-        <label class="talent-option ${ability.polarity}">
+        <label class="talent-option tile ${ability.polarity}">
           <input
             type="checkbox"
             data-action="talent-toggle"
@@ -277,7 +335,7 @@ function renderCharacterEditor(state: AppState, draft: CharacterBuild): string {
   const derivedStats = DERIVED_STAT_ORDER.map((stat) => {
     const iconKey = stat.toLowerCase();
     return `
-      <div class="derived-stat-chip stat-${iconKey}">
+      <div class="derived-stat-chip tile tile-compact stat-${iconKey}">
         <span class="derived-stat-icon">${renderIcon(STAT_ICONS[iconKey]!, "ui-icon ui-icon--sm", 16)}</span>
         <span class="derived-stat-copy">
           <span>${stat}</span>
@@ -314,76 +372,84 @@ function renderCharacterEditor(state: AppState, draft: CharacterBuild): string {
         <button type="button" class="ghost" data-action="new-character">${t(locale, "newCharacter")}</button>
       </div>
 
-      <div class="editor-layout">
-        <div class="editor-main">
-          <section class="editor-step">
-            ${sectionHead(locale, "cardIdentity", "image")}
+      ${renderEditorStepper(locale, state, draft, resolved)}
+
+      <section class="editor-step panel" id="step-identity" role="tabpanel">
+        ${sectionHead(locale, "cardIdentity", "image")}
+        <div class="identity-tile-grid">
+          <div class="identity-col">
             <label class="field">
               <span>${t(locale, "name")}</span>
               <input type="text" data-action="name" value="${escapeHtml(draft.name)}" maxlength="48" />
             </label>
-            <div class="identity-grid">
-              <label class="field">
-                <span>${t(locale, "cardSubtitle")}</span>
-                <input type="text" data-action="subtitle" value="${escapeHtml(draft.subtitle ?? "")}" maxlength="64" placeholder="${locale === "pl" ? "np. Dowódca / Tank" : "e.g. Commander / Tank"}" />
+            <label class="field">
+              <span>${t(locale, "cardSubtitle")}</span>
+              <input type="text" data-action="subtitle" value="${escapeHtml(draft.subtitle ?? "")}" maxlength="64" placeholder="${locale === "pl" ? "np. Dowódca / Tank" : "e.g. Commander / Tank"}" />
+            </label>
+          </div>
+          <label class="field">
+            <span>${t(locale, "faction")}</span>
+            <input type="text" data-action="faction" value="${escapeHtml(draft.faction ?? "")}" maxlength="48" placeholder="${locale === "pl" ? "np. Zakon Chromu" : "e.g. Chrome Order"}" />
+          </label>
+          <div class="portrait-preview-cell">
+            ${
+              draft.cosmetics.portraitDataUrl
+                ? `<img class="portrait-thumb" src="${escapeHtml(draft.cosmetics.portraitDataUrl)}" alt="" />`
+                : `<div class="portrait-thumb portrait-thumb-empty">${uiIcon("image", "ui-icon ui-icon--stat-lg")}</div>`
+            }
+          </div>
+          <div class="portrait-controls-cell">
+            <p class="muted portrait-hint">${t(locale, "portraitHint")}</p>
+            <div class="portrait-controls">
+              <label class="ghost portrait-upload-btn">
+                ${uiIcon("image", "ui-icon ui-icon--sm")}
+                ${t(locale, "portraitUpload")}
+                <input type="file" accept="image/*" data-action="portrait-upload" hidden />
               </label>
-              <label class="field">
-                <span>${t(locale, "faction")}</span>
-                <input type="text" data-action="faction" value="${escapeHtml(draft.faction ?? "")}" maxlength="48" placeholder="${locale === "pl" ? "np. Zakon Chromu" : "e.g. Chrome Order"}" />
-              </label>
-            </div>
-            <div class="portrait-field">
-              <p class="muted portrait-hint">${t(locale, "portraitHint")}</p>
-              <div class="portrait-controls">
-                <label class="ghost portrait-upload-btn">
-                  ${uiIcon("image", "ui-icon ui-icon--sm")}
-                  ${t(locale, "portraitUpload")}
-                  <input type="file" accept="image/*" data-action="portrait-upload" hidden />
-                </label>
-                ${
-                  draft.cosmetics.portraitDataUrl
-                    ? `<button type="button" class="ghost danger" data-action="portrait-remove">${t(locale, "portraitRemove")}</button>`
-                    : ""
-                }
-              </div>
               ${
                 draft.cosmetics.portraitDataUrl
-                  ? `<img class="portrait-thumb" src="${escapeHtml(draft.cosmetics.portraitDataUrl)}" alt="" />`
+                  ? `<button type="button" class="ghost danger" data-action="portrait-remove">${t(locale, "portraitRemove")}</button>`
                   : ""
               }
-              <p class="portrait-error hidden" data-role="portrait-error"></p>
             </div>
-          </section>
-
-          <section class="editor-step">
-            ${sectionHead(locale, "baseStats", "swords")}
-            <div class="stat-grid">${statControls}</div>
-          </section>
-
-          <section class="editor-step">
-            ${sectionHead(locale, "equipment", "sword")}
-            <div class="equipment-grid">${equipmentControls}</div>
-          </section>
-
-          <section class="editor-step">
-            ${sectionHead(
-              locale,
-              "talents",
-              "sparkles",
-              `${draft.talentIds.length}/${DEFAULT_RULESET.character.maxTalents}`,
-            )}
-            <div class="talent-grid">${talents}</div>
-          </section>
+            <p class="portrait-error hidden" data-role="portrait-error"></p>
+          </div>
         </div>
+      </section>
 
-        <aside class="editor-summary">
-          <section class="summary-card">
-            ${sectionHead(locale, "derivedStats", "shield")}
-            <div class="derived-values derived-values-compact">${derivedStats}</div>
-          </section>
+      <section class="editor-step panel" id="step-stats" role="tabpanel">
+        ${sectionHead(locale, "baseStats", "swords")}
+        <div class="stat-grid">${statControls}</div>
+        <div class="derived-block">
+          <h4 class="derived-heading">${t(locale, "derivedStats")}</h4>
+          <div class="derived-values">${derivedStats}</div>
+        </div>
+      </section>
 
-          <section class="summary-card">
-            ${sectionHead(locale, "costBreakdown", "calculator")}
+      <section class="editor-step panel" id="step-equipment" role="tabpanel">
+        ${sectionHead(locale, "equipment", "sword")}
+        <div class="equipment-grid">${equipmentControls}</div>
+      </section>
+
+      <section class="editor-step panel" id="step-talents" role="tabpanel">
+        ${sectionHead(
+          locale,
+          "talents",
+          "sparkles",
+          `${draft.talentIds.length}/${DEFAULT_RULESET.character.maxTalents}`,
+        )}
+        <div class="talent-grid">${talents}</div>
+      </section>
+
+      <section class="editor-summary-panel tile">
+        <div class="summary-split">
+          <div class="summary-cost">
+            <div class="section-head">
+              <span class="section-head-icon" aria-hidden="true">${uiIcon("calculator")}</span>
+              <div class="section-head-copy">
+                <h3>${t(locale, "costBreakdown")}</h3>
+              </div>
+            </div>
             <div class="cost-section">
               <h4>${t(locale, "attributes")}</h4>
               ${renderCostRows(locale, resolved.cost.attributes)}
@@ -396,35 +462,42 @@ function renderCharacterEditor(state: AppState, draft: CharacterBuild): string {
                 <strong>${resolved.cost.total} ${t(locale, "points")}</strong>
               </div>
             </div>
-          </section>
-
-          <section class="summary-card">
-            ${sectionHead(locale, "validation", "circle-check")}
+          </div>
+          <div class="summary-validation">
+            <div class="section-head">
+              <span class="section-head-icon" aria-hidden="true">${uiIcon("circle-check")}</span>
+              <div class="section-head-copy">
+                <h3>${t(locale, "validation")}</h3>
+              </div>
+            </div>
             ${
               issues.length === 0
-                ? `<p class="ok">${t(locale, "noIssues")}</p>`
+                ? `<p class="ok validation-ok">${uiIcon("circle-check", "ui-icon ui-icon--sm")} ${t(locale, "noIssues")}</p>`
                 : `<ul class="issue-list">
                     ${issues
                       .map(
-                        (issue) =>
-                          `<li class="${issue.severity}">${escapeHtml(issue.text)}</li>`,
+                        (issue) => `
+                      <li class="${issue.severity}">
+                        ${uiIcon(issue.severity === "error" ? "triangle-alert" : "circle-check", "ui-icon ui-icon--sm")}
+                        <span>${escapeHtml(issue.text)}</span>
+                      </li>`,
                       )
                       .join("")}
                   </ul>`
             }
-          </section>
-
-          <div class="editor-actions">
-            <button type="button" class="primary" data-action="add-to-team">
-              ${inStash ? t(locale, "updateInStash") : t(locale, "addToStash")}
-            </button>
-            ${
-              inStash
-                ? `<button type="button" class="danger ghost" data-action="remove-active">${t(locale, "removeFromTeam")}</button>`
-                : ""
-            }
           </div>
-        </aside>
+        </div>
+      </section>
+
+      <div class="editor-actions">
+        <button type="button" class="primary" data-action="add-to-team">
+          ${inStash ? t(locale, "updateInStash") : t(locale, "addToStash")}
+        </button>
+        ${
+          inStash
+            ? `<button type="button" class="danger ghost" data-action="remove-active">${t(locale, "removeFromTeam")}</button>`
+            : ""
+        }
       </div>
     </section>`;
 }
@@ -437,8 +510,8 @@ function renderTeamPanel(state: AppState): string {
   const ratio = Math.min(100, Math.round((cost / budget) * 100));
 
   return `
-    <section class="panel team-panel team-bar">
-      <div class="team-bar-main">
+    <section class="panel team-bar">
+      <div class="team-bar-zone team-bar-name">
         <span class="panel-title-icon" aria-hidden="true">${uiIcon("users")}</span>
         <label class="field team-name-field team-name-inline">
           <span>${t(locale, "teamName")}</span>
@@ -447,16 +520,22 @@ function renderTeamPanel(state: AppState): string {
         <span class="ruleset-badge">${DEFAULT_RULESET.id} ${DEFAULT_RULESET.version}</span>
       </div>
 
-      <div class="team-summary team-summary-inline ${resolvedTeam.validation.valid ? "ok" : "bad"}">
+      <div class="team-bar-zone team-bar-budget">
+        <p class="budget-caption">
+          <span class="budget-caption-label">${t(locale, "budgetCaption")}</span>
+          <strong>${cost}</strong> / ${budget} ${t(locale, "points")}
+        </p>
         <div class="budget-bar">
           <div class="budget-fill" style="width: ${ratio}%"></div>
         </div>
-        <div class="team-metrics team-metrics-inline">
-          <div><span>${t(locale, "teamBudget")}</span><strong>${budget}</strong></div>
-          <div><span>${t(locale, "teamCost")}</span><strong>${cost}</strong></div>
-          <div><span>${t(locale, "teamCount")}</span><strong>${state.team.characters.length} / ${DEFAULT_RULESET.team.maximumCharacterCount}</strong></div>
-        </div>
-        <p class="team-status">${resolvedTeam.validation.valid ? t(locale, "teamValid") : t(locale, "teamInvalid")}</p>
+        <p class="team-count-line">
+          ${t(locale, "teamCount")}: <strong>${state.team.characters.length} / ${DEFAULT_RULESET.team.maximumCharacterCount}</strong>
+        </p>
+      </div>
+
+      <div class="team-status-tile ${resolvedTeam.validation.valid ? "ok" : "bad"}">
+        ${uiIcon(resolvedTeam.validation.valid ? "circle-check" : "triangle-alert", "ui-icon ui-icon--stat")}
+        <span>${resolvedTeam.validation.valid ? t(locale, "teamValid") : t(locale, "teamInvalid")}</span>
       </div>
 
       ${
@@ -491,9 +570,9 @@ export function renderApp(state: AppState): string {
 
       ${renderTeamPanel(state)}
 
-      <div class="workspace workspace-config">
+      <div class="workspace">
         ${renderCharacterEditor(state, state.draft)}
-        ${renderCardStash(state, state.draft)}
+        ${renderSidebar(state, state.draft)}
       </div>
     </div>`;
 }

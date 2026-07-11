@@ -73,6 +73,11 @@ const UI = {
     points: "pkt",
     ruleset: "Ruleset",
     theme: "Motyw karty",
+    stepIdentity: "Tożsamość",
+    stepStats: "Statystyki",
+    stepEquipment: "Ekwipunek",
+    stepTalents: "Talenty",
+    budgetCaption: "Koszt drużyny",
   },
   en: {
     title: "LEGO Skirmish — Configurator",
@@ -148,6 +153,11 @@ const UI = {
     points: "pts",
     ruleset: "Ruleset",
     theme: "Card theme",
+    stepIdentity: "Identity",
+    stepStats: "Statistics",
+    stepEquipment: "Equipment",
+    stepTalents: "Talents",
+    budgetCaption: "Team cost",
   },
 } as const;
 

@@ -7,6 +7,7 @@ import {
   removeFromTeam,
   saveState,
   selectTeamCharacter,
+  setActiveEditorStep,
   setCardTheme,
   setDraftEquipment,
   setDraftFaction,
@@ -19,6 +20,7 @@ import {
   startNewCharacter,
   toggleDraftTalent,
   type AppState,
+  type EditorStep,
 } from "./state.js";
 import { t, type Locale } from "./i18n.js";
 
@@ -154,6 +156,14 @@ root.addEventListener("click", (event) => {
 
   if (action === "new-character") {
     update(startNewCharacter);
+    return;
+  }
+
+  if (action === "goto-step" && button.dataset.step) {
+    const step = button.dataset.step as EditorStep;
+    update((current) => setActiveEditorStep(current, step));
+    const target = root.querySelector<HTMLElement>(`#step-${step}`);
+    target?.scrollIntoView({ behavior: "smooth", block: "start" });
     return;
   }
 
