@@ -132,40 +132,40 @@ body {
 }
 
 .character-card .card-stat-icon .hobt-icon {
-  width: calc(14px * var(--card-scale, 1.5));
-  height: calc(14px * var(--card-scale, 1.5));
+  width: calc(14px * var(--card-scale, 0.375));
+  height: calc(14px * var(--card-scale, 0.375));
 }
 
 .character-card .card-portrait-stat-cell .card-stat-icon .hobt-icon {
-  width: calc(16px * var(--card-scale, 1.5));
-  height: calc(16px * var(--card-scale, 1.5));
+  width: calc(16px * var(--card-scale, 0.375));
+  height: calc(16px * var(--card-scale, 0.375));
 }
 
 .character-card .card-eq-icon {
   display: grid;
   place-items: center;
-  width: calc(12px * var(--card-scale, 1.5));
-  height: calc(12px * var(--card-scale, 1.5));
+  width: calc(12px * var(--card-scale, 0.375));
+  height: calc(12px * var(--card-scale, 0.375));
   color: #5f564b;
 }
 
 .character-card .card-eq-icon .hobt-icon {
-  width: calc(11px * var(--card-scale, 1.5));
-  height: calc(11px * var(--card-scale, 1.5));
+  width: calc(11px * var(--card-scale, 0.375) * 1.5);
+  height: calc(11px * var(--card-scale, 0.375) * 1.5);
 }
 
 .character-card .card-ability-icon {
   display: grid;
   place-items: center;
-  width: calc(11px * var(--card-scale, 1.5));
-  height: calc(11px * var(--card-scale, 1.5));
-  margin-top: calc(1px * var(--card-scale, 1.5));
+  width: calc(11px * var(--card-scale, 0.375) * 1.5);
+  height: calc(11px * var(--card-scale, 0.375) * 1.5);
+  margin-top: calc(1px * var(--card-scale, 0.375));
   color: #6d6458;
 }
 
 .character-card .card-ability-icon .hobt-icon {
-  width: calc(10px * var(--card-scale, 1.5));
-  height: calc(10px * var(--card-scale, 1.5));
+  width: calc(10px * var(--card-scale, 0.375) * 1.5);
+  height: calc(10px * var(--card-scale, 0.375) * 1.5);
 }
 
 .card-ability-row.type-negative .card-ability-icon {

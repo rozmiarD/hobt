@@ -195,6 +195,11 @@ select {
   gap: 20px;
 }
 
+.workspace-config {
+  grid-template-columns: minmax(0, 1.55fr) minmax(220px, 0.45fr);
+  align-items: start;
+}
+
 .workspace-stash {
   align-items: start;
 }
@@ -204,6 +209,235 @@ select {
   position: sticky;
   top: 20px;
   align-self: start;
+}
+
+.ui-icon {
+  display: inline-block;
+  flex-shrink: 0;
+  color: var(--accent);
+}
+
+.ui-icon--sm {
+  width: 16px;
+  height: 16px;
+}
+
+.ui-icon--stat {
+  width: 20px;
+  height: 20px;
+}
+
+.panel-title-with-icon {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.panel-title-icon {
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  background: var(--accent-soft);
+  color: var(--accent);
+}
+
+.panel-title-icon .ui-icon {
+  width: 22px;
+  height: 22px;
+}
+
+.section-head {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.section-head-icon {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
+  background: #f6efe4;
+  color: var(--accent);
+  flex-shrink: 0;
+}
+
+.section-head-copy h3 {
+  margin: 0;
+  font-size: 1rem;
+}
+
+.section-head-meta {
+  margin: 2px 0 0;
+  color: var(--muted);
+  font-size: 0.82rem;
+}
+
+.editor-head-meta {
+  margin: 4px 0 0;
+  color: var(--muted);
+  font-size: 0.85rem;
+}
+
+.editor-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(240px, 300px);
+  gap: 18px;
+  align-items: start;
+}
+
+.editor-step {
+  padding: 16px;
+  margin-bottom: 14px;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  background: #fffaf4;
+}
+
+.editor-step:last-child {
+  margin-bottom: 0;
+}
+
+.editor-summary {
+  position: sticky;
+  top: 20px;
+  display: grid;
+  gap: 12px;
+}
+
+.summary-card {
+  padding: 14px;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  background: white;
+}
+
+.summary-card .section-head {
+  margin-bottom: 10px;
+}
+
+.field-label,
+.stat-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.stat-label {
+  justify-content: flex-start;
+}
+
+.stat-label-copy {
+  display: grid;
+  gap: 2px;
+}
+
+.stat-label-icon {
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  background: #f6efe4;
+}
+
+.stat-icon-hp .ui-icon { color: #b33; }
+.stat-icon-mp .ui-icon { color: #2f6b4a; }
+.stat-icon-ms .ui-icon { color: #6d4c35; }
+.stat-icon-rs .ui-icon { color: #5a4a8a; }
+.stat-icon-ls .ui-icon { color: #8a6b1f; }
+.stat-icon-ks .ui-icon { color: #3f5f8a; }
+
+.derived-values-compact {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.derived-stat-chip {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 10px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: #fffdf8;
+}
+
+.derived-stat-copy {
+  display: grid;
+  gap: 2px;
+}
+
+.derived-stat-copy span {
+  font-size: 0.72rem;
+}
+
+.derived-stat-copy strong {
+  font-size: 1.1rem;
+}
+
+.team-bar {
+  display: grid;
+  grid-template-columns: minmax(220px, 1fr) minmax(280px, 1.2fr);
+  gap: 16px;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.team-bar-main {
+  display: flex;
+  align-items: end;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.team-name-inline {
+  flex: 1;
+  min-width: 180px;
+  margin: 0;
+}
+
+.team-summary-inline {
+  margin: 0;
+  padding: 12px 14px;
+}
+
+.team-metrics-inline {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.team-errors {
+  grid-column: 1 / -1;
+  margin: 0;
+}
+
+.theme-field {
+  margin-bottom: 12px;
+}
+
+.stash-head {
+  margin-bottom: 10px;
+}
+
+.stash-section-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.stash-section-title h3 {
+  margin: 0;
+}
+
+.card-preview-compact {
+  margin-bottom: 16px;
+}
+
+.card-preview-compact .character-card {
+  margin-inline: auto;
 }
 
 .stash-intro {
@@ -481,7 +715,7 @@ select {
 
 .talent-option {
   display: grid;
-  grid-template-columns: auto 1fr auto;
+  grid-template-columns: auto auto 1fr auto;
   gap: 10px;
   align-items: center;
   border: 1px solid var(--line);
@@ -625,7 +859,8 @@ select {
 }
 
 .character-card {
-  --card-scale: 1.5;
+  --card-scale: 0.375;
+  --card-detail-text-scale: 6;
   --card-safe: 3.5%;
   width: min(100%, calc(350px * var(--card-scale)));
   aspect-ratio: 7 / 12;
@@ -866,6 +1101,11 @@ select {
   color: #5f564b;
 }
 
+.card-zone-equipment .card-section-title,
+.card-zone-abilities .card-section-title {
+  font-size: calc(0.48rem * var(--card-scale) * var(--card-detail-text-scale));
+}
+
 .card-equipment-list,
 .card-abilities-list {
   display: grid;
@@ -881,7 +1121,7 @@ select {
     1fr;
   gap: calc(4px * var(--card-scale));
   align-items: center;
-  font-size: calc(0.5rem * var(--card-scale));
+  font-size: calc(0.5rem * var(--card-scale) * var(--card-detail-text-scale));
   line-height: 1.15;
 }
 
@@ -900,7 +1140,7 @@ select {
 
 .card-ability-row {
   display: grid;
-  grid-template-columns: calc(10px * var(--card-scale)) 1fr;
+  grid-template-columns: calc(10px * var(--card-scale) * 1.5) 1fr;
   gap: calc(4px * var(--card-scale));
   align-items: start;
   min-height: 1.1em;
@@ -918,12 +1158,17 @@ select {
 
 .card-ability-text {
   margin: 0;
-  font-size: calc(0.5rem * var(--card-scale));
+  font-size: calc(0.5rem * var(--card-scale) * var(--card-detail-text-scale));
   line-height: 1.2;
 }
 
-.card-ability-text.text-compact { font-size: calc(0.46rem * var(--card-scale)); }
-.card-ability-text.text-tiny { font-size: calc(0.42rem * var(--card-scale)); }
+.card-ability-text.text-compact {
+  font-size: calc(0.46rem * var(--card-scale) * var(--card-detail-text-scale));
+}
+
+.card-ability-text.text-tiny {
+  font-size: calc(0.42rem * var(--card-scale) * var(--card-detail-text-scale));
+}
 
 .card-zone-footer {
   display: flex;
@@ -1016,7 +1261,20 @@ select {
 }
 
 @media (max-width: 1080px) {
-  .workspace {
+  .workspace,
+  .workspace-config {
+    grid-template-columns: 1fr;
+  }
+
+  .editor-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .editor-summary {
+    position: static;
+  }
+
+  .team-bar {
     grid-template-columns: 1fr;
   }
 
@@ -1035,8 +1293,15 @@ select {
   .stat-grid,
   .equipment-grid,
   .team-metrics,
+  .team-metrics-inline,
   .derived-values,
+  .derived-values-compact,
   .stash-grid {
     grid-template-columns: 1fr;
+  }
+
+  .team-bar-main {
+    flex-direction: column;
+    align-items: stretch;
   }
 }
