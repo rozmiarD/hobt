@@ -3,33 +3,24 @@ import { renderApp } from "./render.js";
 import { PortraitError, processPortraitFile } from "./portrait.js";
 import {
   addDraftToTeam,
-  clearAll,
   loadState,
   removeFromTeam,
   saveState,
   selectTeamCharacter,
   setActiveEditorStep,
   setCardTheme,
-  setCatalogSort,
   setDraftEquipment,
   setDraftFaction,
   setDraftName,
   setDraftPortrait,
   setDraftStat,
   setDraftSubtitle,
-  setEquipmentSlotFilter,
   setLocale,
-  setMaxCostFilter,
-  setMobilePanel,
-  setSearchQuery,
-  setTalentFilter,
   setTeamName,
   startNewCharacter,
   toggleDraftTalent,
   type AppState,
-  type CatalogSort,
   type EditorStep,
-  type TalentFilter,
 } from "./state.js";
 import { t, type Locale } from "./i18n.js";
 
@@ -44,7 +35,6 @@ interface FocusSnapshot {
   action: string;
   slot?: string;
   talent?: string;
-  item?: string;
   character?: string;
   selectionStart: number | null;
   selectionEnd: number | null;
@@ -68,7 +58,6 @@ function captureFocus(): FocusSnapshot | null {
     action,
     slot: active.dataset.slot,
     talent: active.dataset.talent,
-    item: active.dataset.item,
     character: active.dataset.character,
     selectionStart: hasSelection ? active.selectionStart : null,
     selectionEnd: hasSelection ? active.selectionEnd : null,
@@ -90,9 +79,6 @@ function restoreFocus(snapshot: FocusSnapshot | null): void {
       continue;
     }
     if (snapshot.talent && candidate.dataset.talent !== snapshot.talent) {
-      continue;
-    }
-    if (snapshot.item && candidate.dataset.item !== snapshot.item) {
       continue;
     }
     if (snapshot.character && candidate.dataset.character !== snapshot.character) {
@@ -143,26 +129,6 @@ function showPortraitError(message: string): void {
   node.classList.remove("hidden");
 }
 
-function exportConfiguration(): void {
-  const blob = new Blob([JSON.stringify(state, null, 2)], {
-    type: "application/json",
-  });
-  const url = URL.createObjectURL(blob);
-  const link = document.createElement("a");
-  link.href = url;
-  link.download = `hobt-team-${state.team.name || "export"}.json`;
-  link.click();
-  URL.revokeObjectURL(url);
-}
-
-function clearTeam(state: AppState): AppState {
-  return {
-    ...state,
-    team: { ...state.team, characters: [] },
-    activeCharacterId: null,
-  };
-}
-
 root.addEventListener("click", (event) => {
   const target = event.target as HTMLElement;
   const button = target.closest<HTMLElement>("[data-action]");
@@ -199,41 +165,9 @@ root.addEventListener("click", (event) => {
   }
 
   if (action === "goto-step" && button.dataset.step) {
-    const step = button.dataset.step as EditorStep;
-    update((current) => setActiveEditorStep(current, step));
-    return;
-  }
-
-  if (action === "slot-filter" && button.dataset.slot) {
     update((current) =>
-      setEquipmentSlotFilter(current, button.dataset.slot as EquipmentSlot),
+      setActiveEditorStep(current, button.dataset.step as EditorStep),
     );
-    return;
-  }
-
-  if (action === "talent-filter" && button.dataset.filter) {
-    update((current) =>
-      setTalentFilter(current, button.dataset.filter as TalentFilter),
-    );
-    return;
-  }
-
-  if (action === "equip-item" && button.dataset.item && button.dataset.slot) {
-    const slot = button.dataset.slot as EquipmentSlot;
-    const itemId = button.dataset.item;
-    update((current) => {
-      const currentId = current.draft.equipment[slot]?.itemId;
-      return setDraftEquipment(
-        current,
-        slot,
-        currentId === itemId ? null : itemId,
-      );
-    });
-    return;
-  }
-
-  if (action === "talent-card" && button.dataset.talent) {
-    update((current) => toggleDraftTalent(current, button.dataset.talent!));
     return;
   }
 
@@ -242,8 +176,8 @@ root.addEventListener("click", (event) => {
     return;
   }
 
-  if (action === "remove-character" && button.dataset.character) {
-    update((current) => removeFromTeam(current, button.dataset.character!));
+  if (action === "remove-active" && state.draft.id) {
+    update((current) => removeFromTeam(current, current.draft.id));
     return;
   }
 
@@ -254,45 +188,6 @@ root.addEventListener("click", (event) => {
 
   if (action === "select-character" && button.dataset.character) {
     update((current) => selectTeamCharacter(current, button.dataset.character!));
-    return;
-  }
-
-  if (action === "clear-all") {
-    if (window.confirm(t(state.locale, "clearAll") + "?")) {
-      update(clearAll);
-    }
-    return;
-  }
-
-  if (action === "clear-team") {
-    if (window.confirm(t(state.locale, "clearTeam") + "?")) {
-      update(clearTeam);
-    }
-    return;
-  }
-
-  if (action === "save-config") {
-    saveState(state);
-    return;
-  }
-
-  if (action === "export-json") {
-    exportConfiguration();
-    return;
-  }
-
-  if (action === "open-filters") {
-    update((current) => setMobilePanel(current, "filters"));
-    return;
-  }
-
-  if (action === "open-team") {
-    update((current) => setMobilePanel(current, "team"));
-    return;
-  }
-
-  if (action === "close-panel") {
-    update((current) => setMobilePanel(current, "none"));
   }
 });
 
@@ -322,29 +217,18 @@ root.addEventListener("input", (event) => {
 
   if (action === "team-name" && target instanceof HTMLInputElement) {
     update((current) => setTeamName(current, target.value));
-    return;
-  }
-
-  if (action === "search" && target instanceof HTMLInputElement) {
-    update((current) => setSearchQuery(current, target.value));
-    return;
-  }
-
-  if (action === "cost-filter" && target instanceof HTMLInputElement) {
-    update((current) => setMaxCostFilter(current, Number(target.value)));
-    return;
-  }
-
-  if (action === "cost-filter-input" && target instanceof HTMLInputElement) {
-    update((current) => setMaxCostFilter(current, Number(target.value)));
   }
 });
 
 root.addEventListener("change", async (event) => {
   const target = event.target as HTMLElement;
 
-  if (target instanceof HTMLSelectElement && target.dataset.action === "catalog-sort") {
-    update((current) => setCatalogSort(current, target.value as CatalogSort));
+  if (
+    target instanceof HTMLInputElement &&
+    target.dataset.action === "talent-toggle" &&
+    target.dataset.talent
+  ) {
+    update((current) => toggleDraftTalent(current, target.dataset.talent!));
     return;
   }
 
@@ -368,6 +252,12 @@ root.addEventListener("change", async (event) => {
     } finally {
       target.value = "";
     }
+    return;
+  }
+
+  if (target instanceof HTMLSelectElement && target.dataset.action === "equipment") {
+    const slot = target.dataset.slot as EquipmentSlot;
+    update((current) => setDraftEquipment(current, slot, target.value || null));
     return;
   }
 

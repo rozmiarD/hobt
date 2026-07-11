@@ -1,33 +1,17 @@
-/* Card typography + theme accents */
-
-:root {
-  --font-ui: "Source Sans 3", "Segoe UI", system-ui, sans-serif;
-  --font-card-title: "Cinzel", "Times New Roman", serif;
-  --font-card-body: "Source Sans 3", "Segoe UI", system-ui, sans-serif;
-  --font-card-section: "Oswald", "Arial Narrow", sans-serif;
-}
-
-body {
-  font-family: var(--font-ui);
-}
+/* Card theme fonts and accents */
 
 .character-card .card-name {
-  font-family: var(--font-card-title);
+  font-family: var(--font-card-title, "Cinzel", serif);
 }
 
 .character-card .card-subtitle {
-  font-family: var(--font-card-body);
+  font-family: var(--font-card-body, "Source Sans 3", sans-serif);
 }
 
-.character-card .card-faction-line,
+.character-card .card-faction,
 .character-card .card-section-title,
 .character-card .card-points-label {
-  font-family: var(--font-card-section);
-}
-
-.character-card .card-eq-item,
-.card-ability-text strong {
-  font-family: var(--font-card-body);
+  font-family: var(--font-card-section, "Oswald", sans-serif);
 }
 
 .theme-universal-clean {
@@ -96,31 +80,4 @@ body {
 
 .character-card .card-points-badge {
   background: var(--card-ink, #2d241c);
-}
-
-.hobt-icon {
-  display: inline-block;
-  flex-shrink: 0;
-  vertical-align: middle;
-}
-
-.card-stat-icon {
-  display: grid;
-  place-items: center;
-}
-
-.stash-stat-pill {
-  display: inline-flex;
-  align-items: center;
-  gap: 2px;
-  font-size: 0.58rem;
-  font-weight: 700;
-  padding: 2px 4px;
-  border-radius: 6px;
-  background: rgba(0, 0, 0, 0.05);
-}
-
-.stash-stat-pill .hobt-icon {
-  width: 10px;
-  height: 10px;
 }
