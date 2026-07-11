@@ -136,7 +136,7 @@ function renderFullCard(
           ${sprite(EQUIPMENT_SPRITES[slot])}
           <span class="card-eq-slot">${escapeHtml(t(locale, SLOT_SHORT[slot]))}</span>
           <span>—</span>
-          <span>${escapeHtml(itemName)}</span>
+          <span class="card-eq-item">${escapeHtml(itemName)}</span>
         </div>`;
   }).join("");
 

@@ -10,8 +10,20 @@
 
 .character-card .card-faction,
 .character-card .card-section-title,
-.character-card .card-points-label {
+.character-card .card-points-label,
+.character-card .card-eq-slot {
   font-family: var(--font-card-section, "Oswald", sans-serif);
+}
+
+.character-card .card-eq-item,
+.character-card .card-ability-row p,
+.character-card .card-ability-row strong {
+  font-family: var(--font-card-body, "Source Sans 3", sans-serif);
+}
+
+.character-card .cps-value,
+.character-card .card-stat-value {
+  font-family: var(--font-heading, "Oswald", sans-serif);
 }
 
 .theme-universal-clean {
