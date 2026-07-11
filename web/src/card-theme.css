@@ -1,0 +1,197 @@
+/* App + card typography — Google Fonts (SIL Open Font License) */
+
+:root {
+  --font-ui: "Source Sans 3", "Segoe UI", system-ui, sans-serif;
+  --font-card-title: "Cinzel", "Times New Roman", serif;
+  --font-card-body: "Source Sans 3", "Segoe UI", system-ui, sans-serif;
+  --font-card-section: "Oswald", "Arial Narrow", sans-serif;
+}
+
+body {
+  font-family: var(--font-ui);
+}
+
+.character-card {
+  font-family: var(--font-card-body);
+  color: #1f1a14;
+}
+
+.card-name {
+  font-family: var(--font-card-title);
+  font-weight: 700;
+}
+
+.card-subtitle {
+  font-family: var(--font-card-body);
+  font-style: italic;
+}
+
+.card-faction-line,
+.card-section-title,
+.card-points-label {
+  font-family: var(--font-card-section);
+  letter-spacing: 0.08em;
+}
+
+.card-eq-slot,
+.card-ability-text strong {
+  font-family: var(--font-card-body);
+  font-weight: 700;
+}
+
+.theme-universal-clean {
+  --font-card-title: "Cinzel", serif;
+  --font-card-body: "Source Sans 3", sans-serif;
+  --font-card-section: "Oswald", sans-serif;
+  --card-accent: #c45c26;
+  --card-ink: #1f1a14;
+}
+
+.theme-fantasy {
+  --font-card-title: "Cormorant Garamond", "Times New Roman", serif;
+  --font-card-body: "EB Garamond", Georgia, serif;
+  --font-card-section: "Cinzel", serif;
+  --card-accent: #8b5a2b;
+  --card-ink: #2a1f14;
+}
+
+.theme-gothic {
+  --font-card-title: "Cinzel", serif;
+  --font-card-body: "EB Garamond", serif;
+  --font-card-section: "Cinzel", serif;
+  --card-accent: #5c1f2a;
+  --card-ink: #1a1218;
+}
+
+.theme-historical {
+  --font-card-title: "Cinzel", serif;
+  --font-card-body: "EB Garamond", serif;
+  --font-card-section: "Oswald", sans-serif;
+  --card-accent: #6b4f2d;
+  --card-ink: #241c14;
+}
+
+.theme-modern-tactical {
+  --font-card-title: "Rajdhani", "Arial Narrow", sans-serif;
+  --font-card-body: "IBM Plex Sans", sans-serif;
+  --font-card-section: "Rajdhani", sans-serif;
+  --card-accent: #3d6b52;
+  --card-ink: #142018;
+}
+
+.theme-post-apocalypse {
+  --font-card-title: "Special Elite", "Courier New", monospace;
+  --font-card-body: "Source Sans 3", sans-serif;
+  --font-card-section: "Oswald", sans-serif;
+  --card-accent: #9a6a12;
+  --card-ink: #1c1810;
+}
+
+.theme-sci-fi-clean {
+  --font-card-title: "Orbitron", sans-serif;
+  --font-card-body: "Exo 2", sans-serif;
+  --font-card-section: "Orbitron", sans-serif;
+  --card-accent: #2f6f9c;
+  --card-ink: #0f1a24;
+}
+
+.theme-industrial-retro {
+  --font-card-title: "Share Tech Mono", monospace;
+  --font-card-body: "IBM Plex Sans", sans-serif;
+  --font-card-section: "Oswald", sans-serif;
+  --card-accent: #8a4b28;
+  --card-ink: #1a1410;
+}
+
+.character-card .card-points-badge {
+  background: var(--card-ink, #2d241c);
+}
+
+.character-card .card-points-value {
+  color: #fff;
+}
+
+.stat-hp .hobt-icon { color: #b33; }
+.stat-mp .hobt-icon { color: #2f6b4a; }
+.stat-ac .hobt-icon { color: #4a5f7a; }
+.stat-ms .hobt-icon { color: #6d4c35; }
+.stat-rs .hobt-icon { color: #5a4a8a; }
+.stat-ls .hobt-icon { color: #8a6b1f; }
+.stat-ks .hobt-icon { color: #3f5f8a; }
+
+.hobt-icon {
+  display: inline-block;
+  flex-shrink: 0;
+  vertical-align: middle;
+}
+
+.card-stat-icon {
+  display: grid;
+  place-items: center;
+  margin: 2px auto;
+}
+
+.card-stat-icon .hobt-icon {
+  width: 14px;
+  height: 14px;
+}
+
+.card-eq-icon {
+  display: grid;
+  place-items: center;
+  width: 12px;
+  height: 12px;
+  color: #5f564b;
+}
+
+.card-eq-icon .hobt-icon {
+  width: 11px;
+  height: 11px;
+}
+
+.card-ability-icon {
+  display: grid;
+  place-items: center;
+  width: 11px;
+  height: 11px;
+  margin-top: 1px;
+  color: #6d6458;
+}
+
+.card-ability-icon .hobt-icon {
+  width: 10px;
+  height: 10px;
+}
+
+.card-ability-row.type-negative .card-ability-icon {
+  color: #9f2f2f;
+}
+
+.card-ability-row.type-main_attack .card-ability-icon,
+.card-ability-row.type-ranged .card-ability-icon {
+  color: #6d4c35;
+}
+
+.card-ability-row.type-offhand .card-ability-icon {
+  color: #8a6b4a;
+}
+
+.card-ability-row.type-defense .card-ability-icon {
+  color: #4a5f7a;
+}
+
+.stash-stat-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  font-size: 0.58rem;
+  font-weight: 700;
+  padding: 2px 4px;
+  border-radius: 6px;
+  background: rgba(0, 0, 0, 0.05);
+}
+
+.stash-stat-pill .hobt-icon {
+  width: 10px;
+  height: 10px;
+}

@@ -1,4 +1,10 @@
 import type { CharacterCard, EquipmentSlot } from "@hobt/lego-skirmish/types/domain.js";
+import {
+  abilityIcon,
+  EQUIPMENT_ICONS,
+  renderIcon,
+  STAT_ICONS,
+} from "./icons.js";
 import { t, type Locale } from "./i18n.js";
 
 const STAT_ORDER = ["hp", "mp", "ac", "ms", "rs", "ls", "ks"] as const;
@@ -95,7 +101,7 @@ function renderStats(locale: Locale, card: CharacterCard): string {
     return `
       <div class="card-stat-cell stat-${key}">
         <span class="card-stat-key">${key.toUpperCase()}</span>
-        <span class="card-stat-icon" aria-hidden="true"></span>
+        <span class="card-stat-icon">${renderIcon(STAT_ICONS[key]!, "card-stat-svg", 14)}</span>
         <strong class="card-stat-value">${value}</strong>
         <span class="card-stat-name">${escapeHtml(label)}</span>
       </div>`;
@@ -109,7 +115,7 @@ function renderEquipment(locale: Locale, card: CharacterCard): string {
     const itemName = entry?.name ?? t(locale, "none");
     return `
       <div class="card-equipment-row">
-        <span class="card-eq-icon eq-${slot}" aria-hidden="true"></span>
+        <span class="card-eq-icon eq-${slot}">${renderIcon(EQUIPMENT_ICONS[slot], "card-eq-svg", 11)}</span>
         <span class="card-eq-slot">${escapeHtml(slotLabel)}</span>
         <span class="card-eq-sep">—</span>
         <span class="card-eq-item">${escapeHtml(itemName)}</span>
@@ -130,7 +136,7 @@ function renderAbilities(card: CharacterCard): string {
     ]);
     return `
       <div class="card-ability-row${typeClass}">
-        <span class="card-ability-icon" aria-hidden="true"></span>
+        <span class="card-ability-icon">${renderIcon(abilityIcon(ability.type), "card-ability-svg", 10)}</span>
         <p class="card-ability-text ${descClass}">
           <strong>${escapeHtml(ability.name)}</strong>
           <span> — ${escapeHtml(ability.description)}</span>
@@ -214,6 +220,23 @@ function renderStashCard(
     ? `<img src="${escapeHtml(card.portrait.url)}" alt="" />`
     : `<span>LEGO</span>`;
 
+  const stashStats = [
+    ["hp", card.stats.hp],
+    ["mp", card.stats.mp],
+    ["ac", card.stats.ac],
+    ["ms", card.stats.ms],
+  ] as const;
+
+  const statsMarkup = stashStats
+    .map(
+      ([key, value]) => `
+      <span class="stash-stat-pill stat-${key}">
+        ${renderIcon(STAT_ICONS[key]!, "stash-stat-svg", 10)}
+        <span>${value}</span>
+      </span>`,
+    )
+    .join("");
+
   return `
     <${tag} ${attrs}>
       <div class="stash-card-frame">
@@ -222,12 +245,7 @@ function renderStashCard(
           <span class="stash-card-points">${card.points}</span>
         </div>
         <div class="stash-card-portrait">${portrait}</div>
-        <div class="stash-card-stats">
-          <span>HP ${card.stats.hp}</span>
-          <span>MP ${card.stats.mp}</span>
-          <span>AC ${card.stats.ac}</span>
-          <span>MS ${card.stats.ms}</span>
-        </div>
+        <div class="stash-card-stats">${statsMarkup}</div>
       </div>
     </${tag}>`;
 }
