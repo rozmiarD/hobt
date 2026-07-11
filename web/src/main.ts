@@ -29,6 +29,74 @@ if (!root) {
   throw new Error("Missing #app root element");
 }
 
+interface FocusSnapshot {
+  action: string;
+  slot?: string;
+  talent?: string;
+  selectionStart: number | null;
+  selectionEnd: number | null;
+}
+
+function captureFocus(): FocusSnapshot | null {
+  const active = document.activeElement;
+  if (!(active instanceof HTMLElement) || !root.contains(active)) {
+    return null;
+  }
+
+  const action = active.dataset.action;
+  if (!action) {
+    return null;
+  }
+
+  const hasSelection =
+    active instanceof HTMLInputElement || active instanceof HTMLTextAreaElement;
+
+  return {
+    action,
+    slot: active.dataset.slot,
+    talent: active.dataset.talent,
+    selectionStart: hasSelection ? active.selectionStart : null,
+    selectionEnd: hasSelection ? active.selectionEnd : null,
+  };
+}
+
+function restoreFocus(snapshot: FocusSnapshot | null): void {
+  if (!snapshot) {
+    return;
+  }
+
+  const candidates = root.querySelectorAll<HTMLElement>(
+    `[data-action="${snapshot.action}"]`,
+  );
+  let target: HTMLElement | null = null;
+
+  for (const candidate of candidates) {
+    if (snapshot.slot && candidate.dataset.slot !== snapshot.slot) {
+      continue;
+    }
+    if (snapshot.talent && candidate.dataset.talent !== snapshot.talent) {
+      continue;
+    }
+    target = candidate;
+    break;
+  }
+
+  if (!target) {
+    return;
+  }
+
+  target.focus();
+
+  if (
+    target instanceof HTMLInputElement ||
+    target instanceof HTMLTextAreaElement
+  ) {
+    const start = snapshot.selectionStart ?? target.value.length;
+    const end = snapshot.selectionEnd ?? start;
+    target.setSelectionRange(start, end);
+  }
+}
+
 function commit(next: AppState): void {
   state = next;
   saveState(state);
@@ -40,7 +108,9 @@ function update(updater: (current: AppState) => AppState): void {
 }
 
 function paint(): void {
+  const focus = captureFocus();
   root.innerHTML = renderApp(state);
+  restoreFocus(focus);
 }
 
 function showPortraitError(message: string): void {
