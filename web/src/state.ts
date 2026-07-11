@@ -7,7 +7,7 @@ import type {
 import { DEFAULT_RULESET } from "@hobt/lego-skirmish/rules/default-ruleset.js";
 import type { Locale } from "./i18n.js";
 
-const STORAGE_KEY = "hobt-configurator-state-v1";
+const STORAGE_KEY = "hobt-configurator-state-v2";
 
 export interface AppState {
   locale: Locale;
@@ -79,6 +79,37 @@ export function setLocale(state: AppState, locale: Locale): AppState {
 
 export function setDraftName(state: AppState, name: string): AppState {
   return { ...state, draft: { ...state.draft, name } };
+}
+
+export function setDraftSubtitle(state: AppState, subtitle: string): AppState {
+  return { ...state, draft: { ...state.draft, subtitle } };
+}
+
+export function setDraftFaction(state: AppState, faction: string): AppState {
+  return { ...state, draft: { ...state.draft, faction } };
+}
+
+export function setDraftPortrait(
+  state: AppState,
+  portraitDataUrl: string | undefined,
+): AppState {
+  return {
+    ...state,
+    draft: {
+      ...state.draft,
+      cosmetics: {
+        ...state.draft.cosmetics,
+        portraitDataUrl,
+      },
+    },
+  };
+}
+
+export function setTeamName(state: AppState, name: string): AppState {
+  return {
+    ...state,
+    team: { ...state.team, name },
+  };
 }
 
 export function setDraftStat(

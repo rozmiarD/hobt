@@ -1,7 +1,10 @@
 import type {
+  CharacterCard,
+  CharacterCardContext,
   ResolvedCharacter,
   ResolvedCharacterCardData,
 } from "../types/index.js";
+import { buildCharacterCard } from "./build-spec.js";
 
 function validationState(
   resolved: ResolvedCharacter,
@@ -17,11 +20,13 @@ function validationState(
 
 export function buildCharacterCardSnapshot(
   resolved: ResolvedCharacter,
+  context: CharacterCardContext = {},
 ): ResolvedCharacterCardData {
   return {
     name: resolved.source.name,
     image: {
       assetId: resolved.source.cosmetics.imageRef,
+      url: resolved.source.cosmetics.portraitDataUrl,
     },
     stats: {
       HP: resolved.derivedStats.HP,
@@ -38,3 +43,5 @@ export function buildCharacterCardSnapshot(
     validationState: validationState(resolved),
   };
 }
+
+export { buildCharacterCard } from "./build-spec.js";

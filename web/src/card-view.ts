@@ -1,5 +1,36 @@
-import type { ResolvedCharacterCardData } from "@hobt/lego-skirmish/types/domain.js";
+import type { CharacterCard, EquipmentSlot } from "@hobt/lego-skirmish/types/domain.js";
 import { t, type Locale } from "./i18n.js";
+
+const STAT_ORDER = ["hp", "mp", "ac", "ms", "rs", "ls", "ks"] as const;
+
+function statLabel(locale: Locale, key: (typeof STAT_ORDER)[number]): string {
+  const map = {
+    hp: "statHP",
+    mp: "statMP",
+    ac: "statAC",
+    ms: "statMS",
+    rs: "statRS",
+    ls: "statLS",
+    ks: "statKS",
+  } as const;
+  return t(locale, map[key]);
+}
+
+const EQUIPMENT_SLOTS: EquipmentSlot[] = [
+  "mainWeapon",
+  "offhand",
+  "armor",
+  "item1",
+  "item2",
+];
+
+const EQUIPMENT_LABEL: Record<EquipmentSlot, "slotMainWeapon" | "slotOffhand" | "slotArmor" | "slotItem1" | "slotItem2"> = {
+  mainWeapon: "slotMainWeapon",
+  offhand: "slotOffhand",
+  armor: "slotArmor",
+  item1: "slotItem1",
+  item2: "slotItem2",
+};
 
 function escapeHtml(value: string): string {
   return value
@@ -7,6 +38,15 @@ function escapeHtml(value: string): string {
     .replaceAll("<", "&lt;")
     .replaceAll(">", "&gt;")
     .replaceAll('"', "&quot;");
+}
+
+function fitTextClass(text: string, thresholds: [number, string][]): string {
+  for (const [length, className] of thresholds) {
+    if (text.length > length) {
+      return className;
+    }
+  }
+  return "";
 }
 
 export interface CardViewOptions {
@@ -17,103 +57,152 @@ export interface CardViewOptions {
   interactive?: boolean;
 }
 
-export function renderTarotCard(
+export function renderCharacterCard(
   locale: Locale,
-  card: ResolvedCharacterCardData,
-  themeId: string,
+  card: CharacterCard,
   options: CardViewOptions,
 ): string {
-  const {
-    variant,
-    characterId,
-    selected = false,
-    draft = false,
-    interactive = false,
-  } = options;
-
-  if (variant === "stash") {
-    return renderStashCard(locale, card, themeId, {
-      characterId,
-      selected,
-      draft,
-      interactive,
-    });
+  if (options.variant === "stash") {
+    return renderStashCard(locale, card, options);
   }
+  return renderFullCard(locale, card, options);
+}
 
-  return renderFullCard(locale, card, themeId, { draft });
+function renderFactionLine(card: CharacterCard): string {
+  if (card.faction && card.team) {
+    return `${escapeHtml(card.faction)} — ${escapeHtml(card.team)}`;
+  }
+  if (card.faction) {
+    return escapeHtml(card.faction);
+  }
+  if (card.team) {
+    return escapeHtml(card.team);
+  }
+  return "";
+}
+
+function renderPortrait(card: CharacterCard): string {
+  if (card.portrait?.url) {
+    return `<img class="card-portrait-image" src="${escapeHtml(card.portrait.url)}" alt="" />`;
+  }
+  return `<div class="card-portrait-placeholder">LEGO</div>`;
+}
+
+function renderStats(locale: Locale, card: CharacterCard): string {
+  return STAT_ORDER.map((key) => {
+    const value = card.stats[key];
+    const label = statLabel(locale, key);
+    return `
+      <div class="card-stat-cell stat-${key}">
+        <span class="card-stat-key">${key.toUpperCase()}</span>
+        <span class="card-stat-icon" aria-hidden="true"></span>
+        <strong class="card-stat-value">${value}</strong>
+        <span class="card-stat-name">${escapeHtml(label)}</span>
+      </div>`;
+  }).join("");
+}
+
+function renderEquipment(locale: Locale, card: CharacterCard): string {
+  return EQUIPMENT_SLOTS.map((slot) => {
+    const entry = card.equipment[slot];
+    const slotLabel = t(locale, EQUIPMENT_LABEL[slot]);
+    const itemName = entry?.name ?? t(locale, "none");
+    return `
+      <div class="card-equipment-row">
+        <span class="card-eq-icon eq-${slot}" aria-hidden="true"></span>
+        <span class="card-eq-slot">${escapeHtml(slotLabel)}</span>
+        <span class="card-eq-sep">—</span>
+        <span class="card-eq-item">${escapeHtml(itemName)}</span>
+      </div>`;
+  }).join("");
+}
+
+function renderAbilities(card: CharacterCard): string {
+  const rows = Array.from({ length: 5 }, (_, index) => {
+    const ability = card.abilities[index];
+    if (!ability) {
+      return `<div class="card-ability-row is-empty"><span class="card-ability-dash">—</span></div>`;
+    }
+    const typeClass = ability.type ? ` type-${ability.type}` : "";
+    const descClass = fitTextClass(ability.description, [
+      [48, "text-compact"],
+      [72, "text-tiny"],
+    ]);
+    return `
+      <div class="card-ability-row${typeClass}">
+        <span class="card-ability-icon" aria-hidden="true"></span>
+        <p class="card-ability-text ${descClass}">
+          <strong>${escapeHtml(ability.name)}</strong>
+          <span> — ${escapeHtml(ability.description)}</span>
+        </p>
+      </div>`;
+  });
+  return rows.join("");
 }
 
 function renderFullCard(
   locale: Locale,
-  card: ResolvedCharacterCardData,
-  themeId: string,
-  options: { draft?: boolean },
+  card: CharacterCard,
+  options: CardViewOptions,
 ): string {
-  const statBlock = (value: number, short: string, label: string) => `
-    <div class="card-stat">
-      <div class="card-stat-value">${value}</div>
-      <div class="card-stat-short">${short}</div>
-      <div class="card-stat-label">${escapeHtml(label)}</div>
-    </div>`;
-
-  const derivedRail = `
-    <div class="card-derived-rail">
-      <div class="derived-pill hp"><span>HP</span><strong>${card.stats.HP}</strong></div>
-      <div class="derived-pill mp"><span>MP</span><strong>${card.stats.MP}</strong></div>
-      <div class="derived-pill ac"><span>AC</span><strong>${card.stats.AC}</strong></div>
-    </div>`;
-
+  const nameClass = fitTextClass(card.name, [
+    [24, "name-compact"],
+    [32, "name-tiny"],
+  ]);
+  const subtitle = card.subtitle?.trim();
+  const factionLine = renderFactionLine(card);
   const draftClass = options.draft ? " is-draft" : "";
 
   return `
-    <article class="tarot-card theme-${escapeHtml(themeId)} state-${card.validationState}${draftClass}">
-      <header class="card-header">
-        <h3>${escapeHtml(card.name)}</h3>
-        <span class="card-cost">${card.totalCost} ${t(locale, "points")}</span>
-      </header>
-      <div class="card-hero">
-        <div class="card-portrait">
-          <div class="portrait-placeholder">LEGO</div>
-          ${derivedRail}
+    <article class="character-card theme-${escapeHtml(card.template.id)} state-${card.validationState}${draftClass}" data-aspect="7x12">
+      <header class="card-zone card-zone-header">
+        <div class="card-header-main">
+          <h3 class="card-name ${nameClass}">${escapeHtml(card.name)}</h3>
+          ${subtitle ? `<p class="card-subtitle">${escapeHtml(subtitle)}</p>` : ""}
+          ${factionLine ? `<p class="card-faction-line">${factionLine}</p>` : ""}
         </div>
-      </div>
-      <section class="card-stats-row">
-        ${statBlock(card.stats.MS, "MS", t(locale, "statMS"))}
-        ${statBlock(card.stats.RS, "RS", t(locale, "statRS"))}
-        ${statBlock(card.stats.LS, "LS", t(locale, "statLS"))}
-        ${statBlock(card.stats.KS, "KS", t(locale, "statKS"))}
+        <div class="card-points-badge">
+          <span class="card-points-value">${card.points}</span>
+          <span class="card-points-label">${t(locale, "points")}</span>
+        </div>
+      </header>
+
+      <section class="card-zone card-zone-portrait" aria-label="Portrait">
+        <div class="card-portrait-wrap">
+          ${renderPortrait(card)}
+          <div class="card-portrait-gradient"></div>
+        </div>
       </section>
-      <section class="card-section card-section-compact">
-        <h4>${t(locale, "actionSlots")}</h4>
-        <ol class="card-list">
-          ${card.actions
-            .map(
-              (action) => `
-            <li>
-              <span class="slot-index">${action.slotIndex}</span>
-              <span>${escapeHtml(action.name[locale])}</span>
-            </li>`,
-            )
-            .join("")}
-        </ol>
+
+      <section class="card-zone card-zone-stats" aria-label="Stats">
+        <div class="card-stats-grid">${renderStats(locale, card)}</div>
       </section>
+
+      <section class="card-zone card-zone-equipment" aria-label="Equipment">
+        <h4 class="card-section-title">${t(locale, "equipmentSection")}</h4>
+        <div class="card-equipment-list">${renderEquipment(locale, card)}</div>
+      </section>
+
+      <section class="card-zone card-zone-abilities" aria-label="Abilities">
+        <h4 class="card-section-title">${t(locale, "abilitiesSection")}</h4>
+        <div class="card-abilities-list">${renderAbilities(card)}</div>
+      </section>
+
+      <footer class="card-zone card-zone-footer">
+        <span>LEGO Skirmish ${escapeHtml(card.metadata?.version ?? "")}</span>
+        <span>${escapeHtml(card.metadata?.characterId ?? card.id)}</span>
+      </footer>
     </article>`;
 }
 
 function renderStashCard(
   locale: Locale,
-  card: ResolvedCharacterCardData,
-  themeId: string,
-  options: {
-    characterId?: string;
-    selected?: boolean;
-    draft?: boolean;
-    interactive?: boolean;
-  },
+  card: CharacterCard,
+  options: CardViewOptions,
 ): string {
   const tag = options.interactive ? "button" : "div";
   const attrs = [
-    `class="stash-card theme-${escapeHtml(themeId)} state-${card.validationState}${options.selected ? " is-selected" : ""}${options.draft ? " is-draft" : ""}"`,
+    `class="stash-card state-${card.validationState}${options.selected ? " is-selected" : ""}${options.draft ? " is-draft" : ""} theme-${escapeHtml(card.template.id)}"`,
     options.interactive && options.characterId
       ? `type="button" data-action="select-character" data-character="${escapeHtml(options.characterId)}"`
       : "",
@@ -121,26 +210,23 @@ function renderStashCard(
     .filter(Boolean)
     .join(" ");
 
+  const portrait = card.portrait?.url
+    ? `<img src="${escapeHtml(card.portrait.url)}" alt="" />`
+    : `<span>LEGO</span>`;
+
   return `
     <${tag} ${attrs}>
       <div class="stash-card-frame">
-        <div class="stash-card-header">
-          <strong>${escapeHtml(card.name)}</strong>
-          <span>${card.totalCost}</span>
+        <div class="stash-card-top">
+          <strong class="stash-card-name">${escapeHtml(card.name)}</strong>
+          <span class="stash-card-points">${card.points}</span>
         </div>
-        <div class="stash-card-hero">
-          <div class="stash-portrait">LEGO</div>
-          <div class="stash-rail">
-            <span class="stash-pill hp">HP ${card.stats.HP}</span>
-            <span class="stash-pill mp">MP ${card.stats.MP}</span>
-            <span class="stash-pill ac">AC ${card.stats.AC}</span>
-          </div>
-        </div>
-        <div class="stash-stats">
-          <span>MS ${card.stats.MS}</span>
-          <span>RS ${card.stats.RS}</span>
-          <span>LS ${card.stats.LS}</span>
-          <span>KS ${card.stats.KS}</span>
+        <div class="stash-card-portrait">${portrait}</div>
+        <div class="stash-card-stats">
+          <span>HP ${card.stats.hp}</span>
+          <span>MP ${card.stats.mp}</span>
+          <span>AC ${card.stats.ac}</span>
+          <span>MS ${card.stats.ms}</span>
         </div>
       </div>
     </${tag}>`;
@@ -154,3 +240,6 @@ export function renderEmptyStashSlot(locale: Locale): string {
       </div>
     </div>`;
 }
+
+// Keep alias for older imports during transition.
+export const renderTarotCard = renderCharacterCard;

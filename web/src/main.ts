@@ -1,5 +1,6 @@
 import type { EquipmentSlot, PurchasableStat } from "@hobt/lego-skirmish/types/domain.js";
 import { renderApp } from "./render.js";
+import { PortraitError, processPortraitFile } from "./portrait.js";
 import {
   addDraftToTeam,
   loadState,
@@ -8,14 +9,18 @@ import {
   selectTeamCharacter,
   setCardTheme,
   setDraftEquipment,
+  setDraftFaction,
   setDraftName,
+  setDraftPortrait,
   setDraftStat,
+  setDraftSubtitle,
   setLocale,
+  setTeamName,
   startNewCharacter,
   toggleDraftTalent,
   type AppState,
 } from "./state.js";
-import type { Locale } from "./i18n.js";
+import { t, type Locale } from "./i18n.js";
 
 let state = loadState();
 const root = document.querySelector<HTMLElement>("#app");
@@ -36,6 +41,15 @@ function update(updater: (current: AppState) => AppState): void {
 
 function paint(): void {
   root.innerHTML = renderApp(state);
+}
+
+function showPortraitError(message: string): void {
+  const node = root.querySelector<HTMLElement>('[data-role="portrait-error"]');
+  if (!node) {
+    return;
+  }
+  node.textContent = message;
+  node.classList.remove("hidden");
 }
 
 root.addEventListener("click", (event) => {
@@ -83,6 +97,11 @@ root.addEventListener("click", (event) => {
     return;
   }
 
+  if (action === "portrait-remove") {
+    update((current) => setDraftPortrait(current, undefined));
+    return;
+  }
+
   if (action === "select-character" && button.dataset.character) {
     update((current) => selectTeamCharacter(current, button.dataset.character!));
   }
@@ -102,6 +121,21 @@ root.addEventListener("input", (event) => {
     return;
   }
 
+  if (action === "subtitle" && target instanceof HTMLInputElement) {
+    update((current) => setDraftSubtitle(current, target.value));
+    return;
+  }
+
+  if (action === "faction" && target instanceof HTMLInputElement) {
+    update((current) => setDraftFaction(current, target.value));
+    return;
+  }
+
+  if (action === "team-name" && target instanceof HTMLInputElement) {
+    update((current) => setTeamName(current, target.value));
+    return;
+  }
+
   if (action === "equipment" && target instanceof HTMLSelectElement) {
     const slot = control.dataset.slot as EquipmentSlot;
     update((current) =>
@@ -115,14 +149,38 @@ root.addEventListener("input", (event) => {
   }
 });
 
-root.addEventListener("change", (event) => {
+root.addEventListener("change", async (event) => {
   const target = event.target as HTMLElement;
+
   if (
     target instanceof HTMLInputElement &&
     target.dataset.action === "talent-toggle" &&
     target.dataset.talent
   ) {
     update((current) => toggleDraftTalent(current, target.dataset.talent!));
+    return;
+  }
+
+  if (
+    target instanceof HTMLInputElement &&
+    target.dataset.action === "portrait-upload" &&
+    target.files?.[0]
+  ) {
+    const file = target.files[0];
+    try {
+      const dataUrl = await processPortraitFile(file);
+      update((current) => setDraftPortrait(current, dataUrl));
+    } catch (error) {
+      if (error instanceof PortraitError) {
+        const key =
+          error.code === "too_large"
+            ? "portraitErrorTooLarge"
+            : "portraitErrorType";
+        showPortraitError(t(state.locale, key));
+      }
+    } finally {
+      target.value = "";
+    }
   }
 });
 

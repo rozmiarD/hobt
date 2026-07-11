@@ -21,5 +21,5 @@ export {
 export { resolveCharacter, getEquipmentSlotLabel } from "./resolve/character.js";
 export { validateCharacter } from "./validate/character.js";
 export { validateTeam, calculateTeamCost } from "./validate/team.js";
-export { buildCharacterCardSnapshot } from "./cards/snapshot.js";
+export { buildCharacterCardSnapshot, buildCharacterCard } from "./cards/snapshot.js";
 export { UNRESOLVED_TOPICS } from "./types/domain.js";

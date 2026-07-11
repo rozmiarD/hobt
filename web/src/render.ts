@@ -1,5 +1,5 @@
 import {
-  buildCharacterCardSnapshot,
+  buildCharacterCard,
   DEFAULT_CATALOG,
   DEFAULT_RULESET,
   getItemsForSlot,
@@ -11,8 +11,22 @@ import {
 import type { CharacterBuild, PurchasableStat } from "@hobt/lego-skirmish/types/domain.js";
 import { EQUIPMENT_SLOTS } from "@hobt/lego-skirmish/types/domain.js";
 import type { AppState } from "./state.js";
-import { renderEmptyStashSlot, renderTarotCard } from "./card-view.js";
+import { renderEmptyStashSlot, renderCharacterCard } from "./card-view.js";
 import { CARD_THEMES, t, type Locale } from "./i18n.js";
+
+function cardContext(state: AppState): {
+  teamName?: string;
+  templateId: string;
+  decorationLevel?: "minimal" | "standard" | "ornate" | "worn";
+  locale: Locale;
+} {
+  return {
+    teamName: state.team.name,
+    templateId: state.team.cardTheme.templateId,
+    decorationLevel: state.team.cardTheme.decorLevel,
+    locale: state.locale,
+  };
+}
 
 const PURCHASABLE_STATS: PurchasableStat[] = [
   "MS",
@@ -71,23 +85,21 @@ function renderCostRows(
 
 function renderCardStash(state: AppState, draft: CharacterBuild): string {
   const locale = state.locale;
-  const themeId = state.team.cardTheme.templateId;
+  const context = cardContext(state);
   const draftResolved = resolveCharacter(draft, DEFAULT_RULESET, DEFAULT_CATALOG);
-  const draftCard = buildCharacterCardSnapshot(draftResolved);
+  const draftCard = buildCharacterCard(draftResolved, context);
   const inStash = state.team.characters.some(
     (character) => character.id === draft.id,
   );
 
   const teamCards = state.team.characters.map((character) => {
     const resolved = resolveCharacter(character, DEFAULT_RULESET, DEFAULT_CATALOG);
-    const card = buildCharacterCardSnapshot(resolved);
-    const isSelected = state.activeCharacterId === character.id;
-    const isDraft = character.id === draft.id;
-    return renderTarotCard(locale, card, themeId, {
+    const card = buildCharacterCard(resolved, context);
+    return renderCharacterCard(locale, card, {
       variant: "stash",
       characterId: character.id,
-      selected: isSelected,
-      draft: isDraft,
+      selected: state.activeCharacterId === character.id,
+      draft: character.id === draft.id,
       interactive: true,
     });
   });
@@ -112,7 +124,7 @@ function renderCardStash(state: AppState, draft: CharacterBuild): string {
           <select data-action="card-theme">
             ${CARD_THEMES.map(
               (theme) => `
-              <option value="${theme.id}" ${themeId === theme.id ? "selected" : ""}>
+              <option value="${theme.id}" ${context.templateId === theme.id ? "selected" : ""}>
                 ${escapeHtml(localize(theme.label, locale))}
               </option>`,
             ).join("")}
@@ -129,10 +141,12 @@ function renderCardStash(state: AppState, draft: CharacterBuild): string {
               : ""
           }
         </div>
-        ${renderTarotCard(locale, draftCard, themeId, {
-          variant: "full",
-          draft: !inStash,
-        })}
+        <div class="card-preview-wrap">
+          ${renderCharacterCard(locale, draftCard, {
+            variant: "full",
+            draft: !inStash,
+          })}
+        </div>
       </div>
 
       <div class="stash-collection">
@@ -235,8 +249,45 @@ function renderCharacterEditor(state: AppState, draft: CharacterBuild): string {
 
       <label class="field">
         <span>${t(locale, "name")}</span>
-        <input type="text" data-action="name" value="${escapeHtml(draft.name)}" />
+        <input type="text" data-action="name" value="${escapeHtml(draft.name)}" maxlength="48" />
       </label>
+
+      <div class="subsection card-identity-block">
+        <h3>${t(locale, "cardIdentity")}</h3>
+        <div class="identity-grid">
+          <label class="field">
+            <span>${t(locale, "cardSubtitle")}</span>
+            <input type="text" data-action="subtitle" value="${escapeHtml(draft.subtitle ?? "")}" maxlength="64" placeholder="${locale === "pl" ? "np. Dowódca / Tank" : "e.g. Commander / Tank"}" />
+          </label>
+          <label class="field">
+            <span>${t(locale, "faction")}</span>
+            <input type="text" data-action="faction" value="${escapeHtml(draft.faction ?? "")}" maxlength="48" placeholder="${locale === "pl" ? "np. Zakon Chromu" : "e.g. Chrome Order"}" />
+          </label>
+        </div>
+        <div class="portrait-field">
+          <div class="portrait-field-head">
+            <span>${t(locale, "portrait")}</span>
+            <p class="muted portrait-hint">${t(locale, "portraitHint")}</p>
+          </div>
+          <div class="portrait-controls">
+            <label class="ghost portrait-upload-btn">
+              ${t(locale, "portraitUpload")}
+              <input type="file" accept="image/*" data-action="portrait-upload" hidden />
+            </label>
+            ${
+              draft.cosmetics.portraitDataUrl
+                ? `<button type="button" class="ghost danger" data-action="portrait-remove">${t(locale, "portraitRemove")}</button>`
+                : ""
+            }
+          </div>
+          ${
+            draft.cosmetics.portraitDataUrl
+              ? `<img class="portrait-thumb" src="${escapeHtml(draft.cosmetics.portraitDataUrl)}" alt="" />`
+              : ""
+          }
+          <p class="portrait-error hidden" data-role="portrait-error"></p>
+        </div>
+      </div>
 
       <div class="subsection">
         <h3>${t(locale, "baseStats")}</h3>
@@ -325,6 +376,11 @@ function renderTeamPanel(state: AppState): string {
         <span class="ruleset-badge">${t(locale, "ruleset")}: ${DEFAULT_RULESET.id} ${DEFAULT_RULESET.version}</span>
       </div>
 
+      <label class="field team-name-field">
+        <span>${t(locale, "teamName")}</span>
+        <input type="text" data-action="team-name" value="${escapeHtml(state.team.name)}" maxlength="48" />
+      </label>
+
       <div class="team-summary ${resolvedTeam.validation.valid ? "ok" : "bad"}">
         <div class="budget-bar">
           <div class="budget-fill" style="width: ${ratio}%"></div>
@@ -358,7 +414,7 @@ export function renderApp(state: AppState): string {
     <div class="app-shell">
       <header class="app-header">
         <div>
-          <p class="eyebrow">${t(locale, "subtitle")}</p>
+          <p class="eyebrow">${t(locale, "appSubtitle")}</p>
           <h1>${t(locale, "title")}</h1>
         </div>
         <div class="locale-switch">

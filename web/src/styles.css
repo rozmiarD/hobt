@@ -557,172 +557,410 @@ select {
   color: var(--bad);
 }
 
-.tarot-card {
-  width: min(100%, 360px);
-  margin: 0 auto;
-  aspect-ratio: 2 / 3;
+.card-identity-block {
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  padding: 14px;
+  background: #fffaf4;
+}
+
+.identity-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.portrait-field {
+  margin-top: 14px;
+  display: grid;
+  gap: 10px;
+}
+
+.portrait-field-head {
+  display: grid;
+  gap: 4px;
+}
+
+.portrait-hint {
+  margin: 0;
+  font-size: 0.82rem;
+}
+
+.portrait-controls {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.portrait-upload-btn {
+  display: inline-flex;
+  align-items: center;
+  cursor: pointer;
+}
+
+.portrait-thumb {
+  width: 120px;
+  aspect-ratio: 7 / 12;
+  object-fit: cover;
+  border-radius: 12px;
+  border: 1px solid var(--line);
+}
+
+.portrait-error {
+  margin: 0;
+  color: var(--bad);
+  font-size: 0.85rem;
+}
+
+.portrait-error.hidden {
+  display: none;
+}
+
+.team-name-field {
+  margin-bottom: 14px;
+}
+
+.card-preview-wrap {
+  display: flex;
+  justify-content: center;
+}
+
+.character-card {
+  --card-safe: 3.5%;
+  width: min(100%, 350px);
+  aspect-ratio: 7 / 12;
   border: 2px solid #2d241c;
-  border-radius: 18px;
+  border-radius: 16px;
   overflow: hidden;
   display: grid;
-  grid-template-rows: auto auto auto 1fr 1fr;
+  grid-template-rows: 11% 36% 11% 16% 24% 2%;
   background: linear-gradient(180deg, #fffdf8 0%, #efe4d2 100%);
+  box-shadow: 0 14px 30px rgba(31, 26, 20, 0.14);
 }
 
-.tarot-card.state-invalid {
-  outline: 3px solid rgba(159, 47, 47, 0.35);
+.character-card.is-draft {
+  outline: 3px dashed rgba(196, 92, 38, 0.45);
+  outline-offset: 4px;
 }
 
-.tarot-card.state-warning {
-  outline: 3px solid rgba(154, 106, 18, 0.35);
+.character-card.state-invalid {
+  box-shadow: 0 0 0 3px rgba(159, 47, 47, 0.35);
 }
 
-.card-header,
-.card-section {
-  padding: 12px 14px;
+.character-card.state-warning {
+  box-shadow: 0 0 0 3px rgba(154, 106, 18, 0.35);
 }
 
-.card-header {
-  display: flex;
-  justify-content: space-between;
+.card-zone {
+  min-height: 0;
+  padding-inline: var(--card-safe);
+}
+
+.card-zone-header {
+  display: grid;
+  grid-template-columns: 1fr auto;
   gap: 8px;
-  align-items: baseline;
+  align-items: start;
+  padding-top: 3%;
   border-bottom: 1px solid rgba(0, 0, 0, 0.08);
 }
 
-.card-header h3 {
+.card-header-main {
+  min-width: 0;
+}
+
+.card-name {
   margin: 0;
-  font-size: 1rem;
+  font-size: clamp(0.78rem, 2.8vw, 1rem);
+  line-height: 1.05;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  word-break: break-word;
 }
 
-.card-cost {
+.card-name.name-compact {
+  font-size: clamp(0.7rem, 2.4vw, 0.9rem);
+}
+
+.card-name.name-tiny {
+  font-size: clamp(0.62rem, 2vw, 0.78rem);
+}
+
+.card-subtitle,
+.card-faction-line {
+  margin: 2px 0 0;
+  font-size: 0.52rem;
+  line-height: 1.2;
+  color: #4a4035;
+}
+
+.card-faction-line {
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
   font-weight: 700;
-  color: var(--accent);
 }
 
-.card-hero {
-  position: relative;
-  min-height: 150px;
-}
-
-.card-portrait {
-  position: relative;
-  height: 100%;
-  background: linear-gradient(135deg, #d7c4aa, #9f8668);
-}
-
-.portrait-placeholder {
-  display: grid;
-  place-items: center;
-  height: 100%;
-  color: rgba(255, 255, 255, 0.8);
-  font-weight: 800;
-  letter-spacing: 0.2em;
-}
-
-.card-derived-rail {
-  position: absolute;
-  top: 12px;
-  right: 10px;
-  display: grid;
-  gap: 8px;
-}
-
-.derived-pill {
-  min-width: 58px;
-  padding: 8px 10px;
-  border-radius: 12px;
-  background: rgba(20, 16, 12, 0.72);
+.card-points-badge {
+  min-width: 42px;
+  padding: 4px 6px;
+  border-radius: 10px;
+  background: #2d241c;
   color: white;
   text-align: center;
 }
 
-.derived-pill span {
+.card-points-value {
   display: block;
-  font-size: 0.65rem;
+  font-size: 0.82rem;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.card-points-label {
+  display: block;
+  font-size: 0.45rem;
   opacity: 0.8;
 }
 
-.derived-pill strong {
-  font-size: 1.2rem;
+.card-zone-portrait {
+  padding-inline: 0;
+  position: relative;
 }
 
-.card-stats-row {
+.card-portrait-wrap {
+  position: relative;
+  height: 100%;
+  background: linear-gradient(135deg, #d7c4aa, #8f765d);
+}
+
+.card-portrait-image,
+.card-portrait-placeholder {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.card-portrait-placeholder {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 6px;
-  padding: 10px;
+  place-items: center;
+  color: rgba(255, 255, 255, 0.82);
+  font-weight: 800;
+  letter-spacing: 0.18em;
+  font-size: 0.8rem;
+}
+
+.card-portrait-gradient {
+  position: absolute;
+  inset: auto 0 0 0;
+  height: 35%;
+  background: linear-gradient(180deg, transparent, rgba(20, 16, 12, 0.35));
+  pointer-events: none;
+}
+
+.card-zone-stats {
+  display: flex;
+  align-items: center;
   border-top: 1px solid rgba(0, 0, 0, 0.08);
   border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+  background: rgba(255, 255, 255, 0.45);
 }
 
-.card-stat {
-  text-align: center;
+.card-stats-grid {
+  width: 100%;
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 2px;
 }
+
+.card-stat-cell {
+  text-align: center;
+  padding: 2px 0;
+}
+
+.card-stat-key {
+  display: block;
+  font-size: 0.42rem;
+  font-weight: 700;
+  color: #6d6458;
+}
+
+.card-stat-icon {
+  display: grid;
+  place-items: center;
+  width: 14px;
+  height: 14px;
+  margin: 1px auto;
+}
+
+.card-stat-icon::before {
+  display: block;
+  line-height: 1;
+}
+
+.stat-hp .card-stat-icon::before { content: "♥"; color: #b33; font-size: 0.72rem; }
+.stat-mp .card-stat-icon::before { content: "➤"; color: #285; font-size: 0.62rem; }
+.stat-ac .card-stat-icon::before { content: "🛡"; font-size: 0.58rem; }
+.stat-ms .card-stat-icon::before { content: "⚔"; font-size: 0.58rem; }
+.stat-rs .card-stat-icon::before { content: "◎"; font-size: 0.62rem; }
+.stat-ls .card-stat-icon::before { content: "⚑"; font-size: 0.58rem; }
+.stat-ks .card-stat-icon::before { content: "🧠"; font-size: 0.52rem; }
 
 .card-stat-value {
-  font-size: 1.2rem;
+  display: block;
+  font-size: 0.82rem;
+  line-height: 1;
   font-weight: 800;
 }
 
-.card-stat-short {
-  font-size: 0.72rem;
-  font-weight: 700;
+.card-stat-name {
+  display: none;
 }
 
-.card-stat-label {
-  font-size: 0.62rem;
-  color: var(--muted);
+.card-zone-equipment,
+.card-zone-abilities {
+  padding-top: 2px;
+  overflow: hidden;
 }
 
-.card-list {
-  margin: 0;
-  padding: 0;
-  list-style: none;
+.card-section-title {
+  margin: 0 0 3px;
+  font-size: 0.48rem;
+  letter-spacing: 0.12em;
+  color: #5f564b;
+}
+
+.card-equipment-list,
+.card-abilities-list {
   display: grid;
-  gap: 6px;
+  gap: 2px;
 }
 
-.card-list li {
+.card-equipment-row {
   display: grid;
-  grid-template-columns: 24px 1fr;
-  gap: 8px;
-  align-items: start;
-  font-size: 0.82rem;
+  grid-template-columns: 12px 28% 8px 1fr;
+  gap: 4px;
+  align-items: center;
+  font-size: 0.5rem;
+  line-height: 1.15;
 }
 
-.equipment-list li {
-  grid-template-columns: 18px 0.9fr 1.1fr;
-}
-
-.slot-index {
-  display: grid;
-  place-items: center;
-  width: 24px;
-  height: 24px;
-  border-radius: 999px;
-  background: rgba(0, 0, 0, 0.06);
-  font-size: 0.75rem;
-  font-weight: 700;
-}
-
-.eq-icon {
-  width: 14px;
-  height: 14px;
-  border-radius: 4px;
+.card-eq-icon {
+  width: 10px;
+  height: 10px;
+  border-radius: 2px;
   background: #8d7a67;
 }
 
-.theme-fantasy {
+.eq-mainWeapon { background: #6d4c35; }
+.eq-offhand { border-radius: 50%; background: #c49a6c; }
+.eq-armor { border-radius: 1px; background: #5f6c7a; }
+.eq-item1,
+.eq-item2 { background: #8a7a5d; }
+
+.card-eq-slot {
+  font-weight: 700;
+}
+
+.card-eq-sep {
+  opacity: 0.5;
+}
+
+.card-ability-row {
+  display: grid;
+  grid-template-columns: 10px 1fr;
+  gap: 4px;
+  align-items: start;
+  min-height: 1.1em;
+}
+
+.card-ability-row.is-empty {
+  opacity: 0.35;
+}
+
+.card-ability-icon {
+  width: 8px;
+  height: 8px;
+  margin-top: 2px;
+  border-radius: 50%;
+  background: #8d7a67;
+}
+
+.card-ability-row.type-main_attack .card-ability-icon,
+.card-ability-row.type-ranged .card-ability-icon { background: #6d4c35; }
+.card-ability-row.type-offhand .card-ability-icon { background: #c49a6c; }
+.card-ability-row.type-negative .card-ability-icon { background: #9f2f2f; }
+
+.card-ability-text {
+  margin: 0;
+  font-size: 0.5rem;
+  line-height: 1.2;
+}
+
+.card-ability-text.text-compact { font-size: 0.46rem; }
+.card-ability-text.text-tiny { font-size: 0.42rem; }
+
+.card-zone-footer {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  font-size: 0.38rem;
+  color: #7a7064;
+  padding-bottom: 2px;
+}
+
+.theme-fantasy.character-card {
   background: linear-gradient(180deg, #f8f1e8 0%, #d9c4a1 100%);
 }
 
-.theme-sci-fi-clean {
+.theme-sci-fi-clean.character-card {
   background: linear-gradient(180deg, #f4f8ff 0%, #c8d7ef 100%);
 }
 
-.theme-gothic {
+.theme-gothic.character-card {
   background: linear-gradient(180deg, #f2ecec 0%, #b9a7a7 100%);
+}
+
+.stash-card-top {
+  display: flex;
+  justify-content: space-between;
+  gap: 6px;
+  padding: 8px 10px;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+.stash-card-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 0.72rem;
+}
+
+.stash-card-points {
+  color: var(--accent);
+  font-weight: 800;
+  font-size: 0.72rem;
+}
+
+.stash-card-portrait {
+  min-height: 72px;
+  background: linear-gradient(135deg, #d7c4aa, #9f8668);
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+}
+
+.stash-card-portrait img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.stash-card-portrait span {
+  color: rgba(255, 255, 255, 0.75);
+  font-size: 0.62rem;
+  font-weight: 800;
+  letter-spacing: 0.16em;
 }
 
 @media (max-width: 1080px) {
@@ -741,6 +979,7 @@ select {
     padding: 16px;
   }
 
+  .identity-grid,
   .stat-grid,
   .equipment-grid,
   .team-metrics,

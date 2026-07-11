@@ -61,11 +61,14 @@ export interface ItemInstance {
 export interface CharacterCosmetics {
   cardStyle?: string;
   imageRef?: string;
+  portraitDataUrl?: string;
 }
 
 export interface CharacterBuild {
   id: string;
   name: string;
+  subtitle?: string;
+  faction?: string;
   baseStats: PurchasableStats;
   equipment: Partial<Record<EquipmentSlot, ItemInstance>>;
   talentIds: string[];
@@ -307,6 +310,84 @@ export interface ResolvedCharacterCardData {
   equipment: ResolvedEquipmentSlot[];
   totalCost: number;
   validationState: "valid" | "warning" | "invalid";
+}
+
+export type AbilityCardType =
+  | "main_attack"
+  | "offhand"
+  | "defense"
+  | "movement"
+  | "ranged"
+  | "leadership"
+  | "knowledge"
+  | "healing"
+  | "magic"
+  | "trap"
+  | "area"
+  | "negative"
+  | "passive";
+
+export interface EquipmentCardEntry {
+  name: string;
+  description?: string;
+}
+
+export interface AbilityCardEntry {
+  name: string;
+  description: string;
+  type?: AbilityCardType;
+}
+
+export interface CharacterCardStats {
+  hp: number;
+  mp: number;
+  ac: number;
+  ms: number;
+  rs: number;
+  ls: number;
+  ks: number;
+}
+
+export interface CharacterCardPortrait {
+  url: string;
+  fit?: "contain" | "cover";
+}
+
+export interface CharacterCard {
+  id: string;
+  name: string;
+  subtitle?: string;
+  faction?: string;
+  team?: string;
+  points: number;
+  portrait?: CharacterCardPortrait;
+  stats: CharacterCardStats;
+  equipment: {
+    mainWeapon?: EquipmentCardEntry;
+    offhand?: EquipmentCardEntry;
+    armor?: EquipmentCardEntry;
+    item1?: EquipmentCardEntry;
+    item2?: EquipmentCardEntry;
+  };
+  abilities: AbilityCardEntry[];
+  template: {
+    id: string;
+    decorationLevel?: "minimal" | "standard" | "ornate" | "worn";
+  };
+  metadata?: {
+    cardNumber?: string;
+    version?: string;
+    characterId?: string;
+  };
+  validationState: "valid" | "warning" | "invalid";
+}
+
+export interface CharacterCardContext {
+  teamName?: string;
+  templateId?: string;
+  decorationLevel?: "minimal" | "standard" | "ornate" | "worn";
+  locale?: "pl" | "en";
+  cardNumber?: string;
 }
 
 export interface ResolvedTeam {
