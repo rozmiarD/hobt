@@ -625,29 +625,30 @@ select {
 }
 
 .character-card {
+  --card-scale: 3;
   --card-safe: 3.5%;
-  width: min(100%, 350px);
+  width: min(100%, calc(350px * var(--card-scale)));
   aspect-ratio: 7 / 12;
-  border: 2px solid #2d241c;
-  border-radius: 16px;
+  border: calc(2px * var(--card-scale)) solid #2d241c;
+  border-radius: calc(16px * var(--card-scale));
   overflow: hidden;
   display: grid;
-  grid-template-rows: 11% 36% 11% 16% 24% 2%;
+  grid-template-rows: 12% 30% 13% 20% 23% 2%;
   background: linear-gradient(180deg, #fffdf8 0%, #efe4d2 100%);
   box-shadow: 0 14px 30px rgba(31, 26, 20, 0.14);
 }
 
 .character-card.is-draft {
-  outline: 3px dashed rgba(196, 92, 38, 0.45);
-  outline-offset: 4px;
+  outline: calc(3px * var(--card-scale)) dashed rgba(196, 92, 38, 0.45);
+  outline-offset: calc(4px * var(--card-scale));
 }
 
 .character-card.state-invalid {
-  box-shadow: 0 0 0 3px rgba(159, 47, 47, 0.35);
+  box-shadow: 0 0 0 calc(3px * var(--card-scale)) rgba(159, 47, 47, 0.35);
 }
 
 .character-card.state-warning {
-  box-shadow: 0 0 0 3px rgba(154, 106, 18, 0.35);
+  box-shadow: 0 0 0 calc(3px * var(--card-scale)) rgba(154, 106, 18, 0.35);
 }
 
 .card-zone {
@@ -658,10 +659,10 @@ select {
 .card-zone-header {
   display: grid;
   grid-template-columns: 1fr auto;
-  gap: 8px;
+  gap: calc(8px * var(--card-scale));
   align-items: start;
   padding-top: 3%;
-  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+  border-bottom: calc(1px * var(--card-scale)) solid rgba(0, 0, 0, 0.08);
 }
 
 .card-header-main {
@@ -670,7 +671,11 @@ select {
 
 .card-name {
   margin: 0;
-  font-size: clamp(0.78rem, 2.8vw, 1rem);
+  font-size: clamp(
+    calc(0.78rem * var(--card-scale)),
+    calc(2.8vw * var(--card-scale)),
+    calc(1rem * var(--card-scale))
+  );
   line-height: 1.05;
   text-transform: uppercase;
   letter-spacing: 0.04em;
@@ -678,17 +683,25 @@ select {
 }
 
 .card-name.name-compact {
-  font-size: clamp(0.7rem, 2.4vw, 0.9rem);
+  font-size: clamp(
+    calc(0.7rem * var(--card-scale)),
+    calc(2.4vw * var(--card-scale)),
+    calc(0.9rem * var(--card-scale))
+  );
 }
 
 .card-name.name-tiny {
-  font-size: clamp(0.62rem, 2vw, 0.78rem);
+  font-size: clamp(
+    calc(0.62rem * var(--card-scale)),
+    calc(2vw * var(--card-scale)),
+    calc(0.78rem * var(--card-scale))
+  );
 }
 
 .card-subtitle,
 .card-faction-line {
-  margin: 2px 0 0;
-  font-size: 0.52rem;
+  margin: calc(2px * var(--card-scale)) 0 0;
+  font-size: calc(0.52rem * var(--card-scale));
   line-height: 1.2;
   color: #4a4035;
 }
@@ -700,9 +713,9 @@ select {
 }
 
 .card-points-badge {
-  min-width: 42px;
-  padding: 4px 6px;
-  border-radius: 10px;
+  min-width: calc(42px * var(--card-scale));
+  padding: calc(4px * var(--card-scale)) calc(6px * var(--card-scale));
+  border-radius: calc(10px * var(--card-scale));
   background: #2d241c;
   color: white;
   text-align: center;
@@ -710,14 +723,14 @@ select {
 
 .card-points-value {
   display: block;
-  font-size: 0.82rem;
+  font-size: calc(0.82rem * var(--card-scale));
   font-weight: 800;
   line-height: 1;
 }
 
 .card-points-label {
   display: block;
-  font-size: 0.45rem;
+  font-size: calc(0.45rem * var(--card-scale));
   opacity: 0.8;
 }
 
@@ -746,7 +759,7 @@ select {
   color: rgba(255, 255, 255, 0.82);
   font-weight: 800;
   letter-spacing: 0.18em;
-  font-size: 0.8rem;
+  font-size: calc(0.8rem * var(--card-scale));
 }
 
 .card-portrait-gradient {
@@ -760,8 +773,8 @@ select {
 .card-zone-stats {
   display: flex;
   align-items: center;
-  border-top: 1px solid rgba(0, 0, 0, 0.08);
-  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+  border-top: calc(1px * var(--card-scale)) solid rgba(0, 0, 0, 0.08);
+  border-bottom: calc(1px * var(--card-scale)) solid rgba(0, 0, 0, 0.08);
   background: rgba(255, 255, 255, 0.45);
 }
 
@@ -769,17 +782,17 @@ select {
   width: 100%;
   display: grid;
   grid-template-columns: repeat(7, minmax(0, 1fr));
-  gap: 2px;
+  gap: calc(2px * var(--card-scale));
 }
 
 .card-stat-cell {
   text-align: center;
-  padding: 2px 0;
+  padding: calc(2px * var(--card-scale)) 0;
 }
 
 .card-stat-key {
   display: block;
-  font-size: 0.42rem;
+  font-size: calc(0.42rem * var(--card-scale));
   font-weight: 700;
   color: #6d6458;
 }
@@ -787,12 +800,12 @@ select {
 .card-stat-icon {
   display: grid;
   place-items: center;
-  margin: 1px auto;
+  margin: calc(1px * var(--card-scale)) auto;
 }
 
 .card-stat-value {
   display: block;
-  font-size: 0.82rem;
+  font-size: calc(0.82rem * var(--card-scale));
   line-height: 1;
   font-weight: 800;
 }
@@ -803,13 +816,13 @@ select {
 
 .card-zone-equipment,
 .card-zone-abilities {
-  padding-top: 2px;
+  padding-top: calc(2px * var(--card-scale));
   overflow: hidden;
 }
 
 .card-section-title {
-  margin: 0 0 3px;
-  font-size: 0.48rem;
+  margin: 0 0 calc(3px * var(--card-scale));
+  font-size: calc(0.48rem * var(--card-scale));
   letter-spacing: 0.12em;
   color: #5f564b;
 }
@@ -817,15 +830,19 @@ select {
 .card-equipment-list,
 .card-abilities-list {
   display: grid;
-  gap: 2px;
+  gap: calc(2px * var(--card-scale));
 }
 
 .card-equipment-row {
   display: grid;
-  grid-template-columns: 12px 28% 8px 1fr;
-  gap: 4px;
+  grid-template-columns:
+    calc(12px * var(--card-scale))
+    28%
+    calc(8px * var(--card-scale))
+    1fr;
+  gap: calc(4px * var(--card-scale));
   align-items: center;
-  font-size: 0.5rem;
+  font-size: calc(0.5rem * var(--card-scale));
   line-height: 1.15;
 }
 
@@ -844,8 +861,8 @@ select {
 
 .card-ability-row {
   display: grid;
-  grid-template-columns: 10px 1fr;
-  gap: 4px;
+  grid-template-columns: calc(10px * var(--card-scale)) 1fr;
+  gap: calc(4px * var(--card-scale));
   align-items: start;
   min-height: 1.1em;
 }
@@ -857,25 +874,25 @@ select {
 .card-ability-icon {
   display: grid;
   place-items: center;
-  margin-top: 1px;
+  margin-top: calc(1px * var(--card-scale));
 }
 
 .card-ability-text {
   margin: 0;
-  font-size: 0.5rem;
+  font-size: calc(0.5rem * var(--card-scale));
   line-height: 1.2;
 }
 
-.card-ability-text.text-compact { font-size: 0.46rem; }
-.card-ability-text.text-tiny { font-size: 0.42rem; }
+.card-ability-text.text-compact { font-size: calc(0.46rem * var(--card-scale)); }
+.card-ability-text.text-tiny { font-size: calc(0.42rem * var(--card-scale)); }
 
 .card-zone-footer {
   display: flex;
   justify-content: space-between;
-  gap: 8px;
-  font-size: 0.38rem;
+  gap: calc(8px * var(--card-scale));
+  font-size: calc(0.38rem * var(--card-scale));
   color: #7a7064;
-  padding-bottom: 2px;
+  padding-bottom: calc(2px * var(--card-scale));
 }
 
 .theme-universal-clean.character-card {

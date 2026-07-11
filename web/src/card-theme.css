@@ -128,39 +128,39 @@ body {
 .card-stat-icon {
   display: grid;
   place-items: center;
-  margin: 2px auto;
+  margin: calc(2px * var(--card-scale, 1)) auto;
 }
 
-.card-stat-icon .hobt-icon {
-  width: 14px;
-  height: 14px;
+.character-card .card-stat-icon .hobt-icon {
+  width: calc(14px * var(--card-scale, 3));
+  height: calc(14px * var(--card-scale, 3));
 }
 
-.card-eq-icon {
+.character-card .card-eq-icon {
   display: grid;
   place-items: center;
-  width: 12px;
-  height: 12px;
+  width: calc(12px * var(--card-scale, 3));
+  height: calc(12px * var(--card-scale, 3));
   color: #5f564b;
 }
 
-.card-eq-icon .hobt-icon {
-  width: 11px;
-  height: 11px;
+.character-card .card-eq-icon .hobt-icon {
+  width: calc(11px * var(--card-scale, 3));
+  height: calc(11px * var(--card-scale, 3));
 }
 
-.card-ability-icon {
+.character-card .card-ability-icon {
   display: grid;
   place-items: center;
-  width: 11px;
-  height: 11px;
-  margin-top: 1px;
+  width: calc(11px * var(--card-scale, 3));
+  height: calc(11px * var(--card-scale, 3));
+  margin-top: calc(1px * var(--card-scale, 3));
   color: #6d6458;
 }
 
-.card-ability-icon .hobt-icon {
-  width: 10px;
-  height: 10px;
+.character-card .card-ability-icon .hobt-icon {
+  width: calc(10px * var(--card-scale, 3));
+  height: calc(10px * var(--card-scale, 3));
 }
 
 .card-ability-row.type-negative .card-ability-icon {

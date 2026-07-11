@@ -8,6 +8,7 @@ import {
 import { t, type Locale } from "./i18n.js";
 
 const STAT_ORDER = ["hp", "mp", "ac", "ms", "rs", "ls", "ks"] as const;
+const CARD_ICON_SCALE = 3;
 
 function statLabel(locale: Locale, key: (typeof STAT_ORDER)[number]): string {
   const map = {
@@ -101,7 +102,7 @@ function renderStats(locale: Locale, card: CharacterCard): string {
     return `
       <div class="card-stat-cell stat-${key}">
         <span class="card-stat-key">${key.toUpperCase()}</span>
-        <span class="card-stat-icon">${renderIcon(STAT_ICONS[key]!, "card-stat-svg", 14)}</span>
+        <span class="card-stat-icon">${renderIcon(STAT_ICONS[key]!, "card-stat-svg", 14 * CARD_ICON_SCALE)}</span>
         <strong class="card-stat-value">${value}</strong>
         <span class="card-stat-name">${escapeHtml(label)}</span>
       </div>`;
@@ -115,7 +116,7 @@ function renderEquipment(locale: Locale, card: CharacterCard): string {
     const itemName = entry?.name ?? t(locale, "none");
     return `
       <div class="card-equipment-row">
-        <span class="card-eq-icon eq-${slot}">${renderIcon(EQUIPMENT_ICONS[slot], "card-eq-svg", 11)}</span>
+        <span class="card-eq-icon eq-${slot}">${renderIcon(EQUIPMENT_ICONS[slot], "card-eq-svg", 11 * CARD_ICON_SCALE)}</span>
         <span class="card-eq-slot">${escapeHtml(slotLabel)}</span>
         <span class="card-eq-sep">—</span>
         <span class="card-eq-item">${escapeHtml(itemName)}</span>
@@ -136,7 +137,7 @@ function renderAbilities(card: CharacterCard): string {
     ]);
     return `
       <div class="card-ability-row${typeClass}">
-        <span class="card-ability-icon">${renderIcon(abilityIcon(ability.type), "card-ability-svg", 10)}</span>
+        <span class="card-ability-icon">${renderIcon(abilityIcon(ability.type), "card-ability-svg", 10 * CARD_ICON_SCALE)}</span>
         <p class="card-ability-text ${descClass}">
           <strong>${escapeHtml(ability.name)}</strong>
           <span> — ${escapeHtml(ability.description)}</span>
