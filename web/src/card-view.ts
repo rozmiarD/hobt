@@ -123,7 +123,7 @@ function renderFullCard(
     return `
         <div class="card-stat-cell stat-${key}">
           <span class="card-stat-key">${key.toUpperCase()}</span>
-          ${sprite(STAT_SPRITES[key]!)}
+          <span class="card-stat-icon">${sprite(STAT_SPRITES[key]!)}</span>
           <span class="card-stat-value">${value}</span>
         </div>`;
   }).join("");

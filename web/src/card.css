@@ -109,7 +109,7 @@
   border-radius: calc(16px * var(--card-scale));
   overflow: hidden;
   display: grid;
-  grid-template-rows: 12% 27% 12% 21% 24% 4%;
+  grid-template-rows: 12% 26% 13% 21% 24% 4%;
   row-gap: 1px;
   box-shadow: 0 16px 34px rgba(31, 26, 20, 0.18);
   font-family: var(--font-card-body, var(--font-ui));
@@ -225,6 +225,7 @@
 .card-zone-portrait {
   padding-inline: 0;
   padding-top: 6px;
+  padding-bottom: 4px;
   position: relative;
 }
 
@@ -332,6 +333,7 @@
 .card-zone-stats {
   display: flex;
   align-items: center;
+  padding: 10px 6% 12px;
   border-top: 1px solid rgba(0, 0, 0, 0.08);
   border-bottom: 1px solid rgba(0, 0, 0, 0.08);
   background: rgba(255, 255, 255, 0.5);
@@ -341,31 +343,46 @@
   width: 100%;
   display: grid;
   grid-template-columns: repeat(4, 1fr);
+  gap: 6px;
 }
 
 .card-stat-cell {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: calc(4px * var(--card-type));
   text-align: center;
-  padding: calc(6px * var(--card-type)) 0;
+  padding: calc(4px * var(--card-type)) calc(2px * var(--card-type));
+  min-width: 0;
 }
 
 .card-stat-key {
   display: block;
-  font-size: calc(0.7rem * var(--card-type));
+  font-size: calc(0.68rem * var(--card-type));
   font-weight: 700;
   color: #6d6458;
-  letter-spacing: 0.04em;
+  letter-spacing: 0.05em;
+  line-height: 1;
 }
 
-.card-stat-cell svg {
-  width: calc(22px * var(--card-type));
-  height: calc(22px * var(--card-type));
-  margin: calc(3px * var(--card-type)) auto;
+.card-stat-icon {
+  display: grid;
+  place-items: center;
+  line-height: 0;
+}
+
+.card-stat-cell svg,
+.card-stat-icon svg {
+  width: calc(20px * var(--card-type));
+  height: calc(20px * var(--card-type));
+  margin: 0;
   color: var(--card-accent, #c45c26);
 }
 
 .card-stat-value {
   display: block;
-  font-size: calc(1.25rem * var(--card-type));
+  font-size: calc(1.2rem * var(--card-type));
   line-height: 1;
   font-weight: 800;
   font-family: var(--font-heading);
