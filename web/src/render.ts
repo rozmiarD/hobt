@@ -213,17 +213,15 @@ function renderCharacterEditor(state: AppState, draft: CharacterBuild): string {
       0;
     return `
       <label class="stat-control">
-        <span class="stat-label">
-          <span class="stat-label-icon stat-icon-${stat.toLowerCase()}">${uiIcon(PURCHASABLE_STAT_ICONS[stat], "ui-icon ui-icon--stat")}</span>
-          <span class="stat-label-copy">
-            <strong>${stat}</strong>
-            <small>${escapeHtml(statLabel(locale, stat))}</small>
-          </span>
-        </span>
-        <div class="stepper">
-          <button type="button" data-action="stat-dec" data-stat="${stat}" ${value <= 0 ? "disabled" : ""}>−</button>
-          <span class="stat-value">${value}</span>
-          <button type="button" data-action="stat-inc" data-stat="${stat}" ${value >= 6 ? "disabled" : ""}>+</button>
+        <div class="stat-control-main">
+          <span class="stat-code">${stat}</span>
+          <span class="stat-label-icon stat-icon-${stat.toLowerCase()}">${uiIcon(PURCHASABLE_STAT_ICONS[stat], "ui-icon ui-icon--stat-lg")}</span>
+          <span class="stat-name">${escapeHtml(statLabel(locale, stat))}</span>
+          <div class="stepper stat-stepper">
+            <button type="button" data-action="stat-dec" data-stat="${stat}" ${value <= 0 ? "disabled" : ""}>−</button>
+            <span class="stat-value">${value}</span>
+            <button type="button" data-action="stat-inc" data-stat="${stat}" ${value >= 6 ? "disabled" : ""}>+</button>
+          </div>
         </div>
         <span class="stat-cost">${cost} ${t(locale, "points")}</span>
       </label>`;
