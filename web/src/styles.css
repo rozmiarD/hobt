@@ -196,6 +196,228 @@ select {
   gap: 20px;
 }
 
+.workspace-stash {
+  align-items: start;
+}
+
+.preview-panel,
+.stash-panel {
+  position: sticky;
+  top: 20px;
+  align-self: start;
+}
+
+.stash-intro {
+  margin: 4px 0 0;
+  color: var(--muted);
+  font-size: 0.88rem;
+  max-width: 28rem;
+}
+
+.stash-section-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.stash-section-head h3 {
+  margin: 0;
+  font-size: 0.95rem;
+}
+
+.stash-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: var(--accent-soft);
+  color: var(--accent);
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+.stash-count {
+  color: var(--muted);
+  font-size: 0.85rem;
+}
+
+.stash-live {
+  margin-bottom: 22px;
+  padding-bottom: 22px;
+  border-bottom: 1px dashed var(--line);
+}
+
+.stash-collection {
+  margin-top: 4px;
+}
+
+.stash-empty {
+  margin: 0;
+  padding: 16px;
+  border: 1px dashed var(--line);
+  border-radius: 14px;
+  text-align: center;
+}
+
+.stash-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(132px, 1fr));
+  gap: 12px;
+}
+
+.stash-card {
+  display: block;
+  width: 100%;
+  padding: 0;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  text-align: left;
+  transition: transform 0.15s ease, filter 0.15s ease;
+}
+
+.stash-card:hover {
+  transform: translateY(-2px);
+}
+
+.stash-card.is-selected .stash-card-frame {
+  box-shadow: 0 0 0 3px var(--accent);
+}
+
+.stash-card.is-draft .stash-card-frame {
+  border-style: dashed;
+}
+
+.stash-card.state-invalid .stash-card-frame {
+  box-shadow: 0 0 0 2px rgba(159, 47, 47, 0.45);
+}
+
+.stash-card.state-warning .stash-card-frame {
+  box-shadow: 0 0 0 2px rgba(154, 106, 18, 0.45);
+}
+
+.stash-card-empty {
+  cursor: default;
+  pointer-events: none;
+  opacity: 0.55;
+}
+
+.stash-card-frame {
+  aspect-ratio: 2 / 3;
+  border: 2px solid #2d241c;
+  border-radius: 14px;
+  overflow: hidden;
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  background: linear-gradient(180deg, #fffdf8 0%, #efe4d2 100%);
+  box-shadow: 0 8px 20px rgba(31, 26, 20, 0.12);
+}
+
+.stash-card-header {
+  display: flex;
+  justify-content: space-between;
+  gap: 6px;
+  padding: 8px 10px;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+  font-size: 0.72rem;
+}
+
+.stash-card-header strong {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.stash-card-header span {
+  color: var(--accent);
+  font-weight: 800;
+  flex-shrink: 0;
+}
+
+.stash-card-hero {
+  position: relative;
+  min-height: 72px;
+  background: linear-gradient(135deg, #d7c4aa, #9f8668);
+}
+
+.stash-portrait {
+  display: grid;
+  place-items: center;
+  height: 100%;
+  color: rgba(255, 255, 255, 0.75);
+  font-size: 0.62rem;
+  font-weight: 800;
+  letter-spacing: 0.16em;
+}
+
+.stash-rail {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  display: grid;
+  gap: 4px;
+}
+
+.stash-pill {
+  display: block;
+  padding: 3px 6px;
+  border-radius: 8px;
+  background: rgba(20, 16, 12, 0.78);
+  color: white;
+  font-size: 0.58rem;
+  font-weight: 700;
+  text-align: center;
+}
+
+.stash-stats {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 4px;
+  padding: 8px;
+  font-size: 0.62rem;
+  font-weight: 700;
+}
+
+.stash-stats span {
+  padding: 4px 6px;
+  border-radius: 8px;
+  background: rgba(0, 0, 0, 0.05);
+  text-align: center;
+}
+
+.stash-empty-label {
+  display: grid;
+  place-items: center;
+  height: 100%;
+  padding: 12px;
+  text-align: center;
+  color: var(--muted);
+  font-size: 0.72rem;
+}
+
+.team-panel-compact {
+  margin-bottom: 20px;
+}
+
+.tarot-card.is-draft {
+  outline: 3px dashed rgba(196, 92, 38, 0.45);
+  outline-offset: 4px;
+}
+
+.card-section-compact h4 {
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--muted);
+}
+
+.card-section-compact .card-list {
+  max-height: 5.5rem;
+  overflow: hidden;
+}
+
 .field,
 .inline-field,
 .stat-control {
@@ -333,12 +555,6 @@ select {
 
 .danger {
   color: var(--bad);
-}
-
-.preview-panel {
-  position: sticky;
-  top: 20px;
-  align-self: start;
 }
 
 .tarot-card {
@@ -514,7 +730,8 @@ select {
     grid-template-columns: 1fr;
   }
 
-  .preview-panel {
+  .preview-panel,
+  .stash-panel {
     position: static;
   }
 }
@@ -527,7 +744,8 @@ select {
   .stat-grid,
   .equipment-grid,
   .team-metrics,
-  .derived-values {
+  .derived-values,
+  .stash-grid {
     grid-template-columns: 1fr;
   }
 }

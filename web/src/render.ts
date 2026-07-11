@@ -8,13 +8,10 @@ import {
   resolveCharacter,
   validateTeam,
 } from "@hobt/lego-skirmish";
-import type {
-  CharacterBuild,
-  PurchasableStat,
-  ResolvedCharacterCardData,
-} from "@hobt/lego-skirmish/types/domain.js";
+import type { CharacterBuild, PurchasableStat } from "@hobt/lego-skirmish/types/domain.js";
 import { EQUIPMENT_SLOTS } from "@hobt/lego-skirmish/types/domain.js";
 import type { AppState } from "./state.js";
+import { renderEmptyStashSlot, renderTarotCard } from "./card-view.js";
 import { CARD_THEMES, t, type Locale } from "./i18n.js";
 
 const PURCHASABLE_STATS: PurchasableStat[] = [
@@ -34,7 +31,7 @@ const SLOT_LABEL_KEYS = {
   item2: "slotItem2",
 } as const;
 
-function statLabel(locale: Locale, stat: PurchasableStat | "AC"): string {
+function statLabel(locale: Locale, stat: PurchasableStat): string {
   const map = {
     MS: "statMS",
     RS: "statRS",
@@ -42,7 +39,6 @@ function statLabel(locale: Locale, stat: PurchasableStat | "AC"): string {
     KS: "statKS",
     HP: "statHP",
     MP: "statMP",
-    AC: "statAC",
   } as const;
   return t(locale, map[stat]);
 }
@@ -73,83 +69,89 @@ function renderCostRows(
     .join("");
 }
 
-function renderCardPreview(
-  locale: Locale,
-  card: ResolvedCharacterCardData,
-  themeId: string,
-): string {
-  const statBlock = (value: number, short: string, label: string) => `
-    <div class="card-stat">
-      <div class="card-stat-value">${value}</div>
-      <div class="card-stat-short">${short}</div>
-      <div class="card-stat-label">${escapeHtml(label)}</div>
-    </div>`;
+function renderCardStash(state: AppState, draft: CharacterBuild): string {
+  const locale = state.locale;
+  const themeId = state.team.cardTheme.templateId;
+  const draftResolved = resolveCharacter(draft, DEFAULT_RULESET, DEFAULT_CATALOG);
+  const draftCard = buildCharacterCardSnapshot(draftResolved);
+  const inStash = state.team.characters.some(
+    (character) => character.id === draft.id,
+  );
 
-  const derivedRail = `
-    <div class="card-derived-rail">
-      <div class="derived-pill hp"><span>HP</span><strong>${card.stats.HP}</strong></div>
-      <div class="derived-pill mp"><span>MP</span><strong>${card.stats.MP}</strong></div>
-      <div class="derived-pill ac"><span>AC</span><strong>${card.stats.AC}</strong></div>
-    </div>`;
+  const teamCards = state.team.characters.map((character) => {
+    const resolved = resolveCharacter(character, DEFAULT_RULESET, DEFAULT_CATALOG);
+    const card = buildCharacterCardSnapshot(resolved);
+    const isSelected = state.activeCharacterId === character.id;
+    const isDraft = character.id === draft.id;
+    return renderTarotCard(locale, card, themeId, {
+      variant: "stash",
+      characterId: character.id,
+      selected: isSelected,
+      draft: isDraft,
+      interactive: true,
+    });
+  });
+
+  const emptySlots = Math.max(
+    0,
+    DEFAULT_RULESET.team.recommendedCharacterCount - state.team.characters.length,
+  );
+  const emptySlotMarkup = Array.from({ length: emptySlots }, () =>
+    renderEmptyStashSlot(locale),
+  ).join("");
 
   return `
-    <article class="tarot-card theme-${escapeHtml(themeId)} state-${card.validationState}">
-      <header class="card-header">
-        <h3>${escapeHtml(card.name)}</h3>
-        <span class="card-cost">${card.totalCost} ${t(locale, "points")}</span>
-      </header>
-      <div class="card-hero">
-        <div class="card-portrait">
-          <div class="portrait-placeholder">LEGO</div>
-          ${derivedRail}
+    <section class="panel stash-panel">
+      <div class="panel-head">
+        <div>
+          <h2>${t(locale, "cardStash")}</h2>
+          <p class="stash-intro">${t(locale, "liveDraftHint")}</p>
         </div>
+        <label class="inline-field">
+          <span>${t(locale, "theme")}</span>
+          <select data-action="card-theme">
+            ${CARD_THEMES.map(
+              (theme) => `
+              <option value="${theme.id}" ${themeId === theme.id ? "selected" : ""}>
+                ${escapeHtml(localize(theme.label, locale))}
+              </option>`,
+            ).join("")}
+          </select>
+        </label>
       </div>
-      <section class="card-stats-row">
-        ${statBlock(card.stats.MS, "MS", t(locale, "statMS"))}
-        ${statBlock(card.stats.RS, "RS", t(locale, "statRS"))}
-        ${statBlock(card.stats.LS, "LS", t(locale, "statLS"))}
-        ${statBlock(card.stats.KS, "KS", t(locale, "statKS"))}
-      </section>
-      <section class="card-section">
-        <h4>${t(locale, "actionSlots")}</h4>
-        <ol class="card-list">
-          ${card.actions
-            .map(
-              (action) => `
-            <li>
-              <span class="slot-index">${action.slotIndex}</span>
-              <span>${escapeHtml(localize(action.name, locale))}</span>
-            </li>`,
-            )
-            .join("")}
-        </ol>
-      </section>
-      <section class="card-section">
-        <h4>${t(locale, "equipmentSlots")}</h4>
-        <ol class="card-list equipment-list">
-          ${card.equipment
-            .map((slot) => {
-              const label = t(locale, SLOT_LABEL_KEYS[slot.slot]);
-              const itemName = slot.item
-                ? localize(slot.item.name, locale)
-                : t(locale, "none");
-              return `
-              <li>
-                <span class="eq-icon" data-slot="${slot.slot}"></span>
-                <span class="eq-label">${escapeHtml(label)}</span>
-                <span class="eq-name">${escapeHtml(itemName)}</span>
-              </li>`;
-            })
-            .join("")}
-        </ol>
-      </section>
-    </article>`;
+
+      <div class="stash-live">
+        <div class="stash-section-head">
+          <h3>${t(locale, "liveDraft")}</h3>
+          ${
+            inStash
+              ? `<span class="stash-badge">${t(locale, "inStash")}</span>`
+              : ""
+          }
+        </div>
+        ${renderTarotCard(locale, draftCard, themeId, {
+          variant: "full",
+          draft: !inStash,
+        })}
+      </div>
+
+      <div class="stash-collection">
+        <div class="stash-section-head">
+          <h3>${t(locale, "stashTeamCards")}</h3>
+          <span class="stash-count">${state.team.characters.length} / ${DEFAULT_RULESET.team.maximumCharacterCount}</span>
+        </div>
+        ${
+          state.team.characters.length === 0
+            ? `<p class="stash-empty muted">${t(locale, "emptyStash")}</p>`
+            : `<div class="stash-grid">${teamCards.join("")}${emptySlotMarkup}</div>`
+        }
+      </div>
+    </section>`;
 }
 
 function renderCharacterEditor(state: AppState, draft: CharacterBuild): string {
   const locale = state.locale;
   const resolved = resolveCharacter(draft, DEFAULT_RULESET, DEFAULT_CATALOG);
-  const card = buildCharacterCardSnapshot(resolved);
 
   const statControls = PURCHASABLE_STATS.map((stat) => {
     const value = draft.baseStats[stat];
@@ -220,7 +222,7 @@ function renderCharacterEditor(state: AppState, draft: CharacterBuild): string {
     })),
   ];
 
-  const inTeam = state.team.characters.some(
+  const inStash = state.team.characters.some(
     (character) => character.id === draft.id,
   );
 
@@ -298,32 +300,14 @@ function renderCharacterEditor(state: AppState, draft: CharacterBuild): string {
 
       <div class="editor-actions">
         <button type="button" class="primary" data-action="add-to-team">
-          ${inTeam ? t(locale, "updateInTeam") : t(locale, "addToTeam")}
+          ${inStash ? t(locale, "updateInStash") : t(locale, "addToStash")}
         </button>
         ${
-          inTeam
+          inStash
             ? `<button type="button" class="danger ghost" data-action="remove-active">${t(locale, "removeFromTeam")}</button>`
             : ""
         }
       </div>
-    </section>
-
-    <section class="panel preview-panel">
-      <div class="panel-head">
-        <h2>${t(locale, "cardPreview")}</h2>
-        <label class="inline-field">
-          <span>${t(locale, "theme")}</span>
-          <select data-action="card-theme">
-            ${CARD_THEMES.map(
-              (theme) => `
-              <option value="${theme.id}" ${state.team.cardTheme.templateId === theme.id ? "selected" : ""}>
-                ${escapeHtml(localize(theme.label, locale))}
-              </option>`,
-            ).join("")}
-          </select>
-        </label>
-      </div>
-      ${renderCardPreview(locale, card, state.team.cardTheme.templateId)}
     </section>`;
 }
 
@@ -335,7 +319,7 @@ function renderTeamPanel(state: AppState): string {
   const ratio = Math.min(100, Math.round((cost / budget) * 100));
 
   return `
-    <section class="panel team-panel">
+    <section class="panel team-panel team-panel-compact">
       <div class="panel-head">
         <h2>${t(locale, "team")}</h2>
         <span class="ruleset-badge">${t(locale, "ruleset")}: ${DEFAULT_RULESET.id} ${DEFAULT_RULESET.version}</span>
@@ -352,30 +336,6 @@ function renderTeamPanel(state: AppState): string {
         </div>
         <p class="team-status">${resolvedTeam.validation.valid ? t(locale, "teamValid") : t(locale, "teamInvalid")}</p>
       </div>
-
-      ${
-        state.team.characters.length === 0
-          ? `<p class="muted">${t(locale, "emptyTeam")}</p>`
-          : `<ul class="team-list">
-              ${state.team.characters
-                .map((character) => {
-                  const resolved = resolveCharacter(
-                    character,
-                    DEFAULT_RULESET,
-                    DEFAULT_CATALOG,
-                  );
-                  const active = state.activeCharacterId === character.id;
-                  return `
-                  <li class="${active ? "active" : ""} ${resolved.validation.valid ? "" : "invalid"}">
-                    <button type="button" data-action="select-character" data-character="${character.id}">
-                      <strong>${escapeHtml(character.name)}</strong>
-                      <span>${resolved.cost.total} ${t(locale, "points")}</span>
-                    </button>
-                  </li>`;
-                })
-                .join("")}
-            </ul>`
-      }
 
       ${
         resolvedTeam.validation.errors.length > 0
@@ -409,8 +369,9 @@ export function renderApp(state: AppState): string {
 
       ${renderTeamPanel(state)}
 
-      <div class="workspace">
+      <div class="workspace workspace-stash">
         ${renderCharacterEditor(state, state.draft)}
+        ${renderCardStash(state, state.draft)}
       </div>
     </div>`;
 }
