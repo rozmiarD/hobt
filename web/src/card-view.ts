@@ -8,7 +8,9 @@ import {
 import { t, type Locale } from "./i18n.js";
 
 const STAT_ORDER = ["hp", "mp", "ac", "ms", "rs", "ls", "ks"] as const;
-const CARD_ICON_SCALE = 3;
+const PORTRAIT_STATS = ["hp", "mp", "ac"] as const;
+const BANNER_STATS = ["ms", "rs", "ls", "ks"] as const;
+const CARD_ICON_SCALE = 1.5;
 
 function statLabel(locale: Locale, key: (typeof STAT_ORDER)[number]): string {
   const map = {
@@ -95,18 +97,37 @@ function renderPortrait(card: CharacterCard): string {
   return `<div class="card-portrait-placeholder">LEGO</div>`;
 }
 
-function renderStats(locale: Locale, card: CharacterCard): string {
-  return STAT_ORDER.map((key) => {
-    const value = card.stats[key];
-    const label = statLabel(locale, key);
-    return `
-      <div class="card-stat-cell stat-${key}">
+function renderStatCell(
+  locale: Locale,
+  card: CharacterCard,
+  key: (typeof STAT_ORDER)[number],
+  variant: "portrait" | "banner",
+): string {
+  const value = card.stats[key];
+  const label = statLabel(locale, key);
+  const iconSize = (variant === "portrait" ? 16 : 14) * CARD_ICON_SCALE;
+  const cellClass =
+    variant === "portrait" ? "card-portrait-stat-cell" : "card-stat-cell";
+
+  return `
+      <div class="${cellClass} stat-${key}">
         <span class="card-stat-key">${key.toUpperCase()}</span>
-        <span class="card-stat-icon">${renderIcon(STAT_ICONS[key]!, "card-stat-svg", 14 * CARD_ICON_SCALE)}</span>
+        <span class="card-stat-icon">${renderIcon(STAT_ICONS[key]!, variant === "portrait" ? "card-portrait-stat-svg" : "card-stat-svg", iconSize)}</span>
         <strong class="card-stat-value">${value}</strong>
         <span class="card-stat-name">${escapeHtml(label)}</span>
       </div>`;
-  }).join("");
+}
+
+function renderPortraitStats(locale: Locale, card: CharacterCard): string {
+  return PORTRAIT_STATS.map((key) =>
+    renderStatCell(locale, card, key, "portrait"),
+  ).join("");
+}
+
+function renderBannerStats(locale: Locale, card: CharacterCard): string {
+  return BANNER_STATS.map((key) =>
+    renderStatCell(locale, card, key, "banner"),
+  ).join("");
 }
 
 function renderEquipment(locale: Locale, card: CharacterCard): string {
@@ -175,14 +196,19 @@ function renderFullCard(
       </header>
 
       <section class="card-zone card-zone-portrait" aria-label="Portrait">
-        <div class="card-portrait-wrap">
-          ${renderPortrait(card)}
-          <div class="card-portrait-gradient"></div>
+        <div class="card-portrait-layout">
+          <div class="card-portrait-wrap">
+            ${renderPortrait(card)}
+            <div class="card-portrait-gradient"></div>
+          </div>
+          <div class="card-portrait-stats" aria-label="Core stats">
+            ${renderPortraitStats(locale, card)}
+          </div>
         </div>
       </section>
 
       <section class="card-zone card-zone-stats" aria-label="Stats">
-        <div class="card-stats-grid">${renderStats(locale, card)}</div>
+        <div class="card-stats-grid">${renderBannerStats(locale, card)}</div>
       </section>
 
       <section class="card-zone card-zone-equipment" aria-label="Equipment">
