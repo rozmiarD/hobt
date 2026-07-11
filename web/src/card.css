@@ -1,0 +1,422 @@
+/* Character card — readable flex layout (7:12 min proportion) */
+
+.character-card {
+  --card-w: 380px;
+  --card-pad: 12px;
+  --card-ink: #1f1a14;
+  --card-muted: #6d6458;
+  --card-line: rgba(0, 0, 0, 0.1);
+  width: min(100%, var(--card-w));
+  min-height: calc(var(--card-w) * 12 / 7);
+  max-height: min(90vh, 720px);
+  border: 2px solid #2d241c;
+  border-radius: 16px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  background: linear-gradient(180deg, #fffdf8 0%, #efe4d2 100%);
+  box-shadow: 0 14px 30px rgba(31, 26, 20, 0.14);
+  font-family: var(--font-card-body, "Source Sans 3", sans-serif);
+  font-size: 12px;
+  line-height: 1.35;
+  color: var(--card-ink);
+}
+
+.character-card.is-draft {
+  outline: 3px dashed rgba(196, 92, 38, 0.45);
+  outline-offset: 4px;
+}
+
+.character-card.state-invalid {
+  box-shadow: 0 0 0 3px rgba(159, 47, 47, 0.35);
+}
+
+.character-card.state-warning {
+  box-shadow: 0 0 0 3px rgba(154, 106, 18, 0.35);
+}
+
+/* ── Header ── */
+.card-header {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 10px;
+  align-items: start;
+  padding: var(--card-pad);
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--card-line);
+  flex-shrink: 0;
+}
+
+.card-header-main {
+  min-width: 0;
+}
+
+.card-name {
+  margin: 0;
+  font-family: var(--font-card-title, "Cinzel", serif);
+  font-size: 1.15rem;
+  font-weight: 700;
+  line-height: 1.1;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  word-break: break-word;
+}
+
+.card-name.name-compact { font-size: 1rem; }
+.card-name.name-tiny { font-size: 0.9rem; }
+
+.card-subtitle {
+  margin: 4px 0 0;
+  font-size: 0.8rem;
+  font-style: italic;
+  line-height: 1.25;
+  color: #4a4035;
+}
+
+.card-faction-line {
+  margin: 3px 0 0;
+  font-family: var(--font-card-section, "Oswald", sans-serif);
+  font-size: 0.68rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  line-height: 1.2;
+  color: #4a4035;
+}
+
+.card-points-badge {
+  flex-shrink: 0;
+  min-width: 48px;
+  padding: 6px 8px;
+  border-radius: 10px;
+  background: var(--card-ink, #2d241c);
+  color: #fff;
+  text-align: center;
+}
+
+.card-points-value {
+  display: block;
+  font-size: 1.1rem;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.card-points-label {
+  display: block;
+  font-family: var(--font-card-section, "Oswald", sans-serif);
+  font-size: 0.6rem;
+  letter-spacing: 0.06em;
+  opacity: 0.85;
+  margin-top: 2px;
+}
+
+/* ── Hero: portrait + HP/MP/AC rail ── */
+.card-hero {
+  display: grid;
+  grid-template-columns: 1fr 56px;
+  min-height: 168px;
+  max-height: 220px;
+  flex-shrink: 0;
+  border-bottom: 1px solid var(--card-line);
+}
+
+.card-hero-art {
+  position: relative;
+  min-width: 0;
+  background: linear-gradient(135deg, #d7c4aa, #8f765d);
+}
+
+.card-portrait-image,
+.card-portrait-placeholder {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.card-portrait-placeholder {
+  display: grid;
+  place-items: center;
+  color: rgba(255, 255, 255, 0.85);
+  font-weight: 800;
+  font-size: 0.85rem;
+  letter-spacing: 0.14em;
+}
+
+.card-hero-gradient {
+  position: absolute;
+  inset: auto 0 0 0;
+  height: 40%;
+  background: linear-gradient(180deg, transparent, rgba(20, 16, 12, 0.3));
+  pointer-events: none;
+}
+
+.card-hero-rail {
+  display: grid;
+  grid-template-rows: repeat(3, 1fr);
+  background: rgba(255, 253, 248, 0.95);
+  border-left: 1px solid var(--card-line);
+}
+
+.card-rail-stat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  padding: 4px 2px;
+  border-bottom: 1px solid var(--card-line);
+}
+
+.card-rail-stat:last-child {
+  border-bottom: none;
+}
+
+.card-rail-stat .card-stat-value {
+  font-size: 1.05rem;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.card-rail-stat .card-stat-key {
+  font-size: 0.58rem;
+  font-weight: 700;
+  color: var(--card-muted);
+  letter-spacing: 0.04em;
+}
+
+.card-rail-stat .hobt-icon {
+  width: 16px;
+  height: 16px;
+}
+
+/* ── Stats band (MS RS LS KS) ── */
+.card-stats-band {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 4px;
+  padding: 8px var(--card-pad);
+  background: rgba(255, 255, 255, 0.5);
+  border-bottom: 1px solid var(--card-line);
+  flex-shrink: 0;
+}
+
+.card-band-stat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  text-align: center;
+}
+
+.card-band-stat .card-stat-key {
+  font-size: 0.62rem;
+  font-weight: 700;
+  color: var(--card-muted);
+}
+
+.card-band-stat .hobt-icon {
+  width: 14px;
+  height: 14px;
+}
+
+.card-band-stat .card-stat-value {
+  font-size: 1rem;
+  font-weight: 800;
+  line-height: 1;
+}
+
+/* ── Body: equipment + abilities (scrollable) ── */
+.card-body {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  overflow: hidden;
+}
+
+.card-block {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  padding: 8px var(--card-pad) 6px;
+  overflow: hidden;
+}
+
+.card-block + .card-block {
+  border-top: 1px solid var(--card-line);
+}
+
+.card-section-title {
+  margin: 0 0 6px;
+  font-family: var(--font-card-section, "Oswald", sans-serif);
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  color: var(--card-muted);
+  flex-shrink: 0;
+}
+
+.card-scroll {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding-right: 2px;
+}
+
+.card-scroll::-webkit-scrollbar {
+  width: 4px;
+}
+
+.card-scroll::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.15);
+  border-radius: 4px;
+}
+
+/* Equipment rows */
+.card-equipment-row {
+  display: grid;
+  grid-template-columns: 18px 1fr;
+  gap: 6px;
+  align-items: start;
+  font-size: 0.75rem;
+  line-height: 1.3;
+  padding: 3px 0;
+}
+
+.card-eq-icon .hobt-icon {
+  width: 14px;
+  height: 14px;
+  color: #5f564b;
+}
+
+.card-eq-line {
+  min-width: 0;
+}
+
+.card-eq-slot {
+  display: block;
+  font-size: 0.62rem;
+  font-weight: 700;
+  color: var(--card-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.card-eq-item {
+  display: block;
+  font-weight: 600;
+  word-break: break-word;
+}
+
+/* Ability rows */
+.card-ability-row {
+  display: grid;
+  grid-template-columns: 16px 1fr;
+  gap: 6px;
+  align-items: start;
+  padding: 3px 0;
+}
+
+.card-ability-row.is-empty {
+  opacity: 0.35;
+  padding: 2px 0;
+}
+
+.card-ability-icon .hobt-icon {
+  width: 12px;
+  height: 12px;
+  margin-top: 2px;
+}
+
+.card-ability-text {
+  margin: 0;
+  font-size: 0.75rem;
+  line-height: 1.35;
+  word-break: break-word;
+}
+
+.card-ability-text strong {
+  font-weight: 700;
+}
+
+.card-ability-text.text-compact { font-size: 0.7rem; }
+.card-ability-text.text-tiny { font-size: 0.65rem; }
+
+/* ── Footer ── */
+.card-footer {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 6px var(--card-pad) 8px;
+  font-size: 0.62rem;
+  color: #7a7064;
+  border-top: 1px solid var(--card-line);
+  flex-shrink: 0;
+}
+
+/* Stat colors */
+.stat-hp .hobt-icon { color: #b33; }
+.stat-mp .hobt-icon { color: #2f6b4a; }
+.stat-ac .hobt-icon { color: #4a5f7a; }
+.stat-ms .hobt-icon { color: #6d4c35; }
+.stat-rs .hobt-icon { color: #5a4a8a; }
+.stat-ls .hobt-icon { color: #8a6b1f; }
+.stat-ks .hobt-icon { color: #3f5f8a; }
+
+.card-ability-row.type-negative .card-ability-icon { color: #9f2f2f; }
+.card-ability-row.type-main_attack .card-ability-icon,
+.card-ability-row.type-ranged .card-ability-icon { color: #6d4c35; }
+.card-ability-row.type-offhand .card-ability-icon { color: #8a6b4a; }
+.card-ability-row.type-defense .card-ability-icon { color: #4a5f7a; }
+
+/* Theme backgrounds */
+.theme-universal-clean.character-card {
+  background: linear-gradient(180deg, #faf7f2 0%, #e8dfd2 100%);
+}
+
+.theme-fantasy.character-card {
+  background: linear-gradient(180deg, #f8f1e8 0%, #d9c4a1 100%);
+}
+
+.theme-gothic.character-card {
+  background: linear-gradient(180deg, #f2ecec 0%, #b9a7a7 100%);
+}
+
+.theme-historical.character-card {
+  background: linear-gradient(180deg, #f5efe4 0%, #c9b08a 100%);
+}
+
+.theme-modern-tactical.character-card {
+  background: linear-gradient(180deg, #eef3ef 0%, #b8c9bb 100%);
+}
+
+.theme-post-apocalypse.character-card {
+  background: linear-gradient(180deg, #f0ebe0 0%, #c4b08a 100%);
+}
+
+.theme-sci-fi-clean.character-card {
+  background: linear-gradient(180deg, #f4f8ff 0%, #c8d7ef 100%);
+}
+
+.theme-industrial-retro.character-card {
+  background: linear-gradient(180deg, #f2ebe4 0%, #c7b29a 100%);
+}
+
+/* Preview in sidebar — slightly wider when space allows */
+.card-preview-main .character-card {
+  --card-w: min(100%, 400px);
+}
+
+@media (max-width: 720px) {
+  .character-card {
+    --card-w: min(100%, 340px);
+    max-height: none;
+  }
+}

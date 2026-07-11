@@ -10,7 +10,6 @@ import { t, type Locale } from "./i18n.js";
 const STAT_ORDER = ["hp", "mp", "ac", "ms", "rs", "ls", "ks"] as const;
 const PORTRAIT_STATS = ["hp", "mp", "ac"] as const;
 const BANNER_STATS = ["ms", "rs", "ls", "ks"] as const;
-const CARD_ICON_SCALE = 1.3;
 
 function statLabel(locale: Locale, key: (typeof STAT_ORDER)[number]): string {
   const map = {
@@ -97,37 +96,30 @@ function renderPortrait(card: CharacterCard): string {
   return `<div class="card-portrait-placeholder">LEGO</div>`;
 }
 
-function renderStatCell(
-  locale: Locale,
+function renderRailStat(
   card: CharacterCard,
-  key: (typeof STAT_ORDER)[number],
-  variant: "portrait" | "banner",
+  key: (typeof PORTRAIT_STATS)[number],
 ): string {
   const value = card.stats[key];
-  const label = statLabel(locale, key);
-  const iconSize = (variant === "portrait" ? 16 : 14) * CARD_ICON_SCALE;
-  const cellClass =
-    variant === "portrait" ? "card-portrait-stat-cell" : "card-stat-cell";
-
   return `
-      <div class="${cellClass} stat-${key}">
-        <span class="card-stat-key">${key.toUpperCase()}</span>
-        <span class="card-stat-icon">${renderIcon(STAT_ICONS[key]!, variant === "portrait" ? "card-portrait-stat-svg" : "card-stat-svg", iconSize)}</span>
+      <div class="card-rail-stat stat-${key}">
+        <span class="card-stat-icon">${renderIcon(STAT_ICONS[key]!, "card-stat-svg", 16)}</span>
         <strong class="card-stat-value">${value}</strong>
-        <span class="card-stat-name">${escapeHtml(label)}</span>
+        <span class="card-stat-key">${key.toUpperCase()}</span>
       </div>`;
 }
 
-function renderPortraitStats(locale: Locale, card: CharacterCard): string {
-  return PORTRAIT_STATS.map((key) =>
-    renderStatCell(locale, card, key, "portrait"),
-  ).join("");
-}
-
-function renderBannerStats(locale: Locale, card: CharacterCard): string {
-  return BANNER_STATS.map((key) =>
-    renderStatCell(locale, card, key, "banner"),
-  ).join("");
+function renderBandStat(
+  card: CharacterCard,
+  key: (typeof BANNER_STATS)[number],
+): string {
+  const value = card.stats[key];
+  return `
+      <div class="card-band-stat stat-${key}">
+        <span class="card-stat-key">${key.toUpperCase()}</span>
+        <span class="card-stat-icon">${renderIcon(STAT_ICONS[key]!, "card-stat-svg", 14)}</span>
+        <strong class="card-stat-value">${value}</strong>
+      </div>`;
 }
 
 function renderEquipment(locale: Locale, card: CharacterCard): string {
@@ -137,10 +129,11 @@ function renderEquipment(locale: Locale, card: CharacterCard): string {
     const itemName = entry?.name ?? t(locale, "none");
     return `
       <div class="card-equipment-row">
-        <span class="card-eq-icon eq-${slot}">${renderIcon(EQUIPMENT_ICONS[slot], "card-eq-svg", 11 * CARD_ICON_SCALE)}</span>
-        <span class="card-eq-slot">${escapeHtml(slotLabel)}</span>
-        <span class="card-eq-sep">—</span>
-        <span class="card-eq-item">${escapeHtml(itemName)}</span>
+        <span class="card-eq-icon eq-${slot}">${renderIcon(EQUIPMENT_ICONS[slot], "card-eq-svg", 14)}</span>
+        <div class="card-eq-line">
+          <span class="card-eq-slot">${escapeHtml(slotLabel)}</span>
+          <span class="card-eq-item">${escapeHtml(itemName)}</span>
+        </div>
       </div>`;
   }).join("");
 }
@@ -158,7 +151,7 @@ function renderAbilities(card: CharacterCard): string {
     ]);
     return `
       <div class="card-ability-row${typeClass}">
-        <span class="card-ability-icon">${renderIcon(abilityIcon(ability.type), "card-ability-svg", 10 * CARD_ICON_SCALE)}</span>
+        <span class="card-ability-icon">${renderIcon(abilityIcon(ability.type), "card-ability-svg", 12)}</span>
         <p class="card-ability-text ${descClass}">
           <strong>${escapeHtml(ability.name)}</strong>
           <span> — ${escapeHtml(ability.description)}</span>
@@ -183,7 +176,7 @@ function renderFullCard(
 
   return `
     <article class="character-card theme-${escapeHtml(card.template.id)} state-${card.validationState}${draftClass}" data-aspect="7x12">
-      <header class="card-zone card-zone-header">
+      <header class="card-header">
         <div class="card-header-main">
           <h3 class="card-name ${nameClass}">${escapeHtml(card.name)}</h3>
           ${subtitle ? `<p class="card-subtitle">${escapeHtml(subtitle)}</p>` : ""}
@@ -195,33 +188,33 @@ function renderFullCard(
         </div>
       </header>
 
-      <section class="card-zone card-zone-portrait" aria-label="Portrait">
-        <div class="card-portrait-layout">
-          <div class="card-portrait-wrap">
-            ${renderPortrait(card)}
-            <div class="card-portrait-gradient"></div>
-          </div>
-          <div class="card-portrait-stats" aria-label="Core stats">
-            ${renderPortraitStats(locale, card)}
-          </div>
+      <section class="card-hero" aria-label="Portrait">
+        <div class="card-hero-art">
+          ${renderPortrait(card)}
+          <div class="card-hero-gradient"></div>
+        </div>
+        <div class="card-hero-rail" aria-label="Core stats">
+          ${PORTRAIT_STATS.map((key) => renderRailStat(card, key)).join("")}
         </div>
       </section>
 
-      <section class="card-zone card-zone-stats" aria-label="Stats">
-        <div class="card-stats-grid">${renderBannerStats(locale, card)}</div>
+      <section class="card-stats-band" aria-label="Combat stats">
+        ${BANNER_STATS.map((key) => renderBandStat(card, key)).join("")}
       </section>
 
-      <section class="card-zone card-zone-equipment" aria-label="Equipment">
-        <h4 class="card-section-title">${t(locale, "equipmentSection")}</h4>
-        <div class="card-equipment-list">${renderEquipment(locale, card)}</div>
-      </section>
+      <div class="card-body">
+        <section class="card-block card-block-equipment" aria-label="Equipment">
+          <h4 class="card-section-title">${t(locale, "equipmentSection")}</h4>
+          <div class="card-scroll">${renderEquipment(locale, card)}</div>
+        </section>
 
-      <section class="card-zone card-zone-abilities" aria-label="Abilities">
-        <h4 class="card-section-title">${t(locale, "abilitiesSection")}</h4>
-        <div class="card-abilities-list">${renderAbilities(card)}</div>
-      </section>
+        <section class="card-block card-block-abilities" aria-label="Abilities">
+          <h4 class="card-section-title">${t(locale, "abilitiesSection")}</h4>
+          <div class="card-scroll">${renderAbilities(card)}</div>
+        </section>
+      </div>
 
-      <footer class="card-zone card-zone-footer">
+      <footer class="card-footer">
         <span>LEGO Skirmish ${escapeHtml(card.metadata?.version ?? "")}</span>
         <span>${escapeHtml(card.metadata?.characterId ?? card.id)}</span>
       </footer>
