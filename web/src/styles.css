@@ -36,9 +36,7 @@ body {
   margin: 0;
   min-width: 320px;
   color: #e6edf3;
-  background:
-    radial-gradient(circle at 20% 8%, rgba(36, 78, 110, 0.18), transparent 42%),
-    linear-gradient(180deg, #040c14 0%, #07141f 100%);
+  background: #050d16;
   font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   -webkit-font-smoothing: antialiased;
 }
@@ -315,16 +313,16 @@ svg {
 /* —— Roster —— */
 
 .roster {
-  min-height: 72px;
+  min-height: 64px;
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(195px, 1fr));
-  gap: 8px;
+  grid-template-columns: repeat(auto-fill, minmax(178px, 1fr));
+  gap: 6px;
   align-items: stretch;
-  padding: 10px 12px;
-  border: 1px solid var(--line-dark);
-  border-radius: var(--radius);
-  background: var(--panel-dark);
-  margin-bottom: 6px;
+  padding: 8px 10px;
+  border: 1px solid #24384a;
+  border-radius: 10px;
+  background: #0c1a28;
+  margin-bottom: 4px;
 }
 
 .roster-card {
@@ -450,10 +448,10 @@ svg {
 
 .workspace {
   display: grid;
-  grid-template-columns: minmax(0, 1.55fr) minmax(380px, 1fr);
-  gap: 16px;
+  grid-template-columns: minmax(0, 1.6fr) minmax(340px, 1fr);
+  gap: 14px;
   align-items: start;
-  margin-top: 10px;
+  margin-top: 6px;
 }
 
 .editor-column {
@@ -466,11 +464,11 @@ svg {
 .editor-panel {
   min-width: 0;
   border-radius: var(--radius);
-  padding: 20px 22px 18px;
-  background: linear-gradient(175deg, #f9f7f1 0%, #f1eee4 100%);
-  color: var(--ink);
-  box-shadow: var(--shadow);
-  border: 1px solid #e5e0d3;
+  padding: 18px 20px 16px;
+  background: #f8f5eb;
+  color: #1f1a14;
+  box-shadow: 0 4px 18px rgba(0,0,0,0.2);
+  border: 1px solid #c9b99a;
 }
 
 .editor-top-grid {
@@ -486,13 +484,13 @@ svg {
 .section-block h2 {
   display: flex;
   align-items: center;
-  gap: 9px;
-  margin: 0 0 12px;
-  font-size: 0.82rem;
+  gap: 8px;
+  margin: 0 0 10px;
+  font-size: 0.78rem;
   text-transform: uppercase;
-  letter-spacing: 0.06em;
+  letter-spacing: 0.08em;
   font-weight: 800;
-  color: #3a424c;
+  color: #4a4030;
 }
 
 .section-block h2 svg,
@@ -631,21 +629,38 @@ svg {
 
 .stats-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(92px, 1fr));
-  gap: 8px;
+  grid-template-columns: repeat(auto-fit, minmax(86px, 1fr));
+  gap: 6px;
 }
 
 .stat-tile {
-  min-height: 162px;
-  padding: 10px 8px 7px;
-  border: 1px solid #d3d5d7;
-  border-radius: 10px;
-  background: rgba(255, 255, 255, 0.82);
-  transition: transform var(--transition);
+  padding: 8px 6px 6px;
+  border: 1px solid #c9b99a;
+  border-radius: 8px;
+  background: #f8f5eb;
+  text-align: center;
+  transition: all var(--transition);
 }
 
 .stat-tile:hover {
-  transform: translateY(-2px);
+  border-color: #a78d5c;
+}
+
+.stat-tile .tile-value {
+  font-size: 1.6rem;
+  line-height: 1;
+  font-weight: 700;
+}
+
+.stat-tile .tile-icon {
+  font-size: 1.1rem;
+  margin: 2px 0;
+}
+
+.stat-tile .tile-code {
+  font-size: 0.68rem;
+  font-weight: 700;
+  color: #5c4630;
 }
 
 .stat-tile.hp .tile-icon {
@@ -692,22 +707,22 @@ svg {
 
 .equipment-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(108px, 1fr));
-  gap: 8px;
+  grid-template-columns: repeat(auto-fit, minmax(102px, 1fr));
+  gap: 6px;
 }
 
 .equipment-card {
-  min-height: 198px;
-  padding: 10px 9px 8px;
-  border: 1px solid #d3d5d7;
-  border-radius: 10px;
-  background: rgba(255, 255, 255, 0.82);
+  min-height: 170px;
+  padding: 8px 7px 6px;
+  border: 1px solid #c9b99a;
+  border-radius: 8px;
+  background: #f8f5eb;
   transition: all var(--transition);
+  font-size: 0.82rem;
 }
 
 .equipment-card:hover:not(.is-blocked) {
-  border-color: #b8b8b3;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+  border-color: #a78d5c;
 }
 
 .equipment-card.is-blocked {
@@ -739,25 +754,25 @@ svg {
 
 .abilities-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
-  gap: 10px;
+  grid-template-columns: repeat(auto-fit, minmax(158px, 1fr));
+  gap: 6px;
 }
 
 .ability-card {
   position: relative;
-  min-height: 170px;
-  padding: 12px 11px 10px 14px;
+  min-height: 138px;
+  padding: 8px 8px 6px 10px;
   overflow: hidden;
-  border: 1px solid #d3d5d7;
-  border-radius: 10px;
-  background: rgba(255, 255, 255, 0.82);
+  border: 1px solid #c9b99a;
+  border-radius: 8px;
+  background: #f8f5eb;
   cursor: pointer;
   transition: all var(--transition);
+  font-size: 0.82rem;
 }
 
 .ability-card:hover:not(.is-disabled) {
-  transform: translateY(-2px);
-  border-color: #a7b9a6;
+  border-color: #a78d5c;
 }
 
 .ability-card.is-selected {
@@ -952,429 +967,298 @@ svg {
   border-color: #e8b4b2;
 }
 
-/* —— Preview card —— */
+/* ============================================
+   TAROT CARD - FIXED PROPORTIONS
+   Classic tarot ratio ~ 1 : 1.73
+   Fixed size so it never grows
+   ============================================ */
 
 .preview-panel {
   position: sticky;
   top: 16px;
   align-self: start;
-  min-width: 0;
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   justify-content: center;
-  border-radius: var(--radius);
-  padding: 12px;
-  background: #f1eee5;
+  background: #e8e3d6;
+  padding: 18px;
+  border-radius: 16px;
   box-shadow: var(--shadow);
-  border: 1px solid #d6d1c3;
+  border: 1px solid #c9b99a;
 }
 
+.preview-character-card.tarot-card,
 .preview-character-card {
-  width: min(100%, 520px);
-  max-height: calc(100vh - 60px);
+  /* FIXED TAROT CARD — classic proportions (approx 1:1.735) */
+  width: 340px;
+  height: 590px;
+  flex-shrink: 0;
   display: flex;
   flex-direction: column;
-  flex-shrink: 0;
   overflow: hidden;
-  border: 3px solid var(--gold);
-  border-radius: 14px;
-  padding: 12px 15px 14px;
-  background: linear-gradient(178deg, #f9f7f1, #f0ecdf);
-  color: var(--ink);
-  box-shadow: 0 6px 22px rgba(0, 0, 0, 0.18);
+  border: 8px solid #3a2f1f;
+  border-radius: 8px;
+  background: #f8f4e9;
+  color: #1f1a14;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.35),
+              inset 0 0 0 1px #d4c9a8,
+              inset 0 2px 0 rgba(255,255,255,0.6);
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 13px;
+  line-height: 1.15;
+  padding: 10px 11px 8px;
 }
 
-.preview-character-card .card-header,
-.preview-character-card .card-stats,
-.preview-character-card .equipment-on-card {
-  flex-shrink: 0;
-}
-
-.preview-character-card .talents-on-card,
-.preview-character-card .abilities-on-card {
-  flex: 1 1 auto;
-  min-height: 0;
-  display: flex;
-  flex-direction: column;
-  overflow: auto;
-}
-
+/* Header */
 .card-header {
-  display: grid;
-  grid-template-columns: 62px minmax(0, 1fr);
-  gap: 11px;
-  align-items: start;
+  display: flex;
+  gap: 8px;
+  align-items: flex-start;
+  margin-bottom: 6px;
+  flex-shrink: 0;
 }
 
 .card-crest {
-  width: 56px;
-  height: 64px;
+  width: 42px;
+  height: 48px;
+  flex-shrink: 0;
   display: grid;
   place-items: center;
-  clip-path: polygon(0 0, 100% 0, 100% 72%, 50% 100%, 0 72%);
-  color: #fff;
-  background: #1f466f;
-  border: 3px solid var(--gold);
-  font-size: 1.6rem;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+  clip-path: polygon(0 0, 100% 0, 100% 68%, 50% 100%, 0 68%);
+  background: #2c3f5a;
+  color: #f2b84b;
+  font-size: 1.25rem;
+  border: 2px solid #c98d1f;
 }
 
 .card-title {
-  text-align: left;
+  flex: 1;
+  min-width: 0;
 }
 
 .card-title h1 {
-  margin: 4px 0 1px;
-  font-family: Georgia, serif;
-  font-size: clamp(1.25rem, 2vw, 1.85rem);
+  margin: 0;
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
   text-transform: uppercase;
-  letter-spacing: 0.025em;
   line-height: 1.05;
+  color: #1f1a14;
 }
 
 .card-title h3 {
-  margin: 0;
-  color: #2d5c96;
-  font-family: Georgia, serif;
-  font-size: 0.9rem;
+  margin: 1px 0 0;
+  font-size: 10px;
+  color: #5c4630;
   text-transform: uppercase;
+  letter-spacing: 0.6px;
   font-weight: 600;
 }
 
 .card-title p {
-  margin: 3px 0 0;
-  color: #4d5358;
-  font-family: Georgia, serif;
-  font-size: 0.8rem;
-  text-transform: uppercase;
+  margin: 1px 0 0;
+  font-size: 9.5px;
+  color: #665b4f;
+  font-style: italic;
 }
 
-.vital {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 4px;
-  border: 1px solid #d0d2d5;
-  border-radius: 8px;
-  padding: 8px 6px;
-  background: #fbfaf7;
-  text-align: center;
-}
-
-.vital svg,
-.vital .fa-solid {
-  font-size: 1.35rem;
-}
-
-.vital span small,
-.vital span strong {
-  display: block;
-  line-height: 1;
-}
-
-.vital span small {
-  font-family: Georgia, serif;
-  font-weight: 700;
-  font-size: 0.66rem;
-}
-
-.vital span strong {
-  margin-top: 2px;
-  font-family: Georgia, serif;
-  font-size: 1.75rem;
-}
-
-.hp-vital {
-  border-color: #e4b65b;
-}
-
-.hp-vital svg,
-.hp-vital .fa-solid {
-  color: #e3a321;
-}
-
-.mp-vital svg,
-.mp-vital .fa-solid {
-  color: #1c63a5;
-}
-
-.ac-vital svg,
-.ac-vital .fa-solid {
-  color: #454a4e;
-}
-
+/* Portrait + Vitals */
 .card-portrait-block {
-  margin-top: 10px;
-  display: grid;
-  grid-template-columns: 1fr auto;
-  gap: 10px;
-  align-items: stretch;
-}
-
-.card-portrait-block .hero-placeholder {
-  height: 100%;
-  min-height: 180px;
-}
-
-.card-vitals {
-  width: 78px;
   display: flex;
-  flex-direction: column;
-  gap: 7px;
-}
-
-.card-vitals .vital {
-  flex: 1 1 0;
-  min-height: 0;
-  gap: 4px;
-  padding: 6px 5px;
-  background: rgba(251, 250, 247, 0.96);
-  box-shadow: 0 1px 4px rgba(23, 32, 42, 0.1);
-  border: 1px solid #d0d2d5;
-  border-radius: 8px;
-}
-
-.card-vitals .card-mini-value {
-  font-family: Georgia, serif;
-  font-size: 1.38rem;
-  font-weight: 700;
-  line-height: 1;
-  color: #17202a;
-}
-
-.card-vitals .fa-solid {
-  font-size: 1rem;
-}
-
-.card-vitals .card-mini-code {
-  font-family: Georgia, serif;
-  font-size: 0.58rem;
-  font-weight: 800;
-  letter-spacing: 0.05em;
-  color: #4a535c;
-  line-height: 1;
-}
-
-.vital svg,
-.vital .fa-solid {
-  font-size: 1.35rem;
-}
-
-.vital span small,
-.vital span strong {
-  display: block;
-  line-height: 1;
-}
-
-.vital span small {
-  font-family: Georgia, serif;
-  font-weight: 700;
-  font-size: 0.66rem;
-}
-
-.vital span strong {
-  margin-top: 2px;
-  font-family: Georgia, serif;
-  font-size: 1.75rem;
-}
-
-.hero-placeholder {
-  position: relative;
-  width: 100%;
-  overflow: hidden;
-  border: 1px solid #cdd0d2;
-  border-radius: 10px;
-  background: linear-gradient(145deg, #dfe1e1, #f5f5f3 52%, #cfd2d4);
-  display: grid;
-  place-items: center;
-  min-height: 170px;
-}
-
-.hero-empty-label {
-  font-family: Georgia, serif;
-  font-size: 0.82rem;
-  font-weight: 700;
-  letter-spacing: 0.12em;
-  color: #7a8289;
-}
-
-.card-stats {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  margin-top: 12px;
-  border: 1px solid #d2d4d6;
-  border-radius: 7px;
-  overflow: hidden;
-}
-
-.card-stat-tile {
-  min-height: 88px;
-  padding: 10px 4px 8px;
-  background: #fbfaf7;
-  align-items: center;
-  justify-content: center;
   gap: 6px;
-}
-
-.card-stat-tile .tile-value {
-  font-size: 1.85rem;
-  line-height: 1;
-  margin: 0;
-}
-
-.card-stat-tile .tile-icon {
-  margin: 0;
-  font-size: 1.2rem;
-  line-height: 1;
-}
-
-.card-stat-tile .tile-code {
-  margin: 0;
-  font-size: 0.68rem;
-  line-height: 1;
-  color: #4a535c;
-}
-
-.card-stat-tile .tile-label {
-  display: none;
-}
-
-.card-stats > .card-stat-tile + .card-stat-tile {
-  border-left: 1px solid #d2d4d6;
-}
-
-.card-stats svg,
-.card-stats .fa-solid {
-  font-size: 1.2rem;
-}
-
-.card-stats small,
-.card-stats strong {
-  display: block;
-  font-family: Georgia, serif;
-}
-
-.card-stats small {
-  font-size: 0.68rem;
-}
-
-.card-stats strong {
-  font-size: 1.05rem;
-}
-
-.card-section {
-  margin-top: 11px;
-}
-
-.card-section h4 {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  margin: 0 0 8px;
-  font-family: Georgia, serif;
-  font-size: 0.78rem;
-  text-transform: uppercase;
-}
-
-.card-section h4::before,
-.card-section h4::after {
-  content: "";
-  flex: 1;
-  height: 1px;
-  background: #d0d2d3;
-}
-
-.equipment-on-card {
-  margin-top: 0;
-}
-
-.equipment-list,
-.talents-list,
-.abilities-list {
-  overflow: hidden;
-  border: 1px solid #d2d4d6;
-  border-radius: 7px;
-}
-
-.talents-on-card,
-.abilities-on-card {
-  margin-top: 0;
-  min-height: 0;
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-}
-
-.talents-on-card h4,
-.abilities-on-card h4 {
+  margin: 4px 0 6px;
   flex-shrink: 0;
 }
 
-.talents-list {
-  flex: 1 1 auto;
-  min-height: 0;
+.hero-placeholder {
+  flex: 1;
+  height: 158px;
+  border: 2px solid #8c7b5e;
+  border-radius: 4px;
+  overflow: hidden;
+  background: linear-gradient(145deg, #d9d3c3, #e8e0cf);
+  position: relative;
+}
+
+.hero-placeholder.has-image {
+  background: #3f3a32;
+}
+
+.hero-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.hero-empty-label {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  font-size: 10px;
+  color: #6f6456;
+  text-align: center;
+  padding: 4px;
+}
+
+.card-vitals {
+  width: 52px;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  flex-shrink: 0;
+}
+
+.vital {
+  background: #f8f4e9;
+  border: 1px solid #8c7b5e;
+  border-radius: 3px;
+  padding: 3px 2px;
+  text-align: center;
+  font-size: 10px;
+  line-height: 1;
+}
+
+.vital strong {
+  display: block;
+  font-size: 15px;
+  font-weight: 700;
+  line-height: 1;
+  color: #1f1a14;
+}
+
+.vital span {
+  display: block;
+  font-size: 8.5px;
+  font-weight: 600;
+  color: #5c4630;
+  margin-top: 1px;
+  letter-spacing: 0.3px;
+}
+
+/* Beautiful Stats Row (existing stats, nicer look) */
+.card-stats {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 3px;
+  margin-bottom: 6px;
+  flex-shrink: 0;
+  background: #3a2f1f;
+  padding: 3px;
+  border-radius: 3px;
+}
+
+.card-stat {
+  background: #f8f4e9;
+  text-align: center;
+  padding: 3px 2px 2px;
+  border-radius: 2px;
+}
+
+.card-stat .stat-val {
+  display: block;
+  font-size: 15px;
+  font-weight: 700;
+  line-height: 1;
+  color: #1f1a14;
+}
+
+.card-stat .stat-key {
+  display: block;
+  font-size: 8px;
+  font-weight: 700;
+  color: #5c4630;
+  letter-spacing: 0.5px;
+  margin-top: 1px;
+}
+
+/* Equipment & Abilities - compact, readable, fixed space */
+.card-equipment,
+.card-abilities {
+  flex-shrink: 0;
+  margin-bottom: 4px;
+}
+
+.card-equipment:last-of-type,
+.card-abilities:last-of-type {
+  margin-bottom: 0;
+}
+
+.card-list {
+  border: 1px solid #8c7b5e;
+  border-radius: 3px;
+  background: #fff;
+  font-size: 10.5px;
+  line-height: 1.18;
   overflow: hidden;
 }
 
 .card-list-item {
-  position: relative;
   display: grid;
-  grid-template-columns: 22px minmax(0, 1fr);
-  gap: 7px;
+  grid-template-columns: 16px 1fr;
+  gap: 4px;
+  padding: 3px 5px;
   align-items: start;
-  padding: 6px 8px 6px 12px;
-  border: 1px solid #d2d4d6;
-  background: #fff;
+  border-bottom: 1px solid #d9d0b8;
 }
 
-.card-list-item + .card-list-item {
-  border-top: 0;
-}
-
-.card-list-item .fa-solid {
-  margin-top: 2px;
-  font-size: 0.95rem;
-  color: #3a434b;
+.card-list-item:last-child {
+  border-bottom: none;
 }
 
 .card-list-item strong {
-  font-family: Georgia, serif;
-  font-size: 0.84rem;
-  line-height: 1.2;
+  font-size: 10px;
+  font-weight: 700;
+  line-height: 1.1;
+  display: block;
+  color: #1f1a14;
 }
 
 .card-list-item p {
-  margin: 3px 0 0;
-  color: #414950;
-  font-size: 0.66rem;
-  line-height: 1.35;
+  margin: 1px 0 0;
+  font-size: 8.5px;
+  color: #5c4630;
+  line-height: 1.15;
 }
 
-.card-list-item.card-ability::before {
-  content: "";
-  position: absolute;
-  inset: 0 auto 0 0;
-  width: 4px;
+.card-list-item svg,
+.card-list-item .fa-solid {
+  width: 13px;
+  height: 13px;
+  margin-top: 1px;
+  color: #5c4630;
 }
 
-.card-list-item.card-ability.positive::before {
-  background: var(--green);
-}
-
-.card-list-item.card-ability.negative::before {
-  background: var(--red);
-}
-
-.equipment-item .fa-solid {
-  color: #4a5560;
+.card-ability.negative strong {
+  color: #8c2e2e;
 }
 
 .card-empty {
   margin: 0;
-  color: var(--muted);
-  font-size: 0.8rem;
+  padding: 4px 6px;
+  font-size: 9px;
+  color: #7a6f5e;
+  text-align: center;
 }
+
+/* Footer */
+.card-footer {
+  margin-top: auto;
+  padding-top: 4px;
+  border-top: 1px solid #8c7b5e;
+  text-align: center;
+  flex-shrink: 0;
+}
+
+.card-footer .card-points {
+  font-size: 11px;
+  font-weight: 700;
+  color: #5c4630;
+  letter-spacing: 0.5px;
+}
+
+/* Legacy card styles cleaned up for tarot redesign */
 
 /* —— Catalog mode (dark shell, light panels) —— */
 
@@ -1733,9 +1617,10 @@ svg {
     position: static;
   }
 
+  .preview-character-card.tarot-card,
   .preview-character-card {
-    width: 100%;
-    max-height: none;
+    width: 320px;
+    height: 555px;
   }
 
   .catalog-workspace {
@@ -1808,11 +1693,18 @@ svg {
     justify-content: flex-start;
   }
 
+  .preview-character-card.tarot-card,
   .preview-character-card {
-    max-height: none;
+    width: 300px;
+    height: 520px;
   }
+}
 
-  .card-vitals {
-    width: 64px;
+/* Very small screens — keep tarot proportion */
+@media (max-width: 420px) {
+  .preview-character-card.tarot-card,
+  .preview-character-card {
+    width: 280px;
+    height: 485px;
   }
 }

@@ -45,40 +45,61 @@ export function renderPreviewCard(locale: Locale, card: CharacterCard): string {
   const faction = card.faction?.trim() ?? card.team?.trim() ?? "";
   const portrait = card.portrait?.url;
 
-  const equipmentItems = EQUIPMENT_SLOTS.map((slot) => {
-    const entry = card.equipment[slot];
-    if (!entry?.name) {
-      return "";
-    }
+  // Limit to 5 items total (prioritize mainWeapon + offhand)
+  const equipmentEntries = EQUIPMENT_SLOTS
+    .map((slot) => {
+      const entry = card.equipment[slot];
+      if (!entry?.name) return null;
+      return { slot, entry };
+    })
+    .filter(Boolean) as { slot: EquipmentSlot; entry: any }[];
+
+  const limitedEquipment = [
+    ...equipmentEntries.filter(e => e.slot === "mainWeapon" || e.slot === "offhand"),
+    ...equipmentEntries.filter(e => e.slot !== "mainWeapon" && e.slot !== "offhand"),
+  ].slice(0, 5);
+
+  const equipmentItems = limitedEquipment.length > 0
+    ? limitedEquipment.map(({ slot, entry }) => `
+        <div class="card-list-item equipment-item">
+          ${icon(EQUIPMENT_ICONS[slot])}
+          <div>
+            <strong>${escapeHtml(entry.name)}</strong>
+            <p>${escapeHtml(t(locale, SLOT_LABEL_KEYS[slot]))}</p>
+          </div>
+        </div>`).join("")
+    : `<p class="card-empty">${t(locale, "none")}</p>`;
+
+  // Limit to 5 abilities (1 weapon-related, 1 offhand-related, 3 talents as priority)
+  const allAbilities = card.abilities.filter(Boolean);
+  const weaponAb = allAbilities.find(a => (a.name || "").toLowerCase().includes("weapon") || (a.name || "").toLowerCase().includes("strike") || (a.name || "").toLowerCase().includes("blow")) || allAbilities[0];
+  const offhandAb = allAbilities.find(a => (a.name || "").toLowerCase().includes("off") || (a.name || "").toLowerCase().includes("shield") || (a.name || "").toLowerCase().includes("parry")) || allAbilities[1];
+  
+  let selectedAbilities = allAbilities.slice(0, 5);
+  // Try to construct preferred 5 if possible
+  const preferred: any[] = [];
+  if (weaponAb) preferred.push(weaponAb);
+  if (offhandAb && offhandAb !== weaponAb) preferred.push(offhandAb);
+  const remainingTalents = allAbilities.filter(a => !preferred.includes(a)).slice(0, 3);
+  preferred.push(...remainingTalents);
+  if (preferred.length > 0) {
+    selectedAbilities = preferred.slice(0, 5);
+  }
+
+  const abilitiesHtml = selectedAbilities.map((ability) => {
+    const negative = ability.type === "negative";
     return `
-      <div class="card-list-item equipment-item">
-        ${icon(EQUIPMENT_ICONS[slot])}
+      <div class="card-list-item card-ability ${negative ? "negative" : "positive"}">
+        ${icon(negative ? "warn" : "sparkle")}
         <div>
-          <strong>${escapeHtml(entry.name)}</strong>
-          <p>${escapeHtml(t(locale, SLOT_LABEL_KEYS[slot]))}</p>
+          <strong>${escapeHtml(ability.name)}</strong>
+          <p>${escapeHtml(ability.description)}</p>
         </div>
       </div>`;
-  })
-    .filter(Boolean)
-    .join("");
-
-  const abilities = card.abilities
-    .filter(Boolean)
-    .map((ability) => {
-      const negative = ability.type === "negative";
-      return `
-        <div class="card-list-item card-ability ${negative ? "negative" : "positive"}">
-          ${icon(negative ? "warn" : "sparkle")}
-          <div>
-            <strong>${escapeHtml(ability.name)}</strong>
-            <p>${escapeHtml(ability.description)}</p>
-          </div>
-        </div>`;
-    })
-    .join("");
+  }).join("");
 
   return `
-    <article class="preview-character-card state-${card.validationState}">
+    <article class="preview-character-card tarot-card state-${card.validationState}">
       <header class="card-header">
         <div class="card-crest">${icon("shield")}</div>
         <div class="card-title">
@@ -90,55 +111,50 @@ export function renderPreviewCard(locale: Locale, card: CharacterCard): string {
 
       <section class="card-portrait-block">
         <div class="hero-placeholder${portrait ? " has-image" : ""}">
-          ${
-            portrait
-              ? `<img src="${escapeHtml(portrait)}" alt="" class="hero-image" />`
-              : `<span class="hero-empty-label">${escapeHtml(t(locale, "portraitPlaceholder"))}</span>`
+          ${portrait
+            ? `<img src="${escapeHtml(portrait)}" alt="" class="hero-image" />`
+            : `<span class="hero-empty-label">${escapeHtml(t(locale, "portraitPlaceholder"))}</span>`
           }
         </div>
-        <aside class="card-vitals" aria-label="HP / MP / AC">
+        <aside class="card-vitals">
           <div class="vital hp-vital">
-            <strong class="card-mini-value">${card.stats.hp}</strong>
-            ${icon("heart")}
-            <span class="card-mini-code">HP</span>
+            <strong>${card.stats.hp}</strong>
+            <span>HP</span>
           </div>
           <div class="vital mp-vital">
-            <strong class="card-mini-value">${card.stats.mp}</strong>
-            ${icon("shoe-prints")}
-            <span class="card-mini-code">MP</span>
+            <strong>${card.stats.mp}</strong>
+            <span>MP</span>
           </div>
           <div class="vital ac-vital">
-            <strong class="card-mini-value">${card.stats.ac}</strong>
-            ${icon("shield")}
-            <span class="card-mini-code">AC</span>
+            <strong>${card.stats.ac}</strong>
+            <span>AC</span>
           </div>
         </aside>
       </section>
 
       <section class="card-stats">
-        ${BANNER_STATS.map(
-          (key) => `
-        <div class="tile card-stat-tile">
-          <strong class="tile-value">${card.stats[key]}</strong>
-          <span class="tile-icon">${icon(BANNER_STAT_ICONS[key])}</span>
-          <span class="tile-code">${key.toUpperCase()}</span>
-        </div>`,
-        ).join("")}
+        ${BANNER_STATS.map((key) => `
+          <div class="card-stat">
+            <span class="stat-val">${card.stats[key]}</span>
+            <span class="stat-key">${key.toUpperCase()}</span>
+          </div>`).join("")}
       </section>
 
-      <section class="card-section equipment-on-card">
-        <h4>${t(locale, "equipmentOnCard")}</h4>
+      <section class="card-equipment">
         <div class="card-list equipment-list">
-          ${equipmentItems || `<p class="card-empty">${t(locale, "none")}</p>`}
+          ${equipmentItems}
         </div>
       </section>
 
-      <section class="card-section talents-on-card">
-        <h4>${t(locale, "talentsOnCard")}</h4>
-        <div class="card-list talents-list">
-          ${abilities || `<p class="card-empty">${t(locale, "none")}</p>`}
+      <section class="card-abilities">
+        <div class="card-list abilities-list">
+          ${abilitiesHtml || `<p class="card-empty">${t(locale, "none")}</p>`}
         </div>
       </section>
+
+      <footer class="card-footer">
+        <span class="card-points">${card.points} pts</span>
+      </footer>
     </article>`;
 }
 
