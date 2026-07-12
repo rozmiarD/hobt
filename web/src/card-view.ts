@@ -95,22 +95,7 @@ export function renderPreviewCard(locale: Locale, card: CharacterCard): string {
         </div>
       </header>
 
-      <section class="card-vitals" aria-label="HP / MP / AC">
-        <div class="vital hp-vital">
-          ${icon("heart")}
-          <span><small>HP</small><strong>${card.stats.hp}</strong></span>
-        </div>
-        <div class="vital mp-vital">
-          ${icon("shoe-prints")}
-          <span><small>MP</small><strong>${card.stats.mp}</strong></span>
-        </div>
-        <div class="vital ac-vital">
-          ${icon("shield")}
-          <span><small>AC</small><strong>${card.stats.ac}</strong></span>
-        </div>
-      </section>
-
-      <section class="card-portrait">
+      <section class="card-portrait-block">
         <div class="hero-placeholder${portrait ? " has-image" : ""}">
           ${
             portrait
@@ -118,6 +103,20 @@ export function renderPreviewCard(locale: Locale, card: CharacterCard): string {
               : `<span class="hero-empty-label">${escapeHtml(t(locale, "portraitPlaceholder"))}</span>`
           }
         </div>
+        <aside class="card-vitals" aria-label="HP / MP / AC">
+          <div class="vital hp-vital">
+            ${icon("heart")}
+            <span><small>HP</small><strong>${card.stats.hp}</strong></span>
+          </div>
+          <div class="vital mp-vital">
+            ${icon("shoe-prints")}
+            <span><small>MP</small><strong>${card.stats.mp}</strong></span>
+          </div>
+          <div class="vital ac-vital">
+            ${icon("shield")}
+            <span><small>AC</small><strong>${card.stats.ac}</strong></span>
+          </div>
+        </aside>
       </section>
 
       <section class="card-stats">
