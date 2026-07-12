@@ -8,12 +8,12 @@
 
 .stash-tile {
   border: 1px solid var(--line);
-  border-radius: var(--radius-md);
+  border-radius: 10px;
   overflow: hidden;
   background: #fff;
-  box-shadow: var(--shadow-tile);
+  box-shadow: 0 3px 10px rgba(0,0,0,0.08);
   cursor: pointer;
-  transition: all 0.12s ease;
+  transition: all var(--transition, 0.15s ease);
   padding: 0;
   text-align: left;
   width: 100%;
@@ -22,12 +22,13 @@
 }
 
 .stash-tile:hover {
-  transform: translateY(-2px);
-  box-shadow: var(--shadow-tile-hover);
+  transform: translateY(-3px);
+  box-shadow: 0 8px 18px rgba(0,0,0,0.12);
+  border-color: #c4b89d;
 }
 
 .stash-tile.is-selected {
-  box-shadow: 0 0 0 3px var(--accent);
+  box-shadow: 0 0 0 3px var(--accent, #f2b84b);
 }
 
 .stash-tile.is-draft {
