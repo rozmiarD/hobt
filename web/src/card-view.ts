@@ -15,6 +15,14 @@ const BANNER_LABEL_KEYS = {
 
 const BANNER_STATS = ["ms", "rs", "ls", "ks"] as const;
 
+const SLOT_LABEL_KEYS = {
+  mainWeapon: "slotMainWeapon",
+  offhand: "slotOffhand",
+  armor: "slotArmor",
+  item1: "slotItem1",
+  item2: "slotItem2",
+} as const;
+
 const EQUIPMENT_SLOTS: EquipmentSlot[] = [
   "mainWeapon",
   "offhand",
@@ -44,18 +52,29 @@ export function renderPreviewCard(locale: Locale, card: CharacterCard): string {
   const faction = card.faction?.trim() ?? card.team?.trim() ?? "";
   const portrait = card.portrait?.url;
 
-  const equipmentIcons = EQUIPMENT_SLOTS.map((slot) => {
+  const equipmentItems = EQUIPMENT_SLOTS.map((slot) => {
     const entry = card.equipment[slot];
-    const filled = Boolean(entry?.name);
-    return `<span class="${filled ? "is-filled" : ""}" title="${escapeHtml(entry?.name ?? "")}">${icon(EQUIPMENT_ICONS[slot])}</span>`;
-  }).join("");
+    if (!entry?.name) {
+      return "";
+    }
+    return `
+      <div class="card-list-item equipment-item">
+        ${icon(EQUIPMENT_ICONS[slot])}
+        <div>
+          <strong>${escapeHtml(entry.name)}</strong>
+          <p>${escapeHtml(t(locale, SLOT_LABEL_KEYS[slot]))}</p>
+        </div>
+      </div>`;
+  })
+    .filter(Boolean)
+    .join("");
 
   const abilities = card.abilities
     .filter(Boolean)
     .map((ability) => {
       const negative = ability.type === "negative";
       return `
-        <div class="card-ability ${negative ? "negative" : "positive"}">
+        <div class="card-list-item card-ability ${negative ? "negative" : "positive"}">
           ${icon(negative ? "warn" : "sparkle")}
           <div>
             <strong>${escapeHtml(ability.name)}</strong>
@@ -74,10 +93,6 @@ export function renderPreviewCard(locale: Locale, card: CharacterCard): string {
           ${faction ? `<h3>${escapeHtml(faction)}</h3>` : ""}
           ${subtitle ? `<p>${escapeHtml(subtitle)}</p>` : ""}
         </div>
-        <div class="vital hp-vital">
-          ${icon("heart")}
-          <span><small>HP</small><strong>${card.stats.hp}</strong></span>
-        </div>
       </header>
 
       <section class="card-portrait">
@@ -85,20 +100,23 @@ export function renderPreviewCard(locale: Locale, card: CharacterCard): string {
           ${
             portrait
               ? `<img src="${escapeHtml(portrait)}" alt="" class="hero-image" />`
-              : `<span class="hero-head"></span><span class="hero-body"></span>
-                 <span class="hero-weapon">${icon("khanda")}</span>
-                 <span class="hero-shield">${icon("shield")}</span>`
+              : `<span class="hero-empty-label">${escapeHtml(t(locale, "portraitPlaceholder"))}</span>`
           }
         </div>
-        <div class="vital-stack">
-          <div class="vital mp-vital">
-            ${icon("shoe-prints")}
-            <span><small>MP</small><strong>${card.stats.mp}</strong></span>
-          </div>
-          <div class="vital ac-vital">
-            ${icon("shield")}
-            <span><small>AC</small><strong>${card.stats.ac}</strong></span>
-          </div>
+      </section>
+
+      <section class="card-vitals" aria-label="HP / MP / AC">
+        <div class="vital hp-vital">
+          ${icon("heart")}
+          <span><small>HP</small><strong>${card.stats.hp}</strong></span>
+        </div>
+        <div class="vital mp-vital">
+          ${icon("shoe-prints")}
+          <span><small>MP</small><strong>${card.stats.mp}</strong></span>
+        </div>
+        <div class="vital ac-vital">
+          ${icon("shield")}
+          <span><small>AC</small><strong>${card.stats.ac}</strong></span>
         </div>
       </section>
 
@@ -114,14 +132,16 @@ export function renderPreviewCard(locale: Locale, card: CharacterCard): string {
         ).join("")}
       </section>
 
-      <section class="card-section">
+      <section class="card-section equipment-on-card">
         <h4>${t(locale, "equipmentOnCard")}</h4>
-        <div class="card-equipment">${equipmentIcons}</div>
+        <div class="card-list equipment-list">
+          ${equipmentItems || `<p class="card-empty">${t(locale, "none")}</p>`}
+        </div>
       </section>
 
       <section class="card-section abilities-on-card">
         <h4>${t(locale, "abilitiesOnCard")}</h4>
-        <div class="abilities-list">
+        <div class="card-list abilities-list">
           ${abilities || `<p class="card-empty">${t(locale, "none")}</p>`}
         </div>
       </section>
