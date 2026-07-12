@@ -465,7 +465,7 @@ function renderActionbar(
     : t(locale, "characterRulesBad");
 
   return `
-    <footer class="actionbar">
+    <div class="actionbar">
       <div class="valid-state${valid ? "" : " is-bad"}">
         ${icon(statusIcon)}
         <span>${statusText}</span>
@@ -487,7 +487,7 @@ function renderActionbar(
           ? `<button type="button" class="btn secondary danger" data-action="remove-active">${t(locale, "removeFromTeam")}</button>`
           : ""
       }
-    </footer>`;
+    </div>`;
 }
 
 function renderTeamWorkspace(state: AppState): string {
@@ -502,6 +502,7 @@ function renderTeamWorkspace(state: AppState): string {
     ${renderRoster(state)}
     <section class="workspace">
       <div class="editor-column">
+        ${renderActionbar(locale, resolved, inTeam)}
         <section class="editor-panel">
           <div class="editor-top-grid">
             ${renderIdentitySection(state, draft)}
@@ -510,7 +511,6 @@ function renderTeamWorkspace(state: AppState): string {
           ${renderEquipmentSection(locale, draft, resolved, catalog)}
           ${renderAbilitiesSection(locale, draft, catalog)}
         </section>
-        ${renderActionbar(locale, resolved, inTeam)}
       </div>
       <aside class="preview-panel">
         ${renderPreviewCard(locale, draftCard)}
