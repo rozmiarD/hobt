@@ -154,15 +154,7 @@ function renderTopbar(
         <div class="progress"><span style="width:${ratio}%"></span></div>
       </div>
 
-      <nav class="topbar-end" aria-label="${escapeHtml(t(locale, "appModeLabel"))}">
-        <div class="mode-switch">
-          <button type="button" data-action="app-mode" data-mode="team" class="${state.appMode === "team" ? "active" : ""}">
-            ${t(locale, "modeTeam")}
-          </button>
-          <button type="button" data-action="app-mode" data-mode="catalog" class="${state.appMode === "catalog" ? "active" : ""}">
-            ${t(locale, "modeCatalog")}
-          </button>
-        </div>
+      <nav class="topbar-end">
         <div class="language">
           <button type="button" data-action="locale" data-locale="pl" class="${locale === "pl" ? "active" : ""}">PL</button>
           <span>/</span>
@@ -186,15 +178,7 @@ function renderCatalogTopbar(state: AppState): string {
         <button type="button" class="btn secondary compact" data-action="reset-catalog">${t(locale, "resetCatalog")}</button>
         <input type="file" accept="application/json,.json" data-action="catalog-file" hidden />
       </div>
-      <nav class="topbar-end" aria-label="${escapeHtml(t(locale, "appModeLabel"))}">
-        <div class="mode-switch">
-          <button type="button" data-action="app-mode" data-mode="team" class="${state.appMode === "team" ? "active" : ""}">
-            ${t(locale, "modeTeam")}
-          </button>
-          <button type="button" data-action="app-mode" data-mode="catalog" class="${state.appMode === "catalog" ? "active" : ""}">
-            ${t(locale, "modeCatalog")}
-          </button>
-        </div>
+      <nav class="topbar-end">
         <div class="language">
           <button type="button" data-action="locale" data-locale="pl" class="${locale === "pl" ? "active" : ""}">PL</button>
           <span>/</span>
@@ -202,6 +186,30 @@ function renderCatalogTopbar(state: AppState): string {
         </div>
       </nav>
     </header>`;
+}
+
+function renderAppNav(state: AppState): string {
+  const locale = state.locale;
+  const inTeam = state.appMode === "team";
+  const inItems = state.appMode === "catalog" && state.catalogEditorTab === "items";
+  const inAbilities =
+    state.appMode === "catalog" && state.catalogEditorTab === "abilities";
+
+  return `
+    <nav class="app-nav" aria-label="${escapeHtml(t(locale, "appModeLabel"))}">
+      <button type="button" data-action="app-mode" data-mode="team" class="app-nav-btn${inTeam ? " active" : ""}">
+        ${sprite("i-users")}
+        <span>${t(locale, "navTeam")}</span>
+      </button>
+      <button type="button" data-action="open-catalog" data-tab="items" class="app-nav-btn${inItems ? " active" : ""}">
+        ${sprite("i-shield")}
+        <span>${t(locale, "navItemCatalog")}</span>
+      </button>
+      <button type="button" data-action="open-catalog" data-tab="abilities" class="app-nav-btn${inAbilities ? " active" : ""}">
+        ${sprite("i-sparkle")}
+        <span>${t(locale, "navAbilityCatalog")}</span>
+      </button>
+    </nav>`;
 }
 
 function rosterStatus(resolved: ReturnType<typeof resolveCharacter>): "success" | "warning" {
@@ -339,7 +347,12 @@ function renderEquipmentSection(
 ): string {
   return `
     <section class="section-block equipment-section">
-      <h2>${sprite("i-shield")}<span>${t(locale, "sectionEquipment")}</span></h2>
+      <div class="section-head-row">
+        <h2>${sprite("i-shield")}<span>${t(locale, "sectionEquipment")}</span></h2>
+        <button type="button" class="btn secondary compact section-link" data-action="open-catalog" data-tab="items">
+          ${t(locale, "openItemCatalog")}
+        </button>
+      </div>
       <div class="equipment-grid">
         ${EQUIPMENT_SLOTS.map((slot) => {
           const items = getItemsForSlot(catalog, slot);
@@ -448,12 +461,17 @@ function renderAbilitiesSection(
 
   return `
     <section class="section-block abilities-section">
-      <h2>${sprite("i-sparkle")}<span>${t(locale, "sectionAbilities")}</span></h2>
+      <div class="section-head-row">
+        <h2>${sprite("i-sparkle")}<span>${t(locale, "sectionAbilities")}</span></h2>
+        <button type="button" class="btn secondary compact section-link" data-action="open-catalog" data-tab="abilities">
+          ${t(locale, "openAbilityCatalog")}
+        </button>
+      </div>
       <div class="abilities-grid">
         ${cards.join("")}
         ${
           cards.length < 2
-            ? `<button type="button" class="add-ability" disabled>${sprite("i-sparkle")}<span>${t(locale, "addAbility")}</span></button>`
+            ? `<button type="button" class="add-ability" data-action="open-catalog" data-tab="abilities">${sprite("i-sparkle")}<span>${t(locale, "openAbilityCatalog")}</span></button>`
             : ""
         }
       </div>
@@ -538,8 +556,14 @@ export function renderApp(state: AppState): string {
     <main class="app-shell">
       ${
         state.appMode === "catalog"
-          ? `${renderCatalogTopbar(state)}${renderCatalogMode(state)}`
-          : `${renderTopbar(state, cost, budget, ratio)}${renderTeamWorkspace(state)}`
+          ? renderCatalogTopbar(state)
+          : renderTopbar(state, cost, budget, ratio)
+      }
+      ${renderAppNav(state)}
+      ${
+        state.appMode === "catalog"
+          ? renderCatalogMode(state)
+          : renderTeamWorkspace(state)
       }
       <p class="catalog-toast hidden" data-role="catalog-toast" aria-live="polite"></p>
     </main>`;

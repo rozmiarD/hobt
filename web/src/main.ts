@@ -45,6 +45,7 @@ import {
   setItemDraftTwoHanded,
   setLocale,
   setTeamName,
+  openCatalog,
   startNewCatalogAbility,
   startNewCatalogItem,
   startNewCharacter,
@@ -200,6 +201,13 @@ root.addEventListener("click", (event) => {
 
   if (action === "app-mode" && button.dataset.mode) {
     update((current) => setAppMode(current, button.dataset.mode as AppMode));
+    return;
+  }
+
+  if (action === "open-catalog" && button.dataset.tab) {
+    update((current) =>
+      openCatalog(current, button.dataset.tab as CatalogEditorTab),
+    );
     return;
   }
 

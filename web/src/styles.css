@@ -1229,6 +1229,71 @@ svg {
   color: #1b1b15;
 }
 
+.app-nav {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+  margin-bottom: 12px;
+  padding: 6px;
+  border: 1px solid #1c2b38;
+  border-radius: 10px;
+  background: rgba(10, 22, 34, 0.82);
+}
+
+.app-nav-btn {
+  min-height: 48px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  border: 1px solid #344452;
+  border-radius: 8px;
+  padding: 0 14px;
+  background: linear-gradient(180deg, #132231, #0d1a27);
+  color: #eef2f5;
+  font-family: Georgia, serif;
+  font-size: 0.92rem;
+  font-weight: 700;
+}
+
+.app-nav-btn svg {
+  color: var(--gold);
+  font-size: 1.05rem;
+}
+
+.app-nav-btn.active {
+  border-color: var(--gold);
+  box-shadow: inset 0 0 0 1px rgba(240, 173, 37, 0.35);
+  background: linear-gradient(180deg, #1a3044, #122433);
+}
+
+.section-head-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.section-head-row h2 {
+  margin: 0;
+}
+
+.section-link {
+  flex-shrink: 0;
+}
+
+.add-ability {
+  cursor: pointer;
+}
+
+.add-ability:not([disabled]) {
+  opacity: 1;
+  border-style: solid;
+  border-color: #c9b99a;
+  background: rgba(255, 248, 232, 0.7);
+}
+
 .catalog-workspace {
   display: grid;
   grid-template-columns: 240px minmax(0, 1fr) 280px;

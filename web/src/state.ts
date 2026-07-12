@@ -338,6 +338,13 @@ export function setAppMode(state: AppState, appMode: AppMode): AppState {
   return { ...state, appMode };
 }
 
+export function openCatalog(
+  state: AppState,
+  catalogEditorTab: CatalogEditorTab = "items",
+): AppState {
+  return { ...state, appMode: "catalog", catalogEditorTab };
+}
+
 export function setCatalogDocument(
   state: AppState,
   catalogDocument: CatalogDocument,
