@@ -158,6 +158,7 @@ describe("armor resolution", () => {
 describe("great weapon fighting", () => {
   it("empty offhand → legal", () => {
     const character = makeCharacter({
+      baseStats: { MS: 0, RS: 0, LS: 0, KS: 0, HP: 3, MP: 2 },
       talentIds: ["great-weapon-fighting"],
       equipment: {
         mainWeapon: { itemId: "melee-sword" },
@@ -267,6 +268,64 @@ describe("iron berserker example", () => {
   });
 });
 
+describe("vital stats validation", () => {
+  it("default draft with HP=0 and MP=0 is not rules-compliant", () => {
+    const resolved = resolveCharacter(
+      makeCharacter(),
+      DEFAULT_RULESET,
+      DEFAULT_CATALOG,
+    );
+    expect(resolved.validation.valid).toBe(false);
+    expect(
+      resolved.validation.errors.some((error) => error.code === "hp_zero_or_less"),
+    ).toBe(true);
+    expect(
+      resolved.validation.errors.some((error) => error.code === "mp_zero_or_less"),
+    ).toBe(true);
+  });
+
+  it("derived HP <= 0 is not rules-compliant", () => {
+    const resolved = resolveCharacter(
+      makeCharacter({
+        baseStats: { MS: 0, RS: 0, LS: 0, KS: 0, HP: 1, MP: 2 },
+        talentIds: ["fragile"],
+      }),
+      DEFAULT_RULESET,
+      DEFAULT_CATALOG,
+    );
+    expect(resolved.derivedStats.HP).toBe(0);
+    expect(resolved.validation.valid).toBe(false);
+    expect(
+      resolved.validation.errors.some((error) => error.code === "hp_zero_or_less"),
+    ).toBe(true);
+  });
+
+  it("derived MP <= 0 is not rules-compliant", () => {
+    const resolved = resolveCharacter(
+      makeCharacter({
+        baseStats: { MS: 0, RS: 0, LS: 0, KS: 0, HP: 3, MP: 0 },
+      }),
+      DEFAULT_RULESET,
+      DEFAULT_CATALOG,
+    );
+    expect(resolved.validation.valid).toBe(false);
+    expect(
+      resolved.validation.errors.some((error) => error.code === "mp_zero_or_less"),
+    ).toBe(true);
+  });
+
+  it("positive derived HP and MP is rules-compliant", () => {
+    const resolved = resolveCharacter(
+      makeCharacter({
+        baseStats: { MS: 0, RS: 0, LS: 0, KS: 0, HP: 3, MP: 2 },
+      }),
+      DEFAULT_RULESET,
+      DEFAULT_CATALOG,
+    );
+    expect(resolved.validation.valid).toBe(true);
+  });
+});
+
 describe("derived stats separation", () => {
   it("applies fragile to derived HP, not base", () => {
     const character = makeCharacter({
@@ -299,7 +358,7 @@ describe("derived stats separation", () => {
 describe("team validation", () => {
   const characterAt200 = (): CharacterBuild =>
     makeCharacter({
-      baseStats: { MS: 4, RS: 0, LS: 0, KS: 0, HP: 4, MP: 0 },
+      baseStats: { MS: 4, RS: 0, LS: 0, KS: 1, HP: 3, MP: 2 },
     });
 
   function makeTeam(characters: CharacterBuild[]): Team {

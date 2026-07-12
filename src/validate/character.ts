@@ -257,15 +257,29 @@ export function validateCharacter(
   }
 
   if (derivedStats.HP <= 0) {
-    warnings.push(
+    errors.push(
       issue(
         "hp_zero_or_less",
-        "warning",
+        "error",
         {
-          pl: "Końcowe HP spadło do 0 lub poniżej.",
-          en: "Derived HP dropped to 0 or below.",
+          pl: "Końcowe HP musi być większe od 0.",
+          en: "Derived HP must be greater than 0.",
         },
         "HP",
+      ),
+    );
+  }
+
+  if (derivedStats.MP <= 0) {
+    errors.push(
+      issue(
+        "mp_zero_or_less",
+        "error",
+        {
+          pl: "Końcowe MP musi być większe od 0.",
+          en: "Derived MP must be greater than 0.",
+        },
+        "MP",
       ),
     );
   }
