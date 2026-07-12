@@ -1,5 +1,6 @@
 import {
   buildCharacterCard,
+  calculateCharacterCost,
   DEFAULT_RULESET,
   getItemsForSlot,
   listAbilities,
@@ -7,11 +8,17 @@ import {
   resolveCharacter,
   validateTeam,
 } from "@hobt/lego-skirmish";
-import type { CharacterBuild, EquipmentSlot, GameCatalog, PurchasableStat } from "@hobt/lego-skirmish/types/domain.js";
+import type {
+  CharacterBuild,
+  EquipmentSlot,
+  GameCatalog,
+  ItemDefinition,
+  PurchasableStat,
+} from "@hobt/lego-skirmish/types/domain.js";
 import { EQUIPMENT_SLOTS } from "@hobt/lego-skirmish/types/domain.js";
-import type { AppState, EditorStep } from "./state.js";
+import type { AppState } from "./state.js";
 import { renderCatalogMode } from "./catalog-render.js";
-import { renderEmptyStashSlot, renderCharacterCard } from "./card-view.js";
+import { renderPreviewCard } from "./card-view.js";
 import { CARD_THEMES, t, type Locale } from "./i18n.js";
 import { SPRITE_DEFS, sprite, type SpriteId } from "./sprites.js";
 
@@ -62,58 +69,13 @@ const SLOT_LABEL_KEYS = {
   item2: "slotItem2",
 } as const;
 
-const EDITOR_STEPS: EditorStep[] = [
-  "identity",
-  "stats",
-  "equipment",
-  "talents",
-];
-
-const STEP_LABEL: Record<
-  EditorStep,
-  "stepIdentity" | "stepStats" | "stepEquipment" | "stepTalents"
-> = {
-  identity: "stepIdentity",
-  stats: "stepStats",
-  equipment: "stepEquipment",
-  talents: "stepTalents",
-};
-
-const STEP_HINT: Record<
-  EditorStep,
-  "stepIdentityHint" | "stepStatsHint" | "stepEquipmentHint" | "stepTalentsHint"
-> = {
-  identity: "stepIdentityHint",
-  stats: "stepStatsHint",
-  equipment: "stepEquipmentHint",
-  talents: "stepTalentsHint",
-};
-
-const STEP_ICON: Record<EditorStep, SpriteId> = {
-  identity: "i-user",
-  stats: "i-sword",
-  equipment: "i-shield",
-  talents: "i-sparkle",
-};
-
-const STEP_SECTION: Record<
-  EditorStep,
-  "identityTitle" | "baseStats" | "equipment" | "talents"
-> = {
-  identity: "identityTitle",
-  stats: "baseStats",
-  equipment: "equipment",
-  talents: "talents",
-};
-
-const STEP_SECTION_HINT: Record<
-  EditorStep,
-  "identityMeta" | "statsMeta" | "equipmentMeta" | "talentsMeta"
-> = {
-  identity: "identityMeta",
-  stats: "statsMeta",
-  equipment: "equipmentMeta",
-  talents: "talentsMeta",
+const STAT_SHORT: Record<PurchasableStat, "statMS" | "statRS" | "statLS" | "statKS" | "statHP" | "statMP"> = {
+  MS: "statMS",
+  RS: "statRS",
+  LS: "statLS",
+  KS: "statKS",
+  HP: "statHP",
+  MP: "statMP",
 };
 
 function escapeHtml(value: string): string {
@@ -124,446 +86,461 @@ function escapeHtml(value: string): string {
     .replaceAll('"', "&quot;");
 }
 
-function statLabel(locale: Locale, stat: PurchasableStat): string {
-  const map = {
-    MS: "statMS",
-    RS: "statRS",
-    LS: "statLS",
-    KS: "statKS",
-    HP: "statHP",
-    MP: "statMP",
-  } as const;
-  return t(locale, map[stat]);
+function itemDescription(item: ItemDefinition | undefined, locale: Locale): string {
+  if (!item) {
+    return "";
+  }
+  const parts = item.actions
+    .map((action) => localize(action.name, locale))
+    .concat(
+      item.effects
+        .map((effect) => (effect.display ? localize(effect.display, locale) : ""))
+        .filter(Boolean),
+    );
+  return parts.slice(0, 2).join(" · ") || localize(item.name, locale);
 }
 
-function stepVisual(
-  step: EditorStep,
-  draft: CharacterBuild,
-  resolved: ReturnType<typeof resolveCharacter>,
-): "complete" | "error" | "pending" {
-  if (!draft.name.trim()) {
-    return step === "identity" ? "pending" : "pending";
+function itemCost(item: ItemDefinition | undefined): number {
+  if (!item) {
+    return 0;
   }
-  if (!resolved.validation.valid) {
-    return step === "talents" ? "error" : "pending";
-  }
-  return "complete";
+  const positive = item.cost.effectLevels?.positive ?? 0;
+  const negative = item.cost.effectLevels?.negative ?? 0;
+  const posCost = positive > 0 ? (100 * positive * (positive + 1)) / 2 : 0;
+  const negCost = negative > 0 ? -((100 * negative * (negative + 1)) / 2) : 0;
+  return (item.cost.fixed ?? 0) + posCost + negCost;
 }
 
-function renderStepper(
-  locale: Locale,
+function renderTopbar(
   state: AppState,
-  draft: CharacterBuild,
-  resolved: ReturnType<typeof resolveCharacter>,
+  teamCost: number,
+  budget: number,
+  ratio: number,
 ): string {
+  const locale = state.locale;
+
   return `
-    <nav class="stepper-nav" role="tablist" aria-label="${escapeHtml(t(locale, "character"))}">
-      ${EDITOR_STEPS.map((step, index) => {
-        const visual = stepVisual(step, draft, resolved);
-        const isActive = state.activeEditorStep === step;
-        const numContent =
-          visual === "complete"
-            ? sprite("i-check")
-            : `${index + 1}`;
-        return `
-        <button
-          type="button"
-          class="step-tab${isActive ? " active" : ""}${visual === "complete" ? " is-complete" : ""}${visual === "error" ? " is-error" : ""}"
-          data-action="goto-step"
-          data-step="${step}"
-          role="tab"
-          aria-selected="${isActive}"
-        >
-          <span class="step-num">${numContent}</span>
-          <span class="step-label">
-            <strong>${t(locale, STEP_LABEL[step])}</strong>
-            <span>${t(locale, STEP_HINT[step])}</span>
-          </span>
-        </button>`;
-      }).join("")}
+    <header class="topbar">
+      <a class="brand" href="#" aria-label="${escapeHtml(t(locale, "brandTitle"))}" onclick="return false">
+        <span class="brand-mark">${sprite("i-shield")}</span>
+        <span>${escapeHtml(t(locale, "brandTitle"))}</span>
+      </a>
+
+      <label class="top-control team-control">
+        ${sprite("i-users")}
+        <input
+          type="text"
+          data-action="team-name"
+          value="${escapeHtml(state.team.name)}"
+          maxlength="48"
+          aria-label="${escapeHtml(t(locale, "teamName"))}"
+        />
+      </label>
+
+      <label class="top-control compact theme-control">
+        ${sprite("i-sparkle")}
+        <select data-action="card-theme" aria-label="${escapeHtml(t(locale, "teamTheme"))}">
+          ${CARD_THEMES.map(
+            (theme) => `
+            <option value="${theme.id}" ${state.team.cardTheme.templateId === theme.id ? "selected" : ""}>
+              ${escapeHtml(localize(theme.label, locale))}
+            </option>`,
+          ).join("")}
+        </select>
+      </label>
+
+      <div class="budget-block">
+        <strong>${teamCost} / ${budget} ${t(locale, "points")}</strong>
+        <div class="progress"><span style="width:${ratio}%"></span></div>
+      </div>
+
+      <nav class="topbar-end" aria-label="${escapeHtml(t(locale, "appModeLabel"))}">
+        <div class="mode-switch">
+          <button type="button" data-action="app-mode" data-mode="team" class="${state.appMode === "team" ? "active" : ""}">
+            ${t(locale, "modeTeam")}
+          </button>
+          <button type="button" data-action="app-mode" data-mode="catalog" class="${state.appMode === "catalog" ? "active" : ""}">
+            ${t(locale, "modeCatalog")}
+          </button>
+        </div>
+        <div class="language">
+          <button type="button" data-action="locale" data-locale="pl" class="${locale === "pl" ? "active" : ""}">PL</button>
+          <span>/</span>
+          <button type="button" data-action="locale" data-locale="en" class="${locale === "en" ? "active" : ""}">EN</button>
+        </div>
+      </nav>
+    </header>`;
+}
+
+function renderCatalogTopbar(state: AppState): string {
+  const locale = state.locale;
+  return `
+    <header class="topbar topbar-catalog">
+      <a class="brand" href="#" aria-label="${escapeHtml(t(locale, "brandTitle"))}" onclick="return false">
+        <span class="brand-mark">${sprite("i-shield")}</span>
+        <span>${escapeHtml(t(locale, "catalogPageTitle"))}</span>
+      </a>
+      <div class="catalog-header-actions">
+        <button type="button" class="btn secondary compact" data-action="import-catalog">${t(locale, "importCatalog")}</button>
+        <button type="button" class="btn secondary compact" data-action="export-catalog">${t(locale, "exportCatalog")}</button>
+        <button type="button" class="btn secondary compact" data-action="reset-catalog">${t(locale, "resetCatalog")}</button>
+        <input type="file" accept="application/json,.json" data-action="catalog-file" hidden />
+      </div>
+      <nav class="topbar-end" aria-label="${escapeHtml(t(locale, "appModeLabel"))}">
+        <div class="mode-switch">
+          <button type="button" data-action="app-mode" data-mode="team" class="${state.appMode === "team" ? "active" : ""}">
+            ${t(locale, "modeTeam")}
+          </button>
+          <button type="button" data-action="app-mode" data-mode="catalog" class="${state.appMode === "catalog" ? "active" : ""}">
+            ${t(locale, "modeCatalog")}
+          </button>
+        </div>
+        <div class="language">
+          <button type="button" data-action="locale" data-locale="pl" class="${locale === "pl" ? "active" : ""}">PL</button>
+          <span>/</span>
+          <button type="button" data-action="locale" data-locale="en" class="${locale === "en" ? "active" : ""}">EN</button>
+        </div>
+      </nav>
+    </header>`;
+}
+
+function rosterStatus(resolved: ReturnType<typeof resolveCharacter>): "success" | "warning" {
+  if (!resolved.validation.valid) {
+    return "warning";
+  }
+  if (resolved.validation.warnings.length > 0) {
+    return "warning";
+  }
+  return "success";
+}
+
+function renderRoster(state: AppState): string {
+  const locale = state.locale;
+  const catalog = catalogFor(state);
+
+  const cards = state.team.characters.map((character) => {
+    const resolved = resolveCharacter(character, DEFAULT_RULESET, catalog);
+    const cost = calculateCharacterCost(character, DEFAULT_RULESET, catalog).total;
+    const active = state.draft.id === character.id;
+    const status = rosterStatus(resolved);
+    const portrait = character.cosmetics.portraitDataUrl;
+    const avatarClass = portrait ? "avatar avatar-photo" : "avatar avatar-round";
+    const avatarContent = portrait
+      ? `<img src="${escapeHtml(portrait)}" alt="" />`
+      : "";
+
+    return `
+      <button
+        type="button"
+        class="roster-card${active ? " active" : ""}"
+        data-action="select-character"
+        data-character="${escapeHtml(character.id)}"
+      >
+        <span class="${avatarClass}">${avatarContent}</span>
+        <span class="roster-copy">
+          <strong>${escapeHtml(character.name || t(locale, "newCharacter"))}</strong>
+          <small>${cost} ${t(locale, "points")}</small>
+        </span>
+        <span class="status ${status}">
+          ${sprite(status === "success" ? "i-check" : "i-warn")}
+        </span>
+      </button>`;
+  });
+
+  return `
+    <nav class="roster" aria-label="${escapeHtml(t(locale, "stashRoster"))}">
+      ${cards.join("")}
+      <button type="button" class="roster-card add-character" data-action="new-character">
+        ${sprite("i-sparkle")}
+        <span>${t(locale, "newCharacter")}</span>
+      </button>
     </nav>`;
 }
 
-function renderIdentityStep(state: AppState, draft: CharacterBuild): string {
+function renderIdentitySection(state: AppState, draft: CharacterBuild): string {
   const locale = state.locale;
-  const portrait = draft.cosmetics.portraitDataUrl
-    ? `<img src="${escapeHtml(draft.cosmetics.portraitDataUrl)}" alt="" />`
-    : escapeHtml(t(locale, "portraitPlaceholder"));
+  const portrait = draft.cosmetics.portraitDataUrl;
 
   return `
-    <div class="identity-grid">
-      <div class="field">
-        <label>${t(locale, "characterName")}</label>
-        <input type="text" data-action="name" value="${escapeHtml(draft.name)}" maxlength="48" />
-      </div>
-      <div class="field">
-        <label>${t(locale, "faction")}</label>
-        <input type="text" data-action="faction" value="${escapeHtml(draft.faction ?? "")}" maxlength="48" />
-      </div>
-      <div class="field">
-        <label>${t(locale, "cardSubtitle")}</label>
-        <input type="text" data-action="subtitle" value="${escapeHtml(draft.subtitle ?? "")}" maxlength="64" />
-      </div>
-    </div>
-    <div class="portrait-row">
-      <div class="portrait-thumb">${portrait}</div>
-      <div>
-        <p class="portrait-hint">${t(locale, "portraitHint")}</p>
-        <label class="upload-btn">
-          ${sprite("i-sparkle", "")} ${t(locale, "portraitUpload")}
-          <input type="file" accept="image/*" data-action="portrait-upload" hidden />
-        </label>
-        ${
-          draft.cosmetics.portraitDataUrl
-            ? `<button type="button" class="btn-ghost danger" data-action="portrait-remove" style="margin-left:8px">${t(locale, "portraitRemove")}</button>`
-            : ""
-        }
-        <p class="portrait-error hidden" data-role="portrait-error"></p>
-      </div>
-    </div>`;
-}
-
-function renderStatsStep(locale: Locale, draft: CharacterBuild, resolved: ReturnType<typeof resolveCharacter>): string {
-  return PURCHASABLE_STATS.map((stat) => {
-    const value = draft.baseStats[stat];
-    const cost =
-      resolved.cost.attributes.find((entry) => entry.id === `attr:${stat}`)?.amount ?? 0;
-    return `
-      <div class="tile stat-tile">
-        <div class="stat-tile-main">
-          <span class="stat-code">${stat}</span>
-          <span class="stat-icon-box">${sprite(STAT_SPRITES[stat])}</span>
-          <span class="stat-name">${escapeHtml(statLabel(locale, stat))}</span>
-          <div class="stepper">
-            <button type="button" data-action="stat-dec" data-stat="${stat}" ${value <= 0 ? "disabled" : ""}>−</button>
-            <span class="stat-value">${value}</span>
-            <button type="button" data-action="stat-inc" data-stat="${stat}" ${value >= 6 ? "disabled" : ""}>+</button>
-          </div>
+    <section class="identity section-block">
+      <h2>${sprite("i-user")}<span>${t(locale, "sectionIdentity")}</span></h2>
+      <div class="identity-grid">
+        <div class="portrait-placeholder${portrait ? " has-image" : ""}">
+          ${
+            portrait
+              ? `<img src="${escapeHtml(portrait)}" alt="" class="portrait-image" />`
+              : `<span class="portrait-head"></span><span class="portrait-body"></span>`
+          }
+          <label class="portrait-upload-btn" aria-label="${escapeHtml(t(locale, "portraitUpload"))}">
+            ${sprite("i-sparkle")}
+            <input type="file" accept="image/*" data-action="portrait-upload" hidden />
+          </label>
         </div>
-        <div class="stat-cost">${t(locale, "costPrefix")} <strong>${cost}</strong> ${t(locale, "points")}</div>
-      </div>`;
-  }).join("");
+        <div class="form-stack">
+          <label>
+            <span>${t(locale, "characterName")}</span>
+            <input type="text" data-action="name" value="${escapeHtml(draft.name)}" maxlength="48" />
+          </label>
+          <label>
+            <span>${t(locale, "faction")}</span>
+            <input type="text" data-action="faction" value="${escapeHtml(draft.faction ?? "")}" maxlength="48" />
+          </label>
+          <label>
+            <span>${t(locale, "cardSubtitle")}</span>
+            <input type="text" data-action="subtitle" value="${escapeHtml(draft.subtitle ?? "")}" maxlength="64" />
+          </label>
+          ${
+            portrait
+              ? `<button type="button" class="btn secondary compact portrait-remove-btn" data-action="portrait-remove">${t(locale, "portraitRemove")}</button>`
+              : ""
+          }
+          <p class="portrait-error hidden" data-role="portrait-error"></p>
+        </div>
+      </div>
+    </section>`;
 }
 
-function renderEquipmentStep(
+function renderStatsSection(
+  locale: Locale,
+  draft: CharacterBuild,
+): string {
+  return `
+    <section class="statistics section-block">
+      <h2>${sprite("i-sword")}<span>${t(locale, "sectionStats")}</span></h2>
+      <div class="stats-grid">
+        ${PURCHASABLE_STATS.map((stat) => {
+          const value = draft.baseStats[stat];
+          const hpMp = stat === "HP" || stat === "MP";
+          return `
+          <article class="stat-tile${hpMp ? ` ${stat.toLowerCase()}` : ""}">
+            <div class="stat-topline">
+              <span class="stat-icon">${sprite(STAT_SPRITES[stat])}</span>
+              <div>
+                <strong>${stat}</strong>
+                <small>${escapeHtml(t(locale, STAT_SHORT[stat]))}</small>
+              </div>
+            </div>
+            <div class="stat-value">${value}</div>
+            <div class="stat-controls">
+              <button type="button" data-action="stat-dec" data-stat="${stat}" ${value <= 0 ? "disabled" : ""} aria-label="−">−</button>
+              <button type="button" data-action="stat-inc" data-stat="${stat}" ${value >= 6 ? "disabled" : ""} aria-label="+">+</button>
+            </div>
+          </article>`;
+        }).join("")}
+      </div>
+    </section>`;
+}
+
+function renderEquipmentSection(
   locale: Locale,
   draft: CharacterBuild,
   resolved: ReturnType<typeof resolveCharacter>,
   catalog: GameCatalog,
 ): string {
-  return EQUIPMENT_SLOTS.map((slot) => {
-    const items = getItemsForSlot(catalog, slot);
-    const current = draft.equipment[slot]?.itemId ?? "";
-    const blocked = resolved.blockedSlots.includes(slot);
-    return `
-      <div class="tile eq-tile">
-        <label>
-          <span class="eq-icon-box">${sprite(EQ_SPRITES[slot])}</span>
-          ${t(locale, SLOT_LABEL_KEYS[slot])}${blocked ? " 🔒" : ""}
-        </label>
-        <select data-action="equipment" data-slot="${slot}" ${blocked ? "disabled" : ""}>
-          <option value="">${t(locale, "selectItem")}</option>
-          ${items
-            .map(
-              (item) => `
-            <option value="${item.id}" ${current === item.id ? "selected" : ""}>
-              ${escapeHtml(localize(item.name, locale))}
-            </option>`,
-            )
-            .join("")}
-        </select>
-      </div>`;
-  }).join("");
-}
-
-function renderTalentsStep(locale: Locale, draft: CharacterBuild, catalog: GameCatalog): string {
-  return listAbilities(catalog)
-    .map((ability) => {
-      const checked = draft.talentIds.includes(ability.id);
-      const disabled =
-        !checked && draft.talentIds.length >= DEFAULT_RULESET.character.maxTalents;
-      const polarity = ability.polarity === "negative" ? " negative" : "";
-      const desc = ability.effects
-        .map((e) => (e.display ? localize(e.display, locale) : ""))
-        .filter(Boolean)
-        .join(" · ");
-      return `
-        <label class="tile talent-tile${polarity}">
-          <input
-            type="checkbox"
-            data-action="talent-toggle"
-            data-talent="${ability.id}"
-            ${checked ? "checked" : ""}
-            ${disabled ? "disabled" : ""}
-          />
-          <span class="talent-copy">
-            <strong>${escapeHtml(localize(ability.name, locale))}</strong>
-            <span>${escapeHtml(desc || localize(ability.name, locale))}</span>
-          </span>
-          <span class="talent-cost">${ability.cost > 0 ? "+" : ""}${ability.cost}</span>
-        </label>`;
-    })
-    .join("");
-}
-
-function renderSummary(
-  locale: Locale,
-  state: AppState,
-  resolved: ReturnType<typeof resolveCharacter>,
-): string {
-  const inStash = state.team.characters.some((c) => c.id === state.draft.id);
-  const issues = [
-    ...resolved.validation.errors.map((issue) => ({
-      severity: "error" as const,
-      text: localize(issue.message, locale),
-    })),
-    ...resolved.validation.warnings.map((issue) => ({
-      severity: "warning" as const,
-      text: localize(issue.message, locale),
-    })),
-  ];
-
-  const validationRows =
-    issues.length === 0
-      ? `<div class="issue ok">${sprite("i-check")}<span>${t(locale, "noIssues")}</span></div>`
-      : issues
-          .map((issue) => {
-            const icon = issue.severity === "error" ? "i-warn" : "i-check";
-            const cls = issue.severity === "error" ? "error" : "warn";
-            return `<div class="issue ${cls}">${sprite(icon)}<span>${escapeHtml(issue.text)}</span></div>`;
-          })
-          .join("") +
-        (!inStash
-          ? `<div class="issue warn">${sprite("i-warn")}<span>${t(locale, "notSavedWarning")}</span></div>`
-          : "");
-
   return `
-    <div class="summary-tile">
-      <div class="summary-col">
-        <h4>${t(locale, "costBreakdown")}</h4>
-        <div class="cost-row"><span>${t(locale, "attributes")}</span><strong>${renderCostTotal(resolved.cost.attributes)} ${t(locale, "points")}</strong></div>
-        <div class="cost-row"><span>${t(locale, "equipment")}</span><strong>${renderCostTotal(resolved.cost.equipment)} ${t(locale, "points")}</strong></div>
-        <div class="cost-row"><span>${t(locale, "abilities")}</span><strong>${renderCostTotal(resolved.cost.abilities)} ${t(locale, "points")}</strong></div>
-        <div class="cost-total"><span>${t(locale, "total")}</span><strong>${resolved.cost.total} ${t(locale, "points")}</strong></div>
-      </div>
-      <div class="summary-col">
-        <h4>${t(locale, "validation")}</h4>
-        ${validationRows}
-      </div>
-    </div>`;
-}
+    <section class="section-block equipment-section">
+      <h2>${sprite("i-shield")}<span>${t(locale, "sectionEquipment")}</span></h2>
+      <div class="equipment-grid">
+        ${EQUIPMENT_SLOTS.map((slot) => {
+          const items = getItemsForSlot(catalog, slot);
+          const currentId = draft.equipment[slot]?.itemId ?? "";
+          const currentItem = currentId ? catalog.items[currentId] : undefined;
+          const blocked = resolved.blockedSlots.includes(slot);
+          const name = currentItem
+            ? localize(currentItem.name, locale)
+            : t(locale, "selectItem");
+          const desc = blocked
+            ? "🔒"
+            : itemDescription(currentItem, locale) || t(locale, "changeEquipment");
+          const cost = itemCost(currentItem);
 
-function renderCostTotal(
-  entries: { amount: number }[],
-): number {
-  return entries.reduce((sum, entry) => sum + entry.amount, 0);
-}
-
-function renderStepPanel(
-  step: EditorStep,
-  state: AppState,
-  draft: CharacterBuild,
-  resolved: ReturnType<typeof resolveCharacter>,
-): string {
-  const locale = state.locale;
-  const isActive = state.activeEditorStep === step;
-  let body = "";
-
-  if (step === "identity") {
-    body = renderIdentityStep(state, draft);
-  } else if (step === "stats") {
-    body = `<div class="tile-grid stat-grid">${renderStatsStep(locale, draft, resolved)}</div>`;
-  } else if (step === "equipment") {
-    body = `<div class="tile-grid equipment-grid">${renderEquipmentStep(locale, draft, resolved, catalogFor(state))}</div>`;
-  } else {
-    body = `<div class="tile-grid talent-grid">${renderTalentsStep(locale, draft, catalogFor(state))}</div>${renderSummary(locale, state, resolved)}`;
-  }
-
-  return `
-    <div class="panel step-panel${isActive ? " active" : ""}" data-panel="${step}" role="tabpanel">
-      <div class="section-head">
-        <span class="section-head-icon">${sprite(STEP_ICON[step])}</span>
-        <div>
-          <h2>${t(locale, STEP_SECTION[step])}</h2>
-          <p class="section-head-meta">${t(locale, STEP_SECTION_HINT[step])}</p>
-        </div>
-      </div>
-      ${body}
-    </div>`;
-}
-
-function renderTeamBar(state: AppState): string {
-  const locale = state.locale;
-  const resolvedTeam = validateTeam(state.team, DEFAULT_RULESET, catalogFor(state));
-  const budget = state.team.budget;
-  const cost = resolvedTeam.totalCost;
-  const reserve = Math.max(0, budget - cost);
-  const ratio = Math.min(100, Math.round((cost / budget) * 100));
-  const valid = resolvedTeam.validation.valid;
-
-  return `
-    <section class="team-bar">
-      <div class="tb-identity">
-        <div class="tb-name-row">
-          <input type="text" data-action="team-name" value="${escapeHtml(state.team.name)}" maxlength="48" aria-label="${escapeHtml(t(locale, "teamName"))}" />
-        </div>
-        <div class="tb-theme-row">
-          <label for="team-theme">${t(locale, "teamTheme")}</label>
-          <select id="team-theme" data-action="card-theme">
-            ${CARD_THEMES.map(
-              (theme) => `
-              <option value="${theme.id}" ${state.team.cardTheme.templateId === theme.id ? "selected" : ""}>
-                ${escapeHtml(localize(theme.label, locale))}
-              </option>`,
-            ).join("")}
-          </select>
-        </div>
-      </div>
-      <div class="tb-budget">
-        <div class="tb-budget-label">
-          <span>${t(locale, "teamBudget")}</span>
-          <strong>${cost} / ${budget} ${t(locale, "points")}</strong>
-        </div>
-        <div class="budget-bar"><div class="budget-fill" style="width:${ratio}%"></div></div>
-        <div class="tb-metrics">
-          <span>${t(locale, "charactersLabel")}<strong>${state.team.characters.length} / ${DEFAULT_RULESET.team.maximumCharacterCount}</strong></span>
-          <span>${t(locale, "pointsReserve")}<strong>${reserve} ${t(locale, "points")}</strong></span>
-          <span>${t(locale, "validityLabel")}<strong>${valid ? t(locale, "rulesCompliant") : t(locale, "teamInvalid")}</strong></span>
-        </div>
-      </div>
-      <div class="tb-status${valid ? "" : " is-bad"}">
-        ${sprite("i-check", "tb-status-icon")}
-        <span class="tb-status-text">${valid ? t(locale, "teamReady") : t(locale, "teamInvalid")}</span>
+          return `
+          <article class="equipment-card${blocked ? " is-blocked" : ""}">
+            <div class="equipment-icon">${sprite(EQ_SPRITES[slot])}</div>
+            <div class="equipment-copy">
+              <strong>${escapeHtml(name)}</strong>
+              <small>${escapeHtml(t(locale, SLOT_LABEL_KEYS[slot]))}</small>
+              <p>${escapeHtml(desc)}</p>
+              <span>${cost > 0 ? `${t(locale, "costPrefix")} ${cost} ${t(locale, "points")}` : ""}</span>
+              <select data-action="equipment" data-slot="${slot}" ${blocked ? "disabled" : ""} class="equipment-picker" aria-label="${escapeHtml(t(locale, SLOT_LABEL_KEYS[slot]))}">
+                <option value="">${t(locale, "selectItem")}</option>
+                ${items
+                  .map(
+                    (item) => `
+                  <option value="${item.id}" ${currentId === item.id ? "selected" : ""}>
+                    ${escapeHtml(localize(item.name, locale))}
+                  </option>`,
+                  )
+                  .join("")}
+              </select>
+            </div>
+          </article>`;
+        }).join("")}
       </div>
     </section>`;
 }
 
-function renderSidebar(state: AppState, draft: CharacterBuild): string {
-  const locale = state.locale;
-  const catalog = catalogFor(state);
-  const context = cardContext(state);
-  const draftResolved = resolveCharacter(draft, DEFAULT_RULESET, catalog);
-  const draftCard = buildCharacterCard(draftResolved, context);
+function renderAbilitiesSection(
+  locale: Locale,
+  draft: CharacterBuild,
+  catalog: GameCatalog,
+): string {
+  const abilities = listAbilities(catalog);
+  const selected = abilities.filter((ability) => draft.talentIds.includes(ability.id));
+  const available = abilities.filter((ability) => !draft.talentIds.includes(ability.id));
 
-  const teamTiles = state.team.characters.map((character) => {
-    const resolved = resolveCharacter(character, DEFAULT_RULESET, catalog);
-    const card = buildCharacterCard(resolved, context);
-    return renderCharacterCard(locale, card, {
-      variant: "stash",
-      characterId: character.id,
-      selected: state.activeCharacterId === character.id,
-      draft: character.id === draft.id,
-      interactive: true,
-    });
-  });
+  const renderAbilityCard = (
+    ability: (typeof abilities)[number],
+    checked: boolean,
+    disabled: boolean,
+  ) => {
+    const polarity = ability.polarity === "negative" ? "negative" : "positive";
+    const desc = ability.effects
+      .map((e) => (e.display ? localize(e.display, locale) : ""))
+      .filter(Boolean)
+      .join(" · ");
+    return `
+      <label class="ability-card ${polarity}${checked ? " is-selected" : ""}${disabled ? " is-disabled" : ""}">
+        <input
+          type="checkbox"
+          data-action="talent-toggle"
+          data-talent="${ability.id}"
+          ${checked ? "checked" : ""}
+          ${disabled ? "disabled" : ""}
+          hidden
+        />
+        <div class="ability-icon">${sprite(polarity === "negative" ? "i-warn" : "i-sparkle")}</div>
+        <div class="ability-copy">
+          <strong>${escapeHtml(localize(ability.name, locale))}</strong>
+          <p>${escapeHtml(desc || localize(ability.name, locale))}</p>
+          <small>${t(locale, "costPrefix")} ${ability.cost > 0 ? "+" : ""}${ability.cost} ${t(locale, "points")}</small>
+        </div>
+        <b>${ability.cost > 0 ? "+" : ""}${ability.cost} ${t(locale, "points")}</b>
+      </label>`;
+  };
 
-  const emptySlots = Math.max(
-    0,
-    DEFAULT_RULESET.team.recommendedCharacterCount - state.team.characters.length,
-  );
-  const emptyMarkup = Array.from({ length: emptySlots }, () =>
-    renderEmptyStashSlot(locale),
-  ).join("");
+  const cards = [
+    ...selected.map((ability) => renderAbilityCard(ability, true, false)),
+    ...available.slice(0, Math.max(0, 2 - selected.length)).map((ability) => {
+      const disabled =
+        draft.talentIds.length >= DEFAULT_RULESET.character.maxTalents;
+      return renderAbilityCard(ability, false, disabled);
+    }),
+  ];
+
+  const overflow =
+    available.length > Math.max(0, 2 - selected.length)
+      ? `
+      <details class="ability-overflow">
+        <summary>${t(locale, "addAbility")}</summary>
+        <div class="abilities-grid abilities-overflow-grid">
+          ${available
+            .slice(Math.max(0, 2 - selected.length))
+            .map((ability) => {
+              const disabled =
+                draft.talentIds.length >= DEFAULT_RULESET.character.maxTalents;
+              return renderAbilityCard(ability, false, disabled);
+            })
+            .join("")}
+        </div>
+      </details>`
+      : "";
 
   return `
-    <aside class="sidebar">
-      <div class="theme-picker">
-        <label for="card-theme">${t(locale, "cardThemeSidebar")}</label>
-        <select id="card-theme" data-action="card-theme">
-          ${CARD_THEMES.map(
-            (theme) => `
-            <option value="${theme.id}" ${context.templateId === theme.id ? "selected" : ""}>
-              ${escapeHtml(localize(theme.label, locale))}
-            </option>`,
-          ).join("")}
-        </select>
+    <section class="section-block abilities-section">
+      <h2>${sprite("i-sparkle")}<span>${t(locale, "sectionAbilities")}</span></h2>
+      <div class="abilities-grid">
+        ${cards.join("")}
+        ${
+          cards.length < 2
+            ? `<button type="button" class="add-ability" disabled>${sprite("i-sparkle")}<span>${t(locale, "addAbility")}</span></button>`
+            : ""
+        }
       </div>
-      <div class="preview-wrap">
-        ${renderCharacterCard(locale, draftCard, { variant: "full", draft: true })}
-      </div>
-      <div class="stash-wrap">
-        <div class="stash-head">
-          <h3>${sprite("i-users")} ${t(locale, "stashRoster")}</h3>
-          <span class="stash-count">${state.team.characters.length} / ${DEFAULT_RULESET.team.maximumCharacterCount}</span>
-        </div>
-        <div class="stash-grid">${teamTiles.join("")}${emptyMarkup}</div>
-      </div>
-    </aside>`;
+      ${overflow}
+    </section>`;
 }
 
-function renderEditorActions(state: AppState): string {
-  const locale = state.locale;
-  const inStash = state.team.characters.some((c) => c.id === state.draft.id);
+function renderActionbar(
+  locale: Locale,
+  resolved: ReturnType<typeof resolveCharacter>,
+  inTeam: boolean,
+): string {
+  const valid = resolved.validation.valid;
+  const statusIcon = valid ? "i-check" : "i-warn";
+  const statusText = valid
+    ? t(locale, "characterRulesOk")
+    : t(locale, "characterRulesBad");
+
   return `
-    <div class="editor-actions">
-      <button type="button" class="btn-primary" data-action="add-to-team">
-        ${inStash ? t(locale, "updateInStash") : t(locale, "addToStash")}
+    <footer class="actionbar">
+      <div class="valid-state${valid ? "" : " is-bad"}">
+        ${sprite(statusIcon)}
+        <span>${statusText}</span>
+      </div>
+      <div class="total-cost">
+        <span>${t(locale, "totalCostLabel")}</span>
+        <strong>${resolved.cost.total} ${t(locale, "points")}</strong>
+      </div>
+      <button type="button" class="btn primary" data-action="add-to-team">
+        ${sprite("i-check")}
+        <span>${inTeam ? t(locale, "updateInStash") : t(locale, "saveToTeam")}</span>
       </button>
-      <button type="button" class="btn-ghost" data-action="new-character">${t(locale, "newCharacter")}</button>
+      <button type="button" class="btn secondary" data-action="new-character">
+        ${sprite("i-sparkle")}
+        <span>${t(locale, "newCharacter")}</span>
+      </button>
       ${
-        inStash
-          ? `<button type="button" class="btn-ghost danger" data-action="remove-active">${t(locale, "removeFromTeam")}</button>`
+        inTeam
+          ? `<button type="button" class="btn secondary danger" data-action="remove-active">${t(locale, "removeFromTeam")}</button>`
           : ""
       }
-    </div>`;
+    </footer>`;
 }
 
-export function renderApp(state: AppState): string {
+function renderTeamWorkspace(state: AppState): string {
   const locale = state.locale;
   const draft = state.draft;
   const catalog = catalogFor(state);
   const resolved = resolveCharacter(draft, DEFAULT_RULESET, catalog);
+  const draftCard = buildCharacterCard(resolved, cardContext(state));
+  const inTeam = state.team.characters.some((c) => c.id === draft.id);
+
+  return `
+    ${renderRoster(state)}
+    <section class="workspace">
+      <div class="editor-column">
+        <section class="editor-panel">
+          <div class="editor-top-grid">
+            ${renderIdentitySection(state, draft)}
+            ${renderStatsSection(locale, draft)}
+          </div>
+          ${renderEquipmentSection(locale, draft, resolved, catalog)}
+          ${renderAbilitiesSection(locale, draft, catalog)}
+        </section>
+        ${renderActionbar(locale, resolved, inTeam)}
+      </div>
+      <aside class="preview-panel">
+        ${renderPreviewCard(locale, draftCard)}
+      </aside>
+    </section>`;
+}
+
+export function renderApp(state: AppState): string {
+  const locale = state.locale;
+  const resolvedTeam = validateTeam(state.team, DEFAULT_RULESET, catalogFor(state));
+  const budget = state.team.budget;
+  const cost = resolvedTeam.totalCost;
+  const ratio = Math.min(100, Math.round((cost / budget) * 100));
 
   return `
     ${SPRITE_DEFS}
-    <div class="app-shell">
-      <header class="app-header">
-        <div>
-          <p class="eyebrow">${t(locale, state.appMode === "team" ? "pageEyebrow" : "catalogEyebrow")}</p>
-          <h1>${t(locale, state.appMode === "team" ? "pageTitle" : "catalogPageTitle")}</h1>
-        </div>
-        <div class="header-actions">
-          <nav class="mode-switch" aria-label="${t(locale, "appModeLabel")}">
-            <button type="button" data-action="app-mode" data-mode="team" class="${state.appMode === "team" ? "active" : ""}">
-              ${t(locale, "modeTeam")}
-            </button>
-            <button type="button" data-action="app-mode" data-mode="catalog" class="${state.appMode === "catalog" ? "active" : ""}">
-              ${t(locale, "modeCatalog")}
-            </button>
-          </nav>
-          ${
-            state.appMode === "catalog"
-              ? `
-          <div class="catalog-header-actions">
-            <button type="button" class="btn-ghost" data-action="import-catalog">${t(locale, "importCatalog")}</button>
-            <button type="button" class="btn-ghost" data-action="export-catalog">${t(locale, "exportCatalog")}</button>
-            <button type="button" class="btn-ghost" data-action="reset-catalog">${t(locale, "resetCatalog")}</button>
-            <input type="file" accept="application/json,.json" data-action="catalog-file" hidden />
-          </div>`
-              : ""
-          }
-          <div class="locale-switch">
-            <button type="button" data-action="locale" data-locale="pl" class="${locale === "pl" ? "active" : ""}">PL</button>
-            <button type="button" data-action="locale" data-locale="en" class="${locale === "en" ? "active" : ""}">EN</button>
-          </div>
-        </div>
-      </header>
-
+    <main class="app-shell">
       ${
         state.appMode === "catalog"
-          ? renderCatalogMode(state)
-          : `
-      ${renderTeamBar(state)}
-
-      <div class="workspace">
-        <div class="configurator">
-          ${renderStepper(locale, state, draft, resolved)}
-          ${EDITOR_STEPS.map((step) => renderStepPanel(step, state, draft, resolved)).join("")}
-          ${renderEditorActions(state)}
-        </div>
-        ${renderSidebar(state, draft)}
-      </div>`
+          ? `${renderCatalogTopbar(state)}${renderCatalogMode(state)}`
+          : `${renderTopbar(state, cost, budget, ratio)}${renderTeamWorkspace(state)}`
       }
       <p class="catalog-toast hidden" data-role="catalog-toast" aria-live="polite"></p>
-    </div>`;
+    </main>`;
 }
