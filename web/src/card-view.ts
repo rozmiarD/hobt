@@ -127,7 +127,9 @@ export function renderPreviewCard(locale: Locale, card: CharacterCard): string {
 
       <section class="card-section abilities-on-card">
         <h4>${t(locale, "abilitiesOnCard")}</h4>
-        ${abilities || `<p class="card-empty">${t(locale, "none")}</p>`}
+        <div class="abilities-list">
+          ${abilities || `<p class="card-empty">${t(locale, "none")}</p>`}
+        </div>
       </section>
     </article>`;
 }

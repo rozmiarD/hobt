@@ -343,7 +343,7 @@ svg {
   display: grid;
   grid-template-columns: minmax(0, 1.62fr) minmax(420px, 0.98fr);
   gap: 14px;
-  align-items: stretch;
+  align-items: start;
   margin-top: 14px;
 }
 
@@ -755,6 +755,7 @@ svg {
 }
 
 .ability-overflow {
+  position: relative;
   margin-top: 12px;
 }
 
@@ -762,6 +763,21 @@ svg {
   cursor: pointer;
   font-weight: 700;
   color: #3d4650;
+}
+
+.ability-overflow[open] > .abilities-overflow-grid {
+  position: absolute;
+  left: 0;
+  right: 0;
+  z-index: 20;
+  margin-top: 8px;
+  padding: 12px;
+  border: 1px solid #d3d5d7;
+  border-radius: 8px;
+  background: #fdfcf9;
+  box-shadow: var(--shadow);
+  max-height: min(360px, 50vh);
+  overflow-y: auto;
 }
 
 .abilities-overflow-grid {
@@ -883,9 +899,12 @@ svg {
 /* —— Preview card —— */
 
 .preview-panel {
+  position: sticky;
+  top: 14px;
+  align-self: start;
   min-width: 0;
   display: flex;
-  align-items: stretch;
+  align-items: flex-start;
   justify-content: center;
   border-radius: 12px;
   padding: 14px 16px;
@@ -896,14 +915,22 @@ svg {
 .preview-character-card,
 .character-card.preview-character-card {
   width: min(100%, 560px);
-  min-height: 100%;
+  height: 700px;
+  max-height: calc(100vh - 28px);
   display: flex;
   flex-direction: column;
+  flex-shrink: 0;
+  overflow: hidden;
   border: 2px solid var(--gold);
   border-radius: 12px;
   padding: 14px 18px 18px;
   background: linear-gradient(180deg, #fdfcf9, #f7f5f0);
   color: var(--ink);
+}
+
+.preview-character-card > :not(.abilities-on-card),
+.character-card.preview-character-card > :not(.abilities-on-card) {
+  flex-shrink: 0;
 }
 
 .card-header {
@@ -1152,6 +1179,23 @@ svg {
 
 .abilities-on-card {
   margin-top: 10px;
+  flex: 1 1 auto;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.abilities-on-card h4 {
+  flex-shrink: 0;
+}
+
+.abilities-list {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding-right: 2px;
 }
 
 .abilities-on-card .card-ability {
@@ -1542,6 +1586,20 @@ svg {
 
   .preview-panel {
     order: -1;
+    position: static;
+    max-height: none;
+  }
+
+  .preview-character-card,
+  .character-card.preview-character-card {
+    height: auto;
+    max-height: none;
+    overflow: visible;
+  }
+
+  .abilities-on-card,
+  .abilities-list {
+    overflow: visible;
   }
 
   .catalog-workspace {
