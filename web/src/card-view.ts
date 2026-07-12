@@ -1,20 +1,6 @@
 import type { CharacterCard, EquipmentSlot } from "@hobt/lego-skirmish/types/domain.js";
 import { t, type Locale } from "./i18n.js";
-import {
-  BANNER_STAT_ICONS,
-  EQUIPMENT_ICONS,
-  icon,
-} from "./icons.js";
-
-const BANNER_STATS = ["ms", "rs", "ls", "ks"] as const;
-
-const SLOT_LABEL_KEYS = {
-  mainWeapon: "slotMainWeapon",
-  offhand: "slotOffhand",
-  armor: "slotArmor",
-  item1: "slotItem1",
-  item2: "slotItem2",
-} as const;
+import { icon } from "./icons.js";
 
 const EQUIPMENT_SLOTS: EquipmentSlot[] = [
   "mainWeapon",
@@ -45,117 +31,74 @@ export function renderPreviewCard(locale: Locale, card: CharacterCard): string {
   const faction = card.faction?.trim() ?? card.team?.trim() ?? "";
   const portrait = card.portrait?.url;
 
-  // Limit to 5 items total (prioritize mainWeapon + offhand)
-  const equipmentEntries = EQUIPMENT_SLOTS
-    .map((slot) => {
-      const entry = card.equipment[slot];
-      if (!entry?.name) return null;
-      return { slot, entry };
-    })
-    .filter(Boolean) as { slot: EquipmentSlot; entry: any }[];
+  const equipmentItems = EQUIPMENT_SLOTS.map((slot) => card.equipment[slot])
+    .filter((entry) => entry?.name)
+    .map((entry) => `<li><span>${escapeHtml(entry!.name)}</span></li>`)
+    .join("");
 
-  const limitedEquipment = [
-    ...equipmentEntries.filter(e => e.slot === "mainWeapon" || e.slot === "offhand"),
-    ...equipmentEntries.filter(e => e.slot !== "mainWeapon" && e.slot !== "offhand"),
-  ].slice(0, 5);
+  const abilities = card.abilities.filter(Boolean);
+  const abilitiesText =
+    abilities.length > 0
+      ? abilities
+          .map((ability) => {
+            const desc = ability.description?.trim();
+            return `<b>${escapeHtml(ability.name)}</b>${desc ? ` — ${escapeHtml(desc)}` : ""}`;
+          })
+          .join("<br>")
+      : escapeHtml(t(locale, "none"));
 
-  const equipmentItems = limitedEquipment.length > 0
-    ? limitedEquipment.map(({ slot, entry }) => `
-        <div class="card-list-item equipment-item">
-          ${icon(EQUIPMENT_ICONS[slot])}
-          <div>
-            <strong>${escapeHtml(entry.name)}</strong>
-            <p>${escapeHtml(t(locale, SLOT_LABEL_KEYS[slot]))}</p>
-          </div>
-        </div>`).join("")
-    : `<p class="card-empty">${t(locale, "none")}</p>`;
+  const portraitContent = portrait
+    ? `<img src="${escapeHtml(portrait)}" alt="" class="card-portrait-img" />`
+    : icon("user");
 
-  // Limit to 5 abilities (1 weapon-related, 1 offhand-related, 3 talents as priority)
-  const allAbilities = card.abilities.filter(Boolean);
-  const weaponAb = allAbilities.find(a => (a.name || "").toLowerCase().includes("weapon") || (a.name || "").toLowerCase().includes("strike") || (a.name || "").toLowerCase().includes("blow")) || allAbilities[0];
-  const offhandAb = allAbilities.find(a => (a.name || "").toLowerCase().includes("off") || (a.name || "").toLowerCase().includes("shield") || (a.name || "").toLowerCase().includes("parry")) || allAbilities[1];
-  
-  let selectedAbilities = allAbilities.slice(0, 5);
-  // Try to construct preferred 5 if possible
-  const preferred: any[] = [];
-  if (weaponAb) preferred.push(weaponAb);
-  if (offhandAb && offhandAb !== weaponAb) preferred.push(offhandAb);
-  const remainingTalents = allAbilities.filter(a => !preferred.includes(a)).slice(0, 3);
-  preferred.push(...remainingTalents);
-  if (preferred.length > 0) {
-    selectedAbilities = preferred.slice(0, 5);
-  }
-
-  const abilitiesHtml = selectedAbilities.map((ability) => {
-    const negative = ability.type === "negative";
-    return `
-      <div class="card-list-item card-ability ${negative ? "negative" : "positive"}">
-        ${icon(negative ? "warn" : "sparkle")}
-        <div>
-          <strong>${escapeHtml(ability.name)}</strong>
-          <p>${escapeHtml(ability.description)}</p>
-        </div>
-      </div>`;
-  }).join("");
+  const statPairs = [
+    ["MS", card.stats.ms],
+    ["RS", card.stats.rs],
+    ["LS", card.stats.ls],
+    ["KS", card.stats.ks],
+    ["HP", card.stats.hp],
+    ["MP", card.stats.mp],
+  ] as const;
 
   return `
-    <article class="preview-character-card tarot-card state-${card.validationState}">
-      <header class="card-header">
-        <div class="card-crest">${icon("shield")}</div>
-        <div class="card-title">
-          <h1>${escapeHtml(card.name)}</h1>
-          ${faction ? `<h3>${escapeHtml(faction)}</h3>` : ""}
+    <div class="dossier-card dossier-theme-${escapeHtml(card.template.id)} state-${card.validationState}">
+      <span class="rivet tl"></span><span class="rivet tr"></span>
+      <span class="rivet bl"></span><span class="rivet br"></span>
+
+      <div class="card-head">
+        <div class="card-portrait">${portraitContent}</div>
+        <div class="card-titles">
+          <h3>${escapeHtml(card.name)}</h3>
           ${subtitle ? `<p>${escapeHtml(subtitle)}</p>` : ""}
+          ${faction ? `<span class="faction-chip">${escapeHtml(faction)}</span>` : ""}
         </div>
-      </header>
+      </div>
 
-      <section class="card-portrait-block">
-        <div class="hero-placeholder${portrait ? " has-image" : ""}">
-          ${portrait
-            ? `<img src="${escapeHtml(portrait)}" alt="" class="hero-image" />`
-            : `<span class="hero-empty-label">${escapeHtml(t(locale, "portraitPlaceholder"))}</span>`
-          }
-        </div>
-        <aside class="card-vitals">
-          <div class="vital hp-vital">
-            <strong>${card.stats.hp}</strong>
-            <span>HP</span>
-          </div>
-          <div class="vital mp-vital">
-            <strong>${card.stats.mp}</strong>
-            <span>MP</span>
-          </div>
-          <div class="vital ac-vital">
-            <strong>${card.stats.ac}</strong>
-            <span>AC</span>
-          </div>
-        </aside>
-      </section>
+      <div class="card-stats">
+        ${statPairs
+          .map(
+            ([code, value]) =>
+              `<div><span class="code">${code}</span><span class="val">${value}</span></div>`,
+          )
+          .join("")}
+      </div>
 
-      <section class="card-stats">
-        ${BANNER_STATS.map((key) => `
-          <div class="card-stat">
-            <span class="stat-val">${card.stats[key]}</span>
-            <span class="stat-key">${key.toUpperCase()}</span>
-          </div>`).join("")}
-      </section>
+      <p class="card-section-label">${t(locale, "equipmentOnCard")}</p>
+      <ul class="card-equip-list">
+        ${
+          equipmentItems ||
+          `<li><span>${escapeHtml(t(locale, "none"))}</span><span></span></li>`
+        }
+      </ul>
 
-      <section class="card-equipment">
-        <div class="card-list equipment-list">
-          ${equipmentItems}
-        </div>
-      </section>
+      <p class="card-section-label">${t(locale, "talentsOnCard")}</p>
+      <p class="card-abilities">${abilitiesText}</p>
 
-      <section class="card-abilities">
-        <div class="card-list abilities-list">
-          ${abilitiesHtml || `<p class="card-empty">${t(locale, "none")}</p>`}
-        </div>
-      </section>
-
-      <footer class="card-footer">
-        <span class="card-points">${card.points} pts</span>
-      </footer>
-    </article>`;
+      <div class="stamp">
+        <span class="n">${card.points}</span>
+        <span class="l">${t(locale, "pointsStampLabel")}</span>
+      </div>
+    </div>`;
 }
 
 export function renderCharacterCard(
@@ -186,7 +129,7 @@ function renderStashTile(
 
   const portrait = card.portrait?.url
     ? `<img src="${escapeHtml(card.portrait.url)}" alt="" />`
-    : escapeHtml(t(locale, "portraitPlaceholder"));
+    : icon("user");
 
   const shortName =
     card.name.length > 14 ? `${card.name.slice(0, 12)}…` : card.name;
