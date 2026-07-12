@@ -6,13 +6,6 @@ import {
   icon,
 } from "./icons.js";
 
-const BANNER_LABEL_KEYS = {
-  ms: "statMS",
-  rs: "statRS",
-  ls: "statLS",
-  ks: "statKS",
-} as const;
-
 const BANNER_STATS = ["ms", "rs", "ls", "ks"] as const;
 
 const SLOT_LABEL_KEYS = {
@@ -105,16 +98,19 @@ export function renderPreviewCard(locale: Locale, card: CharacterCard): string {
         </div>
         <aside class="card-vitals" aria-label="HP / MP / AC">
           <div class="vital hp-vital">
+            <strong class="card-mini-value">${card.stats.hp}</strong>
             ${icon("heart")}
-            <span><small>HP</small><strong>${card.stats.hp}</strong></span>
+            <span class="card-mini-code">HP</span>
           </div>
           <div class="vital mp-vital">
+            <strong class="card-mini-value">${card.stats.mp}</strong>
             ${icon("shoe-prints")}
-            <span><small>MP</small><strong>${card.stats.mp}</strong></span>
+            <span class="card-mini-code">MP</span>
           </div>
           <div class="vital ac-vital">
+            <strong class="card-mini-value">${card.stats.ac}</strong>
             ${icon("shield")}
-            <span><small>AC</small><strong>${card.stats.ac}</strong></span>
+            <span class="card-mini-code">AC</span>
           </div>
         </aside>
       </section>
@@ -123,10 +119,9 @@ export function renderPreviewCard(locale: Locale, card: CharacterCard): string {
         ${BANNER_STATS.map(
           (key) => `
         <div class="tile card-stat-tile">
-          <span class="tile-code">${key.toUpperCase()}</span>
-          <span class="tile-icon">${icon(BANNER_STAT_ICONS[key])}</span>
           <strong class="tile-value">${card.stats[key]}</strong>
-          <span class="tile-label">${escapeHtml(t(locale, BANNER_LABEL_KEYS[key]))}</span>
+          <span class="tile-icon">${icon(BANNER_STAT_ICONS[key])}</span>
+          <span class="tile-code">${key.toUpperCase()}</span>
         </div>`,
         ).join("")}
       </section>

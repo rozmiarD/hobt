@@ -1059,9 +1059,55 @@ svg {
 .card-vitals .vital {
   flex: 1 1 0;
   min-height: 0;
+  gap: 5px;
+  padding: 8px 4px;
   background: rgba(251, 250, 247, 0.94);
   box-shadow: 0 2px 8px rgba(23, 32, 42, 0.12);
   pointer-events: auto;
+}
+
+.card-vitals .card-mini-value {
+  font-family: Georgia, serif;
+  font-size: 1.55rem;
+  font-weight: 700;
+  line-height: 1;
+  color: #17202a;
+}
+
+.card-vitals .fa-solid {
+  font-size: 1.1rem;
+}
+
+.card-vitals .card-mini-code {
+  font-family: Georgia, serif;
+  font-size: 0.62rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  color: #4a535c;
+  line-height: 1;
+}
+
+.vital svg,
+.vital .fa-solid {
+  font-size: 1.35rem;
+}
+
+.vital span small,
+.vital span strong {
+  display: block;
+  line-height: 1;
+}
+
+.vital span small {
+  font-family: Georgia, serif;
+  font-weight: 700;
+  font-size: 0.66rem;
+}
+
+.vital span strong {
+  margin-top: 2px;
+  font-family: Georgia, serif;
+  font-size: 1.75rem;
 }
 
 .hero-placeholder {
@@ -1094,23 +1140,35 @@ svg {
 }
 
 .card-stat-tile {
-  min-height: 108px;
-  padding: 8px 4px 10px;
+  min-height: 88px;
+  padding: 10px 4px 8px;
   background: #fbfaf7;
-}
-
-.card-stat-tile .tile-icon {
-  margin: 6px 0 4px;
-  font-size: 1.35rem;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
 }
 
 .card-stat-tile .tile-value {
-  font-size: 1.75rem;
+  font-size: 1.85rem;
+  line-height: 1;
+  margin: 0;
+}
+
+.card-stat-tile .tile-icon {
+  margin: 0;
+  font-size: 1.2rem;
+  line-height: 1;
+}
+
+.card-stat-tile .tile-code {
+  margin: 0;
+  font-size: 0.68rem;
+  line-height: 1;
+  color: #4a535c;
 }
 
 .card-stat-tile .tile-label {
-  margin-top: 6px;
-  font-size: 0.58rem;
+  display: none;
 }
 
 .card-stats > .card-stat-tile + .card-stat-tile {
