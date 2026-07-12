@@ -1,27 +1,19 @@
 import type { CharacterCard, EquipmentSlot } from "@hobt/lego-skirmish/types/domain.js";
 import { t, type Locale } from "./i18n.js";
-import { sprite, type SpriteId } from "./sprites.js";
+import {
+  BANNER_STAT_ICONS,
+  EQUIPMENT_ICONS,
+  icon,
+} from "./icons.js";
 
-const PORTRAIT_STATS = ["hp", "mp", "ac"] as const;
+const BANNER_LABEL_KEYS = {
+  ms: "statMS",
+  rs: "statRS",
+  ls: "statLS",
+  ks: "statKS",
+} as const;
+
 const BANNER_STATS = ["ms", "rs", "ls", "ks"] as const;
-
-const STAT_SPRITES: Record<string, SpriteId> = {
-  hp: "i-heart",
-  mp: "i-boot",
-  ac: "i-shield",
-  ms: "i-sword",
-  rs: "i-target",
-  ls: "i-flag",
-  ks: "i-brain",
-};
-
-const EQUIPMENT_SPRITES: Record<EquipmentSlot, SpriteId> = {
-  mainWeapon: "i-sword",
-  offhand: "i-shield",
-  armor: "i-shield",
-  item1: "i-star-list",
-  item2: "i-star-list",
-};
 
 const EQUIPMENT_SLOTS: EquipmentSlot[] = [
   "mainWeapon",
@@ -55,7 +47,7 @@ export function renderPreviewCard(locale: Locale, card: CharacterCard): string {
   const equipmentIcons = EQUIPMENT_SLOTS.map((slot) => {
     const entry = card.equipment[slot];
     const filled = Boolean(entry?.name);
-    return `<span class="${filled ? "is-filled" : ""}" title="${escapeHtml(entry?.name ?? "")}">${sprite(EQUIPMENT_SPRITES[slot])}</span>`;
+    return `<span class="${filled ? "is-filled" : ""}" title="${escapeHtml(entry?.name ?? "")}">${icon(EQUIPMENT_ICONS[slot])}</span>`;
   }).join("");
 
   const abilities = card.abilities
@@ -64,7 +56,7 @@ export function renderPreviewCard(locale: Locale, card: CharacterCard): string {
       const negative = ability.type === "negative";
       return `
         <div class="card-ability ${negative ? "negative" : "positive"}">
-          ${sprite(negative ? "i-warn" : "i-sparkle")}
+          ${icon(negative ? "warn" : "sparkle")}
           <div>
             <strong>${escapeHtml(ability.name)}</strong>
             <p>${escapeHtml(ability.description)}</p>
@@ -76,14 +68,14 @@ export function renderPreviewCard(locale: Locale, card: CharacterCard): string {
   return `
     <article class="character-card preview-character-card state-${card.validationState}">
       <header class="card-header">
-        <div class="card-crest">${sprite("i-shield")}</div>
+        <div class="card-crest">${icon("shield")}</div>
         <div class="card-title">
           <h1>${escapeHtml(card.name)}</h1>
           ${faction ? `<h3>${escapeHtml(faction)}</h3>` : ""}
           ${subtitle ? `<p>${escapeHtml(subtitle)}</p>` : ""}
         </div>
         <div class="vital hp-vital">
-          ${sprite("i-heart")}
+          ${icon("heart")}
           <span><small>HP</small><strong>${card.stats.hp}</strong></span>
         </div>
       </header>
@@ -94,17 +86,17 @@ export function renderPreviewCard(locale: Locale, card: CharacterCard): string {
             portrait
               ? `<img src="${escapeHtml(portrait)}" alt="" class="hero-image" />`
               : `<span class="hero-head"></span><span class="hero-body"></span>
-                 <span class="hero-weapon">${sprite("i-sword")}</span>
-                 <span class="hero-shield">${sprite("i-shield")}</span>`
+                 <span class="hero-weapon">${icon("khanda")}</span>
+                 <span class="hero-shield">${icon("shield")}</span>`
           }
         </div>
         <div class="vital-stack">
           <div class="vital mp-vital">
-            ${sprite("i-boot")}
+            ${icon("shoe-prints")}
             <span><small>MP</small><strong>${card.stats.mp}</strong></span>
           </div>
           <div class="vital ac-vital">
-            ${sprite("i-shield")}
+            ${icon("shield")}
             <span><small>AC</small><strong>${card.stats.ac}</strong></span>
           </div>
         </div>
@@ -113,9 +105,11 @@ export function renderPreviewCard(locale: Locale, card: CharacterCard): string {
       <section class="card-stats">
         ${BANNER_STATS.map(
           (key) => `
-        <div>
-          ${sprite(STAT_SPRITES[key]!)}
-          <span><small>${key.toUpperCase()}</small><strong>${card.stats[key]}</strong></span>
+        <div class="tile card-stat-tile">
+          <span class="tile-code">${key.toUpperCase()}</span>
+          <span class="tile-icon">${icon(BANNER_STAT_ICONS[key])}</span>
+          <strong class="tile-value">${card.stats[key]}</strong>
+          <span class="tile-label">${escapeHtml(t(locale, BANNER_LABEL_KEYS[key]))}</span>
         </div>`,
         ).join("")}
       </section>

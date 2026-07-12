@@ -20,7 +20,7 @@ import type { AppState } from "./state.js";
 import { renderCatalogMode } from "./catalog-render.js";
 import { renderPreviewCard } from "./card-view.js";
 import { CARD_THEMES, t, type Locale } from "./i18n.js";
-import { SPRITE_DEFS, sprite, type SpriteId } from "./sprites.js";
+import { icon, EQUIPMENT_ICONS, STAT_ICONS } from "./icons.js";
 
 function catalogFor(state: AppState): GameCatalog {
   return state.catalogDocument.catalog;
@@ -43,23 +43,6 @@ const PURCHASABLE_STATS: PurchasableStat[] = [
   "HP",
   "MP",
 ];
-
-const STAT_SPRITES: Record<PurchasableStat, SpriteId> = {
-  HP: "i-heart",
-  MP: "i-boot",
-  MS: "i-sword",
-  RS: "i-target",
-  LS: "i-flag",
-  KS: "i-brain",
-};
-
-const EQ_SPRITES: Record<EquipmentSlot, SpriteId> = {
-  mainWeapon: "i-sword",
-  offhand: "i-shield",
-  armor: "i-shield",
-  item1: "i-star-list",
-  item2: "i-star-list",
-};
 
 const SLOT_LABEL_KEYS = {
   mainWeapon: "slotMainWeapon",
@@ -122,12 +105,12 @@ function renderTopbar(
   return `
     <header class="topbar">
       <a class="brand" href="#" aria-label="${escapeHtml(t(locale, "brandTitle"))}" onclick="return false">
-        <span class="brand-mark">${sprite("i-shield")}</span>
+        <span class="brand-mark">${icon("shield")}</span>
         <span>${escapeHtml(t(locale, "brandTitle"))}</span>
       </a>
 
       <label class="top-control team-control">
-        ${sprite("i-users")}
+        ${icon("users")}
         <input
           type="text"
           data-action="team-name"
@@ -138,7 +121,7 @@ function renderTopbar(
       </label>
 
       <label class="top-control compact theme-control">
-        ${sprite("i-sparkle")}
+        ${icon("sparkle")}
         <select data-action="card-theme" aria-label="${escapeHtml(t(locale, "teamTheme"))}">
           ${CARD_THEMES.map(
             (theme) => `
@@ -169,7 +152,7 @@ function renderCatalogTopbar(state: AppState): string {
   return `
     <header class="topbar topbar-catalog">
       <a class="brand" href="#" aria-label="${escapeHtml(t(locale, "brandTitle"))}" onclick="return false">
-        <span class="brand-mark">${sprite("i-shield")}</span>
+        <span class="brand-mark">${icon("shield")}</span>
         <span>${escapeHtml(t(locale, "catalogPageTitle"))}</span>
       </a>
       <div class="catalog-header-actions">
@@ -198,15 +181,15 @@ function renderAppNav(state: AppState): string {
   return `
     <nav class="app-nav" aria-label="${escapeHtml(t(locale, "appModeLabel"))}">
       <button type="button" data-action="app-mode" data-mode="team" class="app-nav-btn${inTeam ? " active" : ""}">
-        ${sprite("i-users")}
+        ${icon("users")}
         <span>${t(locale, "navTeam")}</span>
       </button>
       <button type="button" data-action="open-catalog" data-tab="items" class="app-nav-btn${inItems ? " active" : ""}">
-        ${sprite("i-shield")}
+        ${icon("shield")}
         <span>${t(locale, "navItemCatalog")}</span>
       </button>
       <button type="button" data-action="open-catalog" data-tab="abilities" class="app-nav-btn${inAbilities ? " active" : ""}">
-        ${sprite("i-sparkle")}
+        ${icon("sparkle")}
         <span>${t(locale, "navAbilityCatalog")}</span>
       </button>
     </nav>`;
@@ -250,7 +233,7 @@ function renderRoster(state: AppState): string {
           <small>${cost} ${t(locale, "points")}</small>
         </span>
         <span class="status ${status}">
-          ${sprite(status === "success" ? "i-check" : "i-warn")}
+          ${icon(status === "success" ? "check" : "warn")}
         </span>
       </button>`;
   });
@@ -259,7 +242,7 @@ function renderRoster(state: AppState): string {
     <nav class="roster" aria-label="${escapeHtml(t(locale, "stashRoster"))}">
       ${cards.join("")}
       <button type="button" class="roster-card add-character" data-action="new-character">
-        ${sprite("i-sparkle")}
+        ${icon("sparkle")}
         <span>${t(locale, "newCharacter")}</span>
       </button>
     </nav>`;
@@ -271,7 +254,7 @@ function renderIdentitySection(state: AppState, draft: CharacterBuild): string {
 
   return `
     <section class="identity section-block">
-      <h2>${sprite("i-user")}<span>${t(locale, "sectionIdentity")}</span></h2>
+      <h2>${icon("user")}<span>${t(locale, "sectionIdentity")}</span></h2>
       <div class="identity-grid">
         <div class="portrait-placeholder${portrait ? " has-image" : ""}">
           ${
@@ -280,7 +263,7 @@ function renderIdentitySection(state: AppState, draft: CharacterBuild): string {
               : `<span class="portrait-head"></span><span class="portrait-body"></span>`
           }
           <label class="portrait-upload-btn" aria-label="${escapeHtml(t(locale, "portraitUpload"))}">
-            ${sprite("i-sparkle")}
+            ${icon("sparkle")}
             <input type="file" accept="image/*" data-action="portrait-upload" hidden />
           </label>
         </div>
@@ -314,21 +297,17 @@ function renderStatsSection(
 ): string {
   return `
     <section class="statistics section-block">
-      <h2>${sprite("i-sword")}<span>${t(locale, "sectionStats")}</span></h2>
+      <h2>${icon("hand-fist")}<span>${t(locale, "sectionStats")}</span></h2>
       <div class="stats-grid">
         ${PURCHASABLE_STATS.map((stat) => {
           const value = draft.baseStats[stat];
           const hpMp = stat === "HP" || stat === "MP";
           return `
-          <article class="stat-tile${hpMp ? ` ${stat.toLowerCase()}` : ""}">
-            <div class="stat-topline">
-              <span class="stat-icon">${sprite(STAT_SPRITES[stat])}</span>
-              <div>
-                <strong>${stat}</strong>
-                <small>${escapeHtml(t(locale, STAT_SHORT[stat]))}</small>
-              </div>
-            </div>
-            <div class="stat-value">${value}</div>
+          <article class="tile stat-tile${hpMp ? ` ${stat.toLowerCase()}` : ""}">
+            <span class="tile-code">${stat}</span>
+            <span class="tile-icon">${icon(STAT_ICONS[stat])}</span>
+            <div class="tile-value">${value}</div>
+            <span class="tile-label">${escapeHtml(t(locale, STAT_SHORT[stat]))}</span>
             <div class="stat-controls">
               <button type="button" data-action="stat-dec" data-stat="${stat}" ${value <= 0 ? "disabled" : ""} aria-label="−">−</button>
               <button type="button" data-action="stat-inc" data-stat="${stat}" ${value >= 6 ? "disabled" : ""} aria-label="+">+</button>
@@ -348,7 +327,7 @@ function renderEquipmentSection(
   return `
     <section class="section-block equipment-section">
       <div class="section-head-row">
-        <h2>${sprite("i-shield")}<span>${t(locale, "sectionEquipment")}</span></h2>
+        <h2>${icon("shield")}<span>${t(locale, "sectionEquipment")}</span></h2>
         <button type="button" class="btn secondary compact section-link" data-action="open-catalog" data-tab="items">
           ${t(locale, "openItemCatalog")}
         </button>
@@ -368,14 +347,13 @@ function renderEquipmentSection(
           const cost = itemCost(currentItem);
 
           return `
-          <article class="equipment-card${blocked ? " is-blocked" : ""}">
-            <div class="equipment-icon">${sprite(EQ_SPRITES[slot])}</div>
-            <div class="equipment-copy">
-              <strong>${escapeHtml(name)}</strong>
-              <small>${escapeHtml(t(locale, SLOT_LABEL_KEYS[slot]))}</small>
-              <p>${escapeHtml(desc)}</p>
-              <span>${cost > 0 ? `${t(locale, "costPrefix")} ${cost} ${t(locale, "points")}` : ""}</span>
-              <select data-action="equipment" data-slot="${slot}" ${blocked ? "disabled" : ""} class="equipment-picker" aria-label="${escapeHtml(t(locale, SLOT_LABEL_KEYS[slot]))}">
+          <article class="tile equipment-card${blocked ? " is-blocked" : ""}">
+            <span class="tile-icon">${icon(EQUIPMENT_ICONS[slot])}</span>
+            <strong class="tile-value equipment-name">${escapeHtml(name)}</strong>
+            <span class="tile-label">${escapeHtml(t(locale, SLOT_LABEL_KEYS[slot]))}</span>
+            <p class="tile-meta">${escapeHtml(desc)}</p>
+            <span class="tile-cost">${cost > 0 ? `${t(locale, "costPrefix")} ${cost} ${t(locale, "points")}` : ""}</span>
+            <select data-action="equipment" data-slot="${slot}" ${blocked ? "disabled" : ""} class="equipment-picker" aria-label="${escapeHtml(t(locale, SLOT_LABEL_KEYS[slot]))}">
                 <option value="">${t(locale, "selectItem")}</option>
                 ${items
                   .map(
@@ -386,7 +364,6 @@ function renderEquipmentSection(
                   )
                   .join("")}
               </select>
-            </div>
           </article>`;
         }).join("")}
       </div>
@@ -413,7 +390,7 @@ function renderAbilitiesSection(
       .filter(Boolean)
       .join(" · ");
     return `
-      <label class="ability-card ${polarity}${checked ? " is-selected" : ""}${disabled ? " is-disabled" : ""}">
+      <label class="tile ability-card ${polarity}${checked ? " is-selected" : ""}${disabled ? " is-disabled" : ""}">
         <input
           type="checkbox"
           data-action="talent-toggle"
@@ -422,13 +399,10 @@ function renderAbilitiesSection(
           ${disabled ? "disabled" : ""}
           hidden
         />
-        <div class="ability-icon">${sprite(polarity === "negative" ? "i-warn" : "i-sparkle")}</div>
-        <div class="ability-copy">
-          <strong>${escapeHtml(localize(ability.name, locale))}</strong>
-          <p>${escapeHtml(desc || localize(ability.name, locale))}</p>
-          <small>${t(locale, "costPrefix")} ${ability.cost > 0 ? "+" : ""}${ability.cost} ${t(locale, "points")}</small>
-        </div>
-        <b>${ability.cost > 0 ? "+" : ""}${ability.cost} ${t(locale, "points")}</b>
+        <span class="tile-icon">${icon(polarity === "negative" ? "warn" : "sparkle")}</span>
+        <strong class="tile-value">${escapeHtml(localize(ability.name, locale))}</strong>
+        <span class="tile-label">${ability.cost > 0 ? "+" : ""}${ability.cost} ${t(locale, "points")}</span>
+        <p class="tile-meta">${escapeHtml(desc || localize(ability.name, locale))}</p>
       </label>`;
   };
 
@@ -462,7 +436,7 @@ function renderAbilitiesSection(
   return `
     <section class="section-block abilities-section">
       <div class="section-head-row">
-        <h2>${sprite("i-sparkle")}<span>${t(locale, "sectionAbilities")}</span></h2>
+        <h2>${icon("sparkle")}<span>${t(locale, "sectionAbilities")}</span></h2>
         <button type="button" class="btn secondary compact section-link" data-action="open-catalog" data-tab="abilities">
           ${t(locale, "openAbilityCatalog")}
         </button>
@@ -471,7 +445,7 @@ function renderAbilitiesSection(
         ${cards.join("")}
         ${
           cards.length < 2
-            ? `<button type="button" class="add-ability" data-action="open-catalog" data-tab="abilities">${sprite("i-sparkle")}<span>${t(locale, "openAbilityCatalog")}</span></button>`
+            ? `<button type="button" class="add-ability" data-action="open-catalog" data-tab="abilities">${icon("sparkle")}<span>${t(locale, "openAbilityCatalog")}</span></button>`
             : ""
         }
       </div>
@@ -485,7 +459,7 @@ function renderActionbar(
   inTeam: boolean,
 ): string {
   const valid = resolved.validation.valid;
-  const statusIcon = valid ? "i-check" : "i-warn";
+  const statusIcon = valid ? "check" : "warn";
   const statusText = valid
     ? t(locale, "characterRulesOk")
     : t(locale, "characterRulesBad");
@@ -493,7 +467,7 @@ function renderActionbar(
   return `
     <footer class="actionbar">
       <div class="valid-state${valid ? "" : " is-bad"}">
-        ${sprite(statusIcon)}
+        ${icon(statusIcon)}
         <span>${statusText}</span>
       </div>
       <div class="total-cost">
@@ -501,11 +475,11 @@ function renderActionbar(
         <strong>${resolved.cost.total} ${t(locale, "points")}</strong>
       </div>
       <button type="button" class="btn primary" data-action="add-to-team">
-        ${sprite("i-check")}
+        ${icon("check")}
         <span>${inTeam ? t(locale, "updateInStash") : t(locale, "saveToTeam")}</span>
       </button>
       <button type="button" class="btn secondary" data-action="new-character">
-        ${sprite("i-sparkle")}
+        ${icon("sparkle")}
         <span>${t(locale, "newCharacter")}</span>
       </button>
       ${
@@ -552,7 +526,6 @@ export function renderApp(state: AppState): string {
   const ratio = Math.min(100, Math.round((cost / budget) * 100));
 
   return `
-    ${SPRITE_DEFS}
     <main class="app-shell">
       ${
         state.appMode === "catalog"

@@ -17,7 +17,7 @@ import {
 } from "@hobt/lego-skirmish";
 import type { AppState } from "./state.js";
 import { t, type Locale } from "./i18n.js";
-import { sprite } from "./sprites.js";
+import { icon } from "./icons.js";
 
 function escapeHtml(value: string): string {
   return value
@@ -48,7 +48,7 @@ function renderValidationIssues(
   issues: { severity: string; message: { pl: string; en: string } }[],
 ): string {
   if (issues.length === 0) {
-    return `<p class="validation-ok">${sprite("i-check")} ${t(locale, "noIssues")}</p>`;
+    return `<p class="validation-ok">${icon("check")} ${t(locale, "noIssues")}</p>`;
   }
 
   return `

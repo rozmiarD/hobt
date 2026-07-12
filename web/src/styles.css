@@ -58,6 +58,83 @@ svg {
   flex: 0 0 auto;
 }
 
+.fa-solid {
+  display: inline-block;
+  line-height: 1;
+  text-align: center;
+}
+
+/* —— Shared tile layout —— */
+
+.tile {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.tile-code {
+  font-family: Georgia, serif;
+  font-size: 0.78rem;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  color: #3d4650;
+  line-height: 1;
+}
+
+.tile-icon {
+  margin: 10px 0 8px;
+  font-size: 2.15rem;
+  line-height: 1;
+  color: #2a3440;
+}
+
+.tile-value {
+  font-family: Georgia, serif;
+  font-size: 2rem;
+  font-weight: 700;
+  line-height: 1;
+  color: #17202a;
+}
+
+.tile-label {
+  margin-top: 10px;
+  font-size: 0.84rem;
+  font-weight: 700;
+  color: #3f4851;
+  line-height: 1.25;
+}
+
+.tile-meta {
+  width: 100%;
+  margin: 8px 0 0;
+  color: #4a535c;
+  font-size: 0.7rem;
+  line-height: 1.35;
+}
+
+.tile-cost {
+  margin-top: 6px;
+  font-size: 0.68rem;
+  font-weight: 700;
+  min-height: 1em;
+  color: #58616a;
+}
+
+.section-block h2 .fa-solid,
+.topbar .fa-solid,
+.app-nav-btn .fa-solid,
+.brand-mark .fa-solid,
+.roster-card .fa-solid,
+.valid-state .fa-solid,
+.btn .fa-solid {
+  color: var(--gold);
+}
+
+.section-block h2 .fa-solid {
+  font-size: 1rem;
+}
+
 .app-shell {
   width: min(1680px, 100%);
   min-height: 100vh;
@@ -111,7 +188,8 @@ svg {
   color: #fff;
 }
 
-.top-control > svg:first-child {
+.top-control > svg:first-child,
+.top-control > .fa-solid:first-child {
   color: var(--gold);
   font-size: 1.15rem;
 }
@@ -332,7 +410,8 @@ svg {
   font-size: 1rem;
 }
 
-.add-character svg {
+.add-character svg,
+.add-character .fa-solid {
   font-size: 1.1rem;
   color: var(--gold);
 }
@@ -384,7 +463,8 @@ svg {
   font-weight: 800;
 }
 
-.section-block h2 svg {
+.section-block h2 svg,
+.section-block h2 .fa-solid {
   width: 1.05rem;
   color: #36404a;
 }
@@ -505,60 +585,30 @@ svg {
 }
 
 .stat-tile {
-  min-height: 111px;
-  display: grid;
-  grid-template-rows: auto 1fr auto;
-  padding: 14px 14px 9px;
+  min-height: 188px;
+  padding: 12px 10px 8px;
   border: 1px solid #d3d5d7;
   border-radius: 8px;
   background: rgba(255, 255, 255, 0.72);
 }
 
-.stat-topline {
-  display: grid;
-  grid-template-columns: 28px minmax(0, 1fr);
-  gap: 10px;
-  align-items: center;
+.stat-tile.hp .tile-icon {
+  color: #d97706;
 }
 
-.stat-icon {
-  font-size: 1.45rem;
-  color: #37414a;
+.stat-tile.mp .tile-icon {
+  color: #1d5f9e;
 }
 
-.stat-topline strong,
-.stat-topline small {
-  display: block;
-}
-
-.stat-topline strong {
-  font-family: Georgia, serif;
-}
-
-.stat-topline small {
-  margin-top: 2px;
-  font-size: 0.68rem;
-  color: #525c64;
-  line-height: 1.2;
-}
-
-.stat-value {
-  align-self: center;
-  text-align: center;
-  font-family: Georgia, serif;
-  font-size: 1.75rem;
-  line-height: 1;
-  font-weight: 700;
-}
-
-.stat-controls {
+.stat-tile .stat-controls {
+  width: 100%;
+  margin-top: auto;
   display: grid;
   grid-template-columns: 1fr 1fr;
-  margin-top: 7px;
   border-top: 1px solid #d9dbdd;
 }
 
-.stat-controls button {
+.stat-tile .stat-controls button {
   display: grid;
   place-items: center;
   height: 28px;
@@ -566,12 +616,12 @@ svg {
   color: var(--ink);
 }
 
-.stat-controls button:disabled {
+.stat-tile .stat-controls button:disabled {
   opacity: 0.35;
   cursor: not-allowed;
 }
 
-.stat-controls button + button {
+.stat-tile .stat-controls button + button {
   border-left: 1px solid #d9dbdd;
 }
 
@@ -591,11 +641,8 @@ svg {
 }
 
 .equipment-card {
-  min-height: 130px;
-  display: grid;
-  grid-template-columns: 40px minmax(0, 1fr);
-  gap: 8px;
-  padding: 12px 10px;
+  min-height: 220px;
+  padding: 12px 10px 10px;
   border: 1px solid #d3d5d7;
   border-radius: 8px;
   background: rgba(255, 255, 255, 0.76);
@@ -605,49 +652,19 @@ svg {
   opacity: 0.65;
 }
 
-.equipment-icon {
-  display: grid;
-  place-items: start center;
-  padding-top: 4px;
-  font-size: 1.8rem;
-  color: #303940;
-}
-
-.equipment-copy strong,
-.equipment-copy small,
-.equipment-copy span {
-  display: block;
-}
-
-.equipment-copy strong {
-  font-family: Georgia, serif;
-  font-size: 0.84rem;
-  line-height: 1.2;
-}
-
-.equipment-copy small {
-  margin-top: 3px;
-  color: #58616a;
-  font-size: 0.7rem;
-}
-
-.equipment-copy p {
-  min-height: 32px;
-  margin: 5px 0 6px;
-  color: #333c44;
-  font-size: 0.68rem;
-  line-height: 1.35;
-}
-
-.equipment-copy span {
-  font-size: 0.68rem;
-  font-weight: 700;
-  min-height: 1em;
-}
-
-.equipment-picker {
+.equipment-card .tile-value.equipment-name {
   width: 100%;
-  margin-top: 6px;
+  font-size: 0.92rem;
+  line-height: 1.2;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.equipment-card .equipment-picker {
+  width: 100%;
+  margin-top: auto;
   border: 1px solid #cfd2d5;
   border-radius: 6px;
   padding: 6px 8px;
@@ -666,11 +683,7 @@ svg {
 
 .ability-card {
   position: relative;
-  min-height: 118px;
-  display: grid;
-  grid-template-columns: 44px minmax(0, 1fr) auto;
-  gap: 10px;
-  align-items: start;
+  min-height: 188px;
   padding: 14px 12px 12px 16px;
   overflow: hidden;
   border: 1px solid #d3d5d7;
@@ -704,45 +717,22 @@ svg {
   background: var(--red);
 }
 
-.ability-icon {
-  font-size: 1.8rem;
-  color: #2f383f;
+.ability-card .tile-value {
+  width: 100%;
+  font-size: 0.95rem;
+  line-height: 1.2;
 }
 
-.ability-copy strong {
-  display: block;
-  font-family: Georgia, serif;
-  font-size: 0.92rem;
-}
-
-.ability-copy p {
-  margin: 6px 0 8px;
-  font-size: 0.72rem;
-  line-height: 1.4;
-}
-
-.ability-copy small {
-  font-weight: 700;
-  font-size: 0.7rem;
-}
-
-.ability-card.positive .ability-copy small,
-.ability-card.positive > b {
+.ability-card.positive .tile-label {
   color: #287c21;
 }
 
-.ability-card.negative .ability-copy small,
-.ability-card.negative > b {
+.ability-card.negative .tile-label {
   color: #c42b27;
 }
 
-.ability-card > b {
-  white-space: nowrap;
-  font-size: 0.7rem;
-}
-
 .add-ability {
-  min-height: 118px;
+  min-height: 188px;
   display: grid;
   place-items: center;
   align-content: center;
@@ -810,7 +800,8 @@ svg {
   color: var(--gold);
 }
 
-.valid-state svg {
+.valid-state svg,
+.valid-state .fa-solid {
   font-size: 1.5rem;
 }
 
@@ -991,7 +982,8 @@ svg {
   background: #fbfaf7;
 }
 
-.vital svg {
+.vital svg,
+.vital .fa-solid {
   font-size: 1.4rem;
 }
 
@@ -1017,15 +1009,18 @@ svg {
   border-color: #e4b65b;
 }
 
-.hp-vital svg {
+.hp-vital svg,
+.hp-vital .fa-solid {
   color: #e3a321;
 }
 
-.mp-vital svg {
+.mp-vital svg,
+.mp-vital .fa-solid {
   color: #1c63a5;
 }
 
-.ac-vital svg {
+.ac-vital svg,
+.ac-vital .fa-solid {
   color: #454a4e;
 }
 
@@ -1100,20 +1095,41 @@ svg {
   overflow: hidden;
 }
 
-.card-stats > div {
-  min-height: 52px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  padding: 6px;
+.card-stat-tile {
+  min-height: 108px;
+  padding: 8px 4px 10px;
+  background: #fbfaf7;
 }
 
-.card-stats > div + div {
+.card-stat-tile .tile-code {
+  font-size: 0.66rem;
+}
+
+.card-stat-tile .tile-icon {
+  margin: 6px 0 4px;
+  font-size: 1.35rem;
+}
+
+.card-stat-tile .tile-value {
+  font-size: 1.35rem;
+}
+
+.card-stat-tile .tile-label {
+  margin-top: 6px;
+  font-size: 0.58rem;
+  line-height: 1.15;
+}
+
+.card-stats > .card-stat-tile + .card-stat-tile {
   border-left: 1px solid #d2d4d6;
 }
 
-.card-stats svg {
+.card-equipment .fa-solid {
+  font-size: 1.1rem;
+}
+
+.card-stats svg,
+.card-stats .fa-solid {
   font-size: 1.2rem;
 }
 
@@ -1300,7 +1316,8 @@ svg {
   font-weight: 700;
 }
 
-.app-nav-btn svg {
+.app-nav-btn svg,
+.app-nav-btn .fa-solid {
   color: var(--gold);
   font-size: 1.05rem;
 }
