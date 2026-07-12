@@ -436,7 +436,7 @@ function renderAbilitiesSection(
   return `
     <section class="section-block abilities-section">
       <div class="section-head-row">
-        <h2>${icon("sparkle")}<span>${t(locale, "sectionAbilities")}</span></h2>
+        <h2>${icon("sparkle")}<span>${t(locale, "sectionTalents")}</span></h2>
         <button type="button" class="btn secondary compact section-link" data-action="open-catalog" data-tab="abilities">
           ${t(locale, "openAbilityCatalog")}
         </button>

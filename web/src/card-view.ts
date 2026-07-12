@@ -85,7 +85,7 @@ export function renderPreviewCard(locale: Locale, card: CharacterCard): string {
     .join("");
 
   return `
-    <article class="character-card preview-character-card state-${card.validationState}">
+    <article class="preview-character-card state-${card.validationState}">
       <header class="card-header">
         <div class="card-crest">${icon("shield")}</div>
         <div class="card-title">
@@ -94,16 +94,6 @@ export function renderPreviewCard(locale: Locale, card: CharacterCard): string {
           ${subtitle ? `<p>${escapeHtml(subtitle)}</p>` : ""}
         </div>
       </header>
-
-      <section class="card-portrait">
-        <div class="hero-placeholder${portrait ? " has-image" : ""}">
-          ${
-            portrait
-              ? `<img src="${escapeHtml(portrait)}" alt="" class="hero-image" />`
-              : `<span class="hero-empty-label">${escapeHtml(t(locale, "portraitPlaceholder"))}</span>`
-          }
-        </div>
-      </section>
 
       <section class="card-vitals" aria-label="HP / MP / AC">
         <div class="vital hp-vital">
@@ -117,6 +107,16 @@ export function renderPreviewCard(locale: Locale, card: CharacterCard): string {
         <div class="vital ac-vital">
           ${icon("shield")}
           <span><small>AC</small><strong>${card.stats.ac}</strong></span>
+        </div>
+      </section>
+
+      <section class="card-portrait">
+        <div class="hero-placeholder${portrait ? " has-image" : ""}">
+          ${
+            portrait
+              ? `<img src="${escapeHtml(portrait)}" alt="" class="hero-image" />`
+              : `<span class="hero-empty-label">${escapeHtml(t(locale, "portraitPlaceholder"))}</span>`
+          }
         </div>
       </section>
 
@@ -139,9 +139,9 @@ export function renderPreviewCard(locale: Locale, card: CharacterCard): string {
         </div>
       </section>
 
-      <section class="card-section abilities-on-card">
-        <h4>${t(locale, "abilitiesOnCard")}</h4>
-        <div class="card-list abilities-list">
+      <section class="card-section talents-on-card">
+        <h4>${t(locale, "talentsOnCard")}</h4>
+        <div class="card-list talents-list">
           ${abilities || `<p class="card-empty">${t(locale, "none")}</p>`}
         </div>
       </section>
