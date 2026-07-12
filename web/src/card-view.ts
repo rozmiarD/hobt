@@ -2,6 +2,8 @@ import type { CharacterCard, EquipmentSlot } from "@hobt/lego-skirmish/types/dom
 import { t, type Locale } from "./i18n.js";
 import { icon } from "./icons.js";
 
+const BANNER_STATS = ["ms", "rs", "ls", "ks"] as const;
+
 const EQUIPMENT_SLOTS: EquipmentSlot[] = [
   "mainWeapon",
   "offhand",
@@ -18,6 +20,40 @@ function escapeHtml(value: string): string {
     .replaceAll('"', "&quot;");
 }
 
+function limitedEquipment(card: CharacterCard) {
+  const entries = EQUIPMENT_SLOTS.map((slot) => {
+    const entry = card.equipment[slot];
+    if (!entry?.name) {
+      return null;
+    }
+    return { slot, entry };
+  }).filter(Boolean) as { slot: EquipmentSlot; entry: { name: string } }[];
+
+  return [
+    ...entries.filter((e) => e.slot === "mainWeapon" || e.slot === "offhand"),
+    ...entries.filter((e) => e.slot !== "mainWeapon" && e.slot !== "offhand"),
+  ].slice(0, 5);
+}
+
+function limitedAbilities(card: CharacterCard) {
+  const all = card.abilities.filter(Boolean);
+  if (all.length <= 5) {
+    return all;
+  }
+
+  const weaponAb =
+    all.find((a) => /weapon|strike|blow|cios/i.test(a.name)) ?? all[0];
+  const offhandAb =
+    all.find(
+      (a) =>
+        a !== weaponAb && /off|shield|parry|tarcz/i.test(a.name),
+    ) ?? all.find((a) => a !== weaponAb);
+
+  const preferred = [weaponAb, offhandAb].filter(Boolean) as typeof all;
+  const remaining = all.filter((a) => !preferred.includes(a)).slice(0, 3);
+  return [...preferred, ...remaining].slice(0, 5);
+}
+
 export interface CardViewOptions {
   variant: "full" | "stash";
   characterId?: string;
@@ -31,12 +67,11 @@ export function renderPreviewCard(locale: Locale, card: CharacterCard): string {
   const faction = card.faction?.trim() ?? card.team?.trim() ?? "";
   const portrait = card.portrait?.url;
 
-  const equipmentItems = EQUIPMENT_SLOTS.map((slot) => card.equipment[slot])
-    .filter((entry) => entry?.name)
-    .map((entry) => `<li><span>${escapeHtml(entry!.name)}</span></li>`)
+  const equipmentItems = limitedEquipment(card)
+    .map((entry) => `<li><span>${escapeHtml(entry.entry.name)}</span></li>`)
     .join("");
 
-  const abilities = card.abilities.filter(Boolean);
+  const abilities = limitedAbilities(card);
   const abilitiesText =
     abilities.length > 0
       ? abilities
@@ -48,17 +83,8 @@ export function renderPreviewCard(locale: Locale, card: CharacterCard): string {
       : escapeHtml(t(locale, "none"));
 
   const portraitContent = portrait
-    ? `<img src="${escapeHtml(portrait)}" alt="" class="card-portrait-img" />`
-    : icon("user");
-
-  const statPairs = [
-    ["MS", card.stats.ms],
-    ["RS", card.stats.rs],
-    ["LS", card.stats.ls],
-    ["KS", card.stats.ks],
-    ["HP", card.stats.hp],
-    ["MP", card.stats.mp],
-  ] as const;
+    ? `<img src="${escapeHtml(portrait)}" alt="" class="card-hero-img" />`
+    : `<span class="card-hero-empty">${escapeHtml(t(locale, "portraitPlaceholder"))}</span>`;
 
   return `
     <div class="dossier-card dossier-theme-${escapeHtml(card.template.id)} state-${card.validationState}">
@@ -66,7 +92,6 @@ export function renderPreviewCard(locale: Locale, card: CharacterCard): string {
       <span class="rivet bl"></span><span class="rivet br"></span>
 
       <div class="card-head">
-        <div class="card-portrait">${portraitContent}</div>
         <div class="card-titles">
           <h3>${escapeHtml(card.name)}</h3>
           ${subtitle ? `<p>${escapeHtml(subtitle)}</p>` : ""}
@@ -74,25 +99,43 @@ export function renderPreviewCard(locale: Locale, card: CharacterCard): string {
         </div>
       </div>
 
-      <div class="card-stats">
-        ${statPairs
-          .map(
-            ([code, value]) =>
-              `<div><span class="code">${code}</span><span class="val">${value}</span></div>`,
-          )
-          .join("")}
+      <div class="card-portrait-block">
+        <div class="card-hero${portrait ? " has-image" : ""}">${portraitContent}</div>
+        <div class="card-vitals">
+          <div class="vital hp-vital">
+            <strong>${card.stats.hp}</strong>
+            <span>HP</span>
+          </div>
+          <div class="vital mp-vital">
+            <strong>${card.stats.mp}</strong>
+            <span>MP</span>
+          </div>
+          <div class="vital ac-vital">
+            <strong>${card.stats.ac}</strong>
+            <span>AC</span>
+          </div>
+        </div>
       </div>
 
-      <p class="card-section-label">${t(locale, "equipmentOnCard")}</p>
-      <ul class="card-equip-list">
-        ${
-          equipmentItems ||
-          `<li><span>${escapeHtml(t(locale, "none"))}</span><span></span></li>`
-        }
-      </ul>
+      <div class="card-stats">
+        ${BANNER_STATS.map(
+          (key) =>
+            `<div><span class="code">${key.toUpperCase()}</span><span class="val">${card.stats[key]}</span></div>`,
+        ).join("")}
+      </div>
 
-      <p class="card-section-label">${t(locale, "talentsOnCard")}</p>
-      <p class="card-abilities">${abilitiesText}</p>
+      <div class="card-content">
+        <p class="card-section-label">${t(locale, "equipmentOnCard")}</p>
+        <ul class="card-equip-list">
+          ${
+            equipmentItems ||
+            `<li><span>${escapeHtml(t(locale, "none"))}</span></li>`
+          }
+        </ul>
+
+        <p class="card-section-label">${t(locale, "talentsOnCard")}</p>
+        <p class="card-abilities">${abilitiesText}</p>
+      </div>
 
       <div class="stamp">
         <span class="n">${card.points}</span>
