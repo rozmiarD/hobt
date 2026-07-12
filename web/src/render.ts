@@ -1,6 +1,5 @@
 import {
   buildCharacterCard,
-  DEFAULT_CATALOG,
   DEFAULT_RULESET,
   getItemsForSlot,
   listAbilities,
@@ -8,12 +7,17 @@ import {
   resolveCharacter,
   validateTeam,
 } from "@hobt/lego-skirmish";
-import type { CharacterBuild, EquipmentSlot, PurchasableStat } from "@hobt/lego-skirmish/types/domain.js";
+import type { CharacterBuild, EquipmentSlot, GameCatalog, PurchasableStat } from "@hobt/lego-skirmish/types/domain.js";
 import { EQUIPMENT_SLOTS } from "@hobt/lego-skirmish/types/domain.js";
 import type { AppState, EditorStep } from "./state.js";
+import { renderCatalogMode } from "./catalog-render.js";
 import { renderEmptyStashSlot, renderCharacterCard } from "./card-view.js";
 import { CARD_THEMES, t, type Locale } from "./i18n.js";
 import { SPRITE_DEFS, sprite, type SpriteId } from "./sprites.js";
+
+function catalogFor(state: AppState): GameCatalog {
+  return state.catalogDocument.catalog;
+}
 
 function cardContext(state: AppState) {
   return {
@@ -245,9 +249,10 @@ function renderEquipmentStep(
   locale: Locale,
   draft: CharacterBuild,
   resolved: ReturnType<typeof resolveCharacter>,
+  catalog: GameCatalog,
 ): string {
   return EQUIPMENT_SLOTS.map((slot) => {
-    const items = getItemsForSlot(DEFAULT_CATALOG, slot);
+    const items = getItemsForSlot(catalog, slot);
     const current = draft.equipment[slot]?.itemId ?? "";
     const blocked = resolved.blockedSlots.includes(slot);
     return `
@@ -271,8 +276,8 @@ function renderEquipmentStep(
   }).join("");
 }
 
-function renderTalentsStep(locale: Locale, draft: CharacterBuild): string {
-  return listAbilities(DEFAULT_CATALOG)
+function renderTalentsStep(locale: Locale, draft: CharacterBuild, catalog: GameCatalog): string {
+  return listAbilities(catalog)
     .map((ability) => {
       const checked = draft.talentIds.includes(ability.id);
       const disabled =
@@ -369,9 +374,9 @@ function renderStepPanel(
   } else if (step === "stats") {
     body = `<div class="tile-grid stat-grid">${renderStatsStep(locale, draft, resolved)}</div>`;
   } else if (step === "equipment") {
-    body = `<div class="tile-grid equipment-grid">${renderEquipmentStep(locale, draft, resolved)}</div>`;
+    body = `<div class="tile-grid equipment-grid">${renderEquipmentStep(locale, draft, resolved, catalogFor(state))}</div>`;
   } else {
-    body = `<div class="tile-grid talent-grid">${renderTalentsStep(locale, draft)}</div>${renderSummary(locale, state, resolved)}`;
+    body = `<div class="tile-grid talent-grid">${renderTalentsStep(locale, draft, catalogFor(state))}</div>${renderSummary(locale, state, resolved)}`;
   }
 
   return `
@@ -389,7 +394,7 @@ function renderStepPanel(
 
 function renderTeamBar(state: AppState): string {
   const locale = state.locale;
-  const resolvedTeam = validateTeam(state.team, DEFAULT_RULESET, DEFAULT_CATALOG);
+  const resolvedTeam = validateTeam(state.team, DEFAULT_RULESET, catalogFor(state));
   const budget = state.team.budget;
   const cost = resolvedTeam.totalCost;
   const reserve = Math.max(0, budget - cost);
@@ -435,12 +440,13 @@ function renderTeamBar(state: AppState): string {
 
 function renderSidebar(state: AppState, draft: CharacterBuild): string {
   const locale = state.locale;
+  const catalog = catalogFor(state);
   const context = cardContext(state);
-  const draftResolved = resolveCharacter(draft, DEFAULT_RULESET, DEFAULT_CATALOG);
+  const draftResolved = resolveCharacter(draft, DEFAULT_RULESET, catalog);
   const draftCard = buildCharacterCard(draftResolved, context);
 
   const teamTiles = state.team.characters.map((character) => {
-    const resolved = resolveCharacter(character, DEFAULT_RULESET, DEFAULT_CATALOG);
+    const resolved = resolveCharacter(character, DEFAULT_RULESET, catalog);
     const card = buildCharacterCard(resolved, context);
     return renderCharacterCard(locale, card, {
       variant: "stash",
@@ -505,22 +511,48 @@ function renderEditorActions(state: AppState): string {
 export function renderApp(state: AppState): string {
   const locale = state.locale;
   const draft = state.draft;
-  const resolved = resolveCharacter(draft, DEFAULT_RULESET, DEFAULT_CATALOG);
+  const catalog = catalogFor(state);
+  const resolved = resolveCharacter(draft, DEFAULT_RULESET, catalog);
 
   return `
     ${SPRITE_DEFS}
     <div class="app-shell">
       <header class="app-header">
         <div>
-          <p class="eyebrow">${t(locale, "pageEyebrow")}</p>
-          <h1>${t(locale, "pageTitle")}</h1>
+          <p class="eyebrow">${t(locale, state.appMode === "team" ? "pageEyebrow" : "catalogEyebrow")}</p>
+          <h1>${t(locale, state.appMode === "team" ? "pageTitle" : "catalogPageTitle")}</h1>
         </div>
-        <div class="locale-switch">
-          <button type="button" data-action="locale" data-locale="pl" class="${locale === "pl" ? "active" : ""}">PL</button>
-          <button type="button" data-action="locale" data-locale="en" class="${locale === "en" ? "active" : ""}">EN</button>
+        <div class="header-actions">
+          <nav class="mode-switch" aria-label="${t(locale, "appModeLabel")}">
+            <button type="button" data-action="app-mode" data-mode="team" class="${state.appMode === "team" ? "active" : ""}">
+              ${t(locale, "modeTeam")}
+            </button>
+            <button type="button" data-action="app-mode" data-mode="catalog" class="${state.appMode === "catalog" ? "active" : ""}">
+              ${t(locale, "modeCatalog")}
+            </button>
+          </nav>
+          ${
+            state.appMode === "catalog"
+              ? `
+          <div class="catalog-header-actions">
+            <button type="button" class="btn-ghost" data-action="import-catalog">${t(locale, "importCatalog")}</button>
+            <button type="button" class="btn-ghost" data-action="export-catalog">${t(locale, "exportCatalog")}</button>
+            <button type="button" class="btn-ghost" data-action="reset-catalog">${t(locale, "resetCatalog")}</button>
+            <input type="file" accept="application/json,.json" data-action="catalog-file" hidden />
+          </div>`
+              : ""
+          }
+          <div class="locale-switch">
+            <button type="button" data-action="locale" data-locale="pl" class="${locale === "pl" ? "active" : ""}">PL</button>
+            <button type="button" data-action="locale" data-locale="en" class="${locale === "en" ? "active" : ""}">EN</button>
+          </div>
         </div>
       </header>
 
+      ${
+        state.appMode === "catalog"
+          ? renderCatalogMode(state)
+          : `
       ${renderTeamBar(state)}
 
       <div class="workspace">
@@ -530,6 +562,8 @@ export function renderApp(state: AppState): string {
           ${renderEditorActions(state)}
         </div>
         ${renderSidebar(state, draft)}
-      </div>
+      </div>`
+      }
+      <p class="catalog-toast hidden" data-role="catalog-toast" aria-live="polite"></p>
     </div>`;
 }

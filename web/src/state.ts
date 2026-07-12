@@ -4,10 +4,21 @@ import type {
   PurchasableStat,
   Team,
 } from "@hobt/lego-skirmish/types/domain.js";
+import {
+  buildItemFromDraft,
+  createEmptyItemDraft,
+  getBaselineCatalogDocument,
+  itemDraftFromDefinition,
+  type CatalogDocument,
+  type ItemDraft,
+  type ItemFamily,
+} from "@hobt/lego-skirmish";
 import { DEFAULT_RULESET } from "@hobt/lego-skirmish/rules/default-ruleset.js";
 import type { Locale } from "./i18n.js";
 
 const STORAGE_KEY = "hobt-configurator-state-v2";
+
+export type AppMode = "team" | "catalog";
 
 export type EditorStep = "identity" | "stats" | "equipment" | "talents";
 
@@ -17,6 +28,10 @@ export type MobilePanel = "none" | "filters" | "team";
 
 export interface AppState {
   locale: Locale;
+  appMode: AppMode;
+  catalogDocument: CatalogDocument;
+  itemDraft: ItemDraft;
+  catalogSelectionId: string | null;
   team: Team;
   activeCharacterId: string | null;
   activeEditorStep: EditorStep;
@@ -47,6 +62,10 @@ export function createInitialState(): AppState {
   const draft = createEmptyCharacter();
   return {
     locale: "pl",
+    appMode: "team",
+    catalogDocument: structuredClone(getBaselineCatalogDocument()),
+    itemDraft: createEmptyItemDraft(),
+    catalogSelectionId: null,
     team: {
       id: "team-1",
       name: "Moja drużyna",
@@ -82,6 +101,11 @@ export function loadState(): AppState {
     return {
       ...createInitialState(),
       ...parsed,
+      catalogDocument:
+        parsed.catalogDocument ?? structuredClone(getBaselineCatalogDocument()),
+      itemDraft: parsed.itemDraft ?? createEmptyItemDraft(),
+      catalogSelectionId: parsed.catalogSelectionId ?? null,
+      appMode: parsed.appMode ?? "team",
       draft: parsed.draft ?? createEmptyCharacter(),
       activeEditorStep: parsed.activeEditorStep ?? "identity",
       searchQuery: parsed.searchQuery ?? "",
@@ -289,4 +313,141 @@ export function setMobilePanel(state: AppState, mobilePanel: MobilePanel): AppSt
 
 export function clearAll(state: AppState): AppState {
   return { ...createInitialState(), locale: state.locale };
+}
+
+export function setAppMode(state: AppState, appMode: AppMode): AppState {
+  return { ...state, appMode };
+}
+
+export function setCatalogDocument(
+  state: AppState,
+  catalogDocument: CatalogDocument,
+): AppState {
+  return { ...state, catalogDocument: structuredClone(catalogDocument) };
+}
+
+export function resetCatalogToBaseline(state: AppState): AppState {
+  return {
+    ...state,
+    catalogDocument: structuredClone(getBaselineCatalogDocument()),
+    itemDraft: createEmptyItemDraft(),
+    catalogSelectionId: null,
+  };
+}
+
+export function startNewCatalogItem(state: AppState): AppState {
+  return {
+    ...state,
+    itemDraft: createEmptyItemDraft(state.itemDraft.family),
+    catalogSelectionId: null,
+  };
+}
+
+export function selectCatalogItem(state: AppState, itemId: string): AppState {
+  const item = state.catalogDocument.catalog.items[itemId];
+  if (!item) {
+    return state;
+  }
+  return {
+    ...state,
+    catalogSelectionId: itemId,
+    itemDraft: itemDraftFromDefinition(item, state.catalogDocument),
+  };
+}
+
+export function setItemDraftFamily(state: AppState, family: ItemFamily): AppState {
+  return {
+    ...state,
+    itemDraft: {
+      ...createEmptyItemDraft(family),
+      id: state.itemDraft.id,
+      name: state.itemDraft.name,
+    },
+  };
+}
+
+export function setItemDraftId(state: AppState, id: string): AppState {
+  return { ...state, itemDraft: { ...state.itemDraft, id } };
+}
+
+export function setItemDraftName(
+  state: AppState,
+  localeKey: "pl" | "en",
+  value: string,
+): AppState {
+  return {
+    ...state,
+    itemDraft: {
+      ...state.itemDraft,
+      name: { ...state.itemDraft.name, [localeKey]: value },
+    },
+  };
+}
+
+export function setItemDraftSubtype(state: AppState, subtypeId: string): AppState {
+  return { ...state, itemDraft: { ...state.itemDraft, subtypeId } };
+}
+
+export function setItemDraftFixedCost(state: AppState, fixedCost: number): AppState {
+  return {
+    ...state,
+    itemDraft: {
+      ...state.itemDraft,
+      fixedCost: Math.max(-500, Math.min(500, fixedCost)),
+    },
+  };
+}
+
+export function setItemDraftTwoHanded(state: AppState, twoHanded: boolean): AppState {
+  return { ...state, itemDraft: { ...state.itemDraft, twoHanded } };
+}
+
+export function toggleItemDraftTrait(state: AppState, traitId: string): AppState {
+  const selected = new Set(state.itemDraft.selectedTraitIds);
+  if (selected.has(traitId)) {
+    selected.delete(traitId);
+  } else {
+    selected.add(traitId);
+  }
+  return {
+    ...state,
+    itemDraft: { ...state.itemDraft, selectedTraitIds: [...selected] },
+  };
+}
+
+export function saveItemDraftToCatalog(state: AppState): AppState {
+  const item = buildItemFromDraft(state.itemDraft, state.catalogDocument);
+  return {
+    ...state,
+    catalogDocument: {
+      ...state.catalogDocument,
+      catalog: {
+        ...state.catalogDocument.catalog,
+        items: {
+          ...state.catalogDocument.catalog.items,
+          [item.id]: item,
+        },
+      },
+    },
+    catalogSelectionId: item.id,
+    itemDraft: { ...state.itemDraft, id: item.id },
+  };
+}
+
+export function deleteCatalogItem(state: AppState, itemId: string): AppState {
+  const items = { ...state.catalogDocument.catalog.items };
+  delete items[itemId];
+  return {
+    ...state,
+    catalogDocument: {
+      ...state.catalogDocument,
+      catalog: { ...state.catalogDocument.catalog, items },
+    },
+    catalogSelectionId:
+      state.catalogSelectionId === itemId ? null : state.catalogSelectionId,
+    itemDraft:
+      state.catalogSelectionId === itemId
+        ? createEmptyItemDraft(state.itemDraft.family)
+        : state.itemDraft,
+  };
 }

@@ -7,6 +7,35 @@ export {
 } from "./rules/default-ruleset.js";
 export { DEFAULT_CATALOG } from "./catalog/default-catalog.js";
 export {
+  getBaselineCatalogDocument,
+  loadCatalogFromJson,
+  mergeCatalogDocuments,
+  normalizeCatalogDocument,
+  serializeCatalogDocument,
+  toGameCatalog,
+} from "./catalog/load-catalog.js";
+export type { CatalogDocument, WeaponSubtype } from "./catalog/catalog-document.js";
+export {
+  FAMILY_PROFILES,
+  FAMILY_TRAIT_TEMPLATES,
+  getFamilyProfile,
+  getTraitsForFamily,
+} from "./catalog/families.js";
+export type { FamilyProfile, TraitTemplate } from "./catalog/families.js";
+export {
+  buildItemFromDraft,
+  createEmptyItemDraft,
+  estimateItemPointCost,
+  itemDraftFromDefinition,
+  previewItemDraft,
+} from "./catalog/item-builder.js";
+export type { ItemDraft } from "./catalog/item-builder.js";
+export {
+  inferItemFamily,
+  listItemFamilies,
+  validateItemDefinition,
+} from "./catalog/validate-item.js";
+export {
   getItemsForSlot,
   listAbilities,
   listItems,

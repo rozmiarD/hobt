@@ -1,24 +1,41 @@
 import type { EquipmentSlot, PurchasableStat } from "@hobt/lego-skirmish/types/domain.js";
+import type { ItemFamily } from "@hobt/lego-skirmish";
+import { loadCatalogFromJson, serializeCatalogDocument } from "@hobt/lego-skirmish";
 import { renderApp } from "./render.js";
 import { PortraitError, processPortraitFile } from "./portrait.js";
 import {
   addDraftToTeam,
+  deleteCatalogItem,
   loadState,
   removeFromTeam,
+  resetCatalogToBaseline,
+  saveItemDraftToCatalog,
   saveState,
+  selectCatalogItem,
   selectTeamCharacter,
   setActiveEditorStep,
+  setAppMode,
   setCardTheme,
+  setCatalogDocument,
   setDraftEquipment,
   setDraftFaction,
   setDraftName,
   setDraftPortrait,
   setDraftStat,
   setDraftSubtitle,
+  setItemDraftFamily,
+  setItemDraftFixedCost,
+  setItemDraftId,
+  setItemDraftName,
+  setItemDraftSubtype,
+  setItemDraftTwoHanded,
   setLocale,
   setTeamName,
+  startNewCatalogItem,
   startNewCharacter,
   toggleDraftTalent,
+  toggleItemDraftTrait,
+  type AppMode,
   type AppState,
   type EditorStep,
 } from "./state.js";
@@ -129,6 +146,26 @@ function showPortraitError(message: string): void {
   node.classList.remove("hidden");
 }
 
+function downloadJson(filename: string, content: string): void {
+  const blob = new Blob([content], { type: "application/json" });
+  const url = URL.createObjectURL(blob);
+  const anchor = document.createElement("a");
+  anchor.href = url;
+  anchor.download = filename;
+  anchor.click();
+  URL.revokeObjectURL(url);
+}
+
+function showCatalogToast(message: string): void {
+  const node = root.querySelector<HTMLElement>('[data-role="catalog-toast"]');
+  if (!node) {
+    return;
+  }
+  node.textContent = message;
+  node.classList.remove("hidden");
+  window.setTimeout(() => node.classList.add("hidden"), 3200);
+}
+
 root.addEventListener("click", (event) => {
   const target = event.target as HTMLElement;
   const button = target.closest<HTMLElement>("[data-action]");
@@ -140,6 +177,53 @@ root.addEventListener("click", (event) => {
 
   if (action === "locale" && button.dataset.locale) {
     update((current) => setLocale(current, button.dataset.locale as Locale));
+    return;
+  }
+
+  if (action === "app-mode" && button.dataset.mode) {
+    update((current) => setAppMode(current, button.dataset.mode as AppMode));
+    return;
+  }
+
+  if (action === "export-catalog") {
+    downloadJson(
+      `hobt-catalog-${state.catalogDocument.version}.json`,
+      serializeCatalogDocument(state.catalogDocument),
+    );
+    return;
+  }
+
+  if (action === "import-catalog") {
+    root.querySelector<HTMLInputElement>('[data-action="catalog-file"]')?.click();
+    return;
+  }
+
+  if (action === "reset-catalog") {
+    if (window.confirm(t(state.locale, "resetCatalog") + "?")) {
+      update(resetCatalogToBaseline);
+    }
+    return;
+  }
+
+  if (action === "new-catalog-item") {
+    update(startNewCatalogItem);
+    return;
+  }
+
+  if (action === "select-catalog-item" && button.dataset.item) {
+    update((current) => selectCatalogItem(current, button.dataset.item!));
+    return;
+  }
+
+  if (action === "save-catalog-item") {
+    update(saveItemDraftToCatalog);
+    return;
+  }
+
+  if (action === "delete-catalog-item" && button.dataset.item) {
+    if (window.confirm(t(state.locale, "deleteCatalogItem") + "?")) {
+      update((current) => deleteCatalogItem(current, button.dataset.item!));
+    }
     return;
   }
 
@@ -217,11 +301,82 @@ root.addEventListener("input", (event) => {
 
   if (action === "team-name" && target instanceof HTMLInputElement) {
     update((current) => setTeamName(current, target.value));
+    return;
+  }
+
+  if (action === "item-id" && target instanceof HTMLInputElement) {
+    update((current) => setItemDraftId(current, target.value));
+    return;
+  }
+
+  if (action === "item-name-pl" && target instanceof HTMLInputElement) {
+    update((current) => setItemDraftName(current, "pl", target.value));
+    return;
+  }
+
+  if (action === "item-name-en" && target instanceof HTMLInputElement) {
+    update((current) => setItemDraftName(current, "en", target.value));
   }
 });
 
 root.addEventListener("change", async (event) => {
   const target = event.target as HTMLElement;
+
+  if (
+    target instanceof HTMLInputElement &&
+    target.dataset.action === "toggle-item-trait" &&
+    target.dataset.trait
+  ) {
+    update((current) => toggleItemDraftTrait(current, target.dataset.trait!));
+    return;
+  }
+
+  if (
+    target instanceof HTMLInputElement &&
+    target.dataset.action === "item-two-handed"
+  ) {
+    update((current) => setItemDraftTwoHanded(current, target.checked));
+    return;
+  }
+
+  if (
+    target instanceof HTMLInputElement &&
+    target.dataset.action === "item-fixed-cost"
+  ) {
+    update((current) =>
+      setItemDraftFixedCost(current, Number.parseInt(target.value, 10) || 0),
+    );
+    return;
+  }
+
+  if (
+    target instanceof HTMLInputElement &&
+    target.dataset.action === "catalog-file" &&
+    target.files?.[0]
+  ) {
+    const file = target.files[0];
+    try {
+      const text = await file.text();
+      const document = loadCatalogFromJson(text);
+      update((current) => setCatalogDocument(current, document));
+      showCatalogToast(t(state.locale, "catalogImportSuccess"));
+    } catch {
+      showCatalogToast(t(state.locale, "catalogImportError"));
+    } finally {
+      target.value = "";
+    }
+    return;
+  }
+
+  if (target instanceof HTMLSelectElement && target.dataset.action === "item-family") {
+    update((current) => setItemDraftFamily(current, target.value as ItemFamily));
+    return;
+  }
+
+  if (target instanceof HTMLSelectElement && target.dataset.action === "item-subtype") {
+    update((current) => setItemDraftSubtype(current, target.value));
+    return;
+  }
 
   if (
     target instanceof HTMLInputElement &&

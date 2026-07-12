@@ -168,6 +168,29 @@ export interface CostDefinition {
   effectLevels?: { positive?: number; negative?: number };
 }
 
+export type ItemFamily =
+  | "melee_weapon"
+  | "ranged_weapon"
+  | "armor"
+  | "offhand"
+  | "utility_item";
+
+export const ITEM_FAMILIES: readonly ItemFamily[] = [
+  "melee_weapon",
+  "ranged_weapon",
+  "armor",
+  "offhand",
+  "utility_item",
+] as const;
+
+export interface ItemMeta {
+  family: ItemFamily;
+  /** Cosmetic weapon subtype (sword, bow, …) — no mechanical effect */
+  subtypeId?: string;
+  author?: string;
+  notes?: string;
+}
+
 export interface ItemDefinition {
   id: string;
   name: LocalizedText;
@@ -177,6 +200,7 @@ export interface ItemDefinition {
   effects: EffectDefinition[];
   restrictions: RestrictionDefinition[];
   cost: CostDefinition;
+  meta?: ItemMeta;
 }
 
 export interface AbilityDefinition {
