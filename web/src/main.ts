@@ -1,22 +1,36 @@
-import type { EquipmentSlot, PurchasableStat } from "@hobt/lego-skirmish/types/domain.js";
+import type {
+  AbilityLevel,
+  AbilityPolarity,
+  EquipmentSlot,
+  PurchasableStat,
+} from "@hobt/lego-skirmish/types/domain.js";
 import type { ItemFamily } from "@hobt/lego-skirmish";
 import { loadCatalogFromJson, serializeCatalogDocument } from "@hobt/lego-skirmish";
 import { renderApp } from "./render.js";
 import { PortraitError, processPortraitFile } from "./portrait.js";
 import {
   addDraftToTeam,
+  deleteCatalogAbility,
   deleteCatalogItem,
   loadState,
   removeFromTeam,
   resetCatalogToBaseline,
+  saveAbilityDraftToCatalog,
   saveItemDraftToCatalog,
   saveState,
+  selectCatalogAbility,
   selectCatalogItem,
   selectTeamCharacter,
+  setAbilityDraftCostOverride,
+  setAbilityDraftId,
+  setAbilityDraftLevel,
+  setAbilityDraftName,
+  setAbilityDraftPolarity,
   setActiveEditorStep,
   setAppMode,
   setCardTheme,
   setCatalogDocument,
+  setCatalogEditorTab,
   setDraftEquipment,
   setDraftFaction,
   setDraftName,
@@ -31,12 +45,16 @@ import {
   setItemDraftTwoHanded,
   setLocale,
   setTeamName,
+  startNewCatalogAbility,
   startNewCatalogItem,
   startNewCharacter,
+  toggleAbilityDraftRequirement,
+  toggleAbilityDraftTrait,
   toggleDraftTalent,
   toggleItemDraftTrait,
   type AppMode,
   type AppState,
+  type CatalogEditorTab,
   type EditorStep,
 } from "./state.js";
 import { t, type Locale } from "./i18n.js";
@@ -210,6 +228,35 @@ root.addEventListener("click", (event) => {
     return;
   }
 
+  if (action === "catalog-tab" && button.dataset.tab) {
+    update((current) =>
+      setCatalogEditorTab(current, button.dataset.tab as CatalogEditorTab),
+    );
+    return;
+  }
+
+  if (action === "new-catalog-ability") {
+    update(startNewCatalogAbility);
+    return;
+  }
+
+  if (action === "select-catalog-ability" && button.dataset.ability) {
+    update((current) => selectCatalogAbility(current, button.dataset.ability!));
+    return;
+  }
+
+  if (action === "save-catalog-ability") {
+    update(saveAbilityDraftToCatalog);
+    return;
+  }
+
+  if (action === "delete-catalog-ability" && button.dataset.ability) {
+    if (window.confirm(t(state.locale, "deleteCatalogAbility") + "?")) {
+      update((current) => deleteCatalogAbility(current, button.dataset.ability!));
+    }
+    return;
+  }
+
   if (action === "select-catalog-item" && button.dataset.item) {
     update((current) => selectCatalogItem(current, button.dataset.item!));
     return;
@@ -316,11 +363,60 @@ root.addEventListener("input", (event) => {
 
   if (action === "item-name-en" && target instanceof HTMLInputElement) {
     update((current) => setItemDraftName(current, "en", target.value));
+    return;
+  }
+
+  if (action === "ability-id" && target instanceof HTMLInputElement) {
+    update((current) => setAbilityDraftId(current, target.value));
+    return;
+  }
+
+  if (action === "ability-name-pl" && target instanceof HTMLInputElement) {
+    update((current) => setAbilityDraftName(current, "pl", target.value));
+    return;
+  }
+
+  if (action === "ability-name-en" && target instanceof HTMLInputElement) {
+    update((current) => setAbilityDraftName(current, "en", target.value));
   }
 });
 
 root.addEventListener("change", async (event) => {
   const target = event.target as HTMLElement;
+
+  if (
+    target instanceof HTMLInputElement &&
+    target.dataset.action === "toggle-ability-trait" &&
+    target.dataset.trait
+  ) {
+    update((current) => toggleAbilityDraftTrait(current, target.dataset.trait!));
+    return;
+  }
+
+  if (
+    target instanceof HTMLInputElement &&
+    target.dataset.action === "toggle-ability-requirement" &&
+    target.dataset.requirement
+  ) {
+    update((current) =>
+      toggleAbilityDraftRequirement(current, target.dataset.requirement!),
+    );
+    return;
+  }
+
+  if (
+    target instanceof HTMLInputElement &&
+    target.dataset.action === "ability-cost-override"
+  ) {
+    const raw = target.value.trim();
+    update((current) =>
+      setAbilityDraftCostOverride(
+        current,
+        raw === "" ? undefined : Number.parseInt(raw, 10),
+      ),
+    );
+    return;
+  }
 
   if (
     target instanceof HTMLInputElement &&
@@ -375,6 +471,20 @@ root.addEventListener("change", async (event) => {
 
   if (target instanceof HTMLSelectElement && target.dataset.action === "item-subtype") {
     update((current) => setItemDraftSubtype(current, target.value));
+    return;
+  }
+
+  if (target instanceof HTMLSelectElement && target.dataset.action === "ability-polarity") {
+    update((current) =>
+      setAbilityDraftPolarity(current, target.value as AbilityPolarity),
+    );
+    return;
+  }
+
+  if (target instanceof HTMLSelectElement && target.dataset.action === "ability-level") {
+    update((current) =>
+      setAbilityDraftLevel(current, Number.parseInt(target.value, 10) as AbilityLevel),
+    );
     return;
   }
 

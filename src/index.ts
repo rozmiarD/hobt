@@ -31,6 +31,28 @@ export {
 } from "./catalog/item-builder.js";
 export type { ItemDraft } from "./catalog/item-builder.js";
 export {
+  buildAbilityFromDraft,
+  abilityDraftFromDefinition,
+  createEmptyAbilityDraft,
+  estimateAbilityPointCost,
+  previewAbilityDraft,
+  validateAbilityDefinition,
+} from "./catalog/ability-builder.js";
+export type { AbilityDraft } from "./catalog/ability-builder.js";
+export {
+  ABILITY_CATEGORIES,
+  ABILITY_CATEGORY_LABELS,
+  ABILITY_REQUIREMENT_TEMPLATES,
+  ABILITY_TRAIT_TEMPLATES,
+  getTraitsForAbility,
+  inferAbilityCategory,
+} from "./catalog/ability-templates.js";
+export type {
+  AbilityCategory,
+  AbilityRequirementTemplate,
+  AbilityTraitTemplate,
+} from "./catalog/ability-templates.js";
+export {
   inferItemFamily,
   listItemFamilies,
   validateItemDefinition,
