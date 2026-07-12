@@ -5,7 +5,9 @@ Thumbs.db
 *~
 .idea/
 .vscode/
-.cursor/
+.cursor/*
+!.cursor/rules/
+!.cursor/rules/**
 *.code-workspace
 
 # Local env / secrets

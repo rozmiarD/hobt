@@ -1,0 +1,20 @@
+---
+description: Auto commit and push after each completed task in hobt
+alwaysApply: true
+---
+
+# Auto commit & push (hobt)
+
+After completing each user task in **this repository** (`hobt`), automatically:
+
+1. Run `git status` and `git diff` — skip if there is nothing to commit.
+2. Stage only files changed for the task (never `.env`, credentials, or secrets).
+3. Commit with a concise message focused on **why** (1–2 sentences, HEREDOC).
+4. Push to `origin` on the current branch (`git push`).
+5. Report commit hash and push result to the user.
+
+Do **not** wait for the user to ask for commit/push unless they explicitly say otherwise for that turn (e.g. “bez commita”, “nie pushuj”).
+
+If commit fails due to a hook, fix the issue and create a **new** commit (never amend a failed commit).
+
+If push fails, diagnose and retry once; then report the blocker.
