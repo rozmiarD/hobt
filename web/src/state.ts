@@ -71,6 +71,23 @@ export interface AppState {
 
 let nextId = 1;
 
+function versionParts(version: string): number[] {
+  return version.split(".").map((part) => Number.parseInt(part, 10) || 0);
+}
+
+function isOlderCatalogVersion(stored: string, baseline: string): boolean {
+  const left = versionParts(stored);
+  const right = versionParts(baseline);
+  const length = Math.max(left.length, right.length);
+  for (let index = 0; index < length; index += 1) {
+    const difference = (left[index] ?? 0) - (right[index] ?? 0);
+    if (difference !== 0) {
+      return difference < 0;
+    }
+  }
+  return false;
+}
+
 export function createEmptyCharacter(name = "Nowa postać"): CharacterBuild {
   const id = `char-${nextId++}`;
   return {
@@ -158,11 +175,16 @@ export function loadState(): AppState {
         },
       },
       catalogDocument: parsed.catalogDocument
-        ? mergeCatalogDocuments(
-            structuredClone(getBaselineCatalogDocument()),
-            parsed.catalogDocument,
+        ? isOlderCatalogVersion(
+            parsed.catalogDocument.version,
+            initial.catalogDocument.version,
           )
-        : structuredClone(getBaselineCatalogDocument()),
+          ? mergeCatalogDocuments(
+              parsed.catalogDocument,
+              initial.catalogDocument,
+            )
+          : parsed.catalogDocument
+        : initial.catalogDocument,
       itemDraft: parsed.itemDraft ?? createEmptyItemDraft(),
       abilityDraft: parsed.abilityDraft ?? createEmptyAbilityDraft(),
       catalogSelectionId: parsed.catalogSelectionId ?? null,

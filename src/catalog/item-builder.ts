@@ -11,6 +11,7 @@ import {
   getTraitsForFamily,
   type TraitTemplate,
 } from "./families.js";
+import { majorEffectCost } from "../rules/default-ruleset.js";
 import { validateItemDefinition } from "./validate-item.js";
 
 export interface ItemDraft {
@@ -151,12 +152,7 @@ export function buildItemFromDraft(
     allowedSlots = ["mainWeapon"];
   }
 
-  let baseDamage = 1;
-  if (autoTwoHanded && draft.family === "melee_weapon") {
-    baseDamage = 2;
-  }
-
-  const actions = baseWeaponAction(draft.family, baseDamage);
+  const actions = baseWeaponAction(draft.family, 1);
   if (
     draft.family === "offhand" &&
     traits.some((trait) => trait.id === "offhand-melee-attack")
@@ -180,12 +176,17 @@ export function buildItemFromDraft(
 
   const restrictions = traits.flatMap((trait) => trait.restrictions ?? []);
 
-  let positiveLevels = 0;
+  let positiveBonusCount =
+    draft.family === "melee_weapon" || draft.family === "ranged_weapon"
+      ? 1
+      : 0;
   let negativeLevels = 0;
   for (const trait of traits) {
-    positiveLevels += trait.effectLevelContribution.positive ?? 0;
+    positiveBonusCount += trait.effectLevelContribution.positive ?? 0;
     negativeLevels += trait.effectLevelContribution.negative ?? 0;
   }
+
+  const paidPositiveLevels = Math.max(0, positiveBonusCount - 1);
 
   if (autoTwoHanded && !traits.some((t) => t.id === "melee-two-handed")) {
     negativeLevels += 1;
@@ -214,7 +215,7 @@ export function buildItemFromDraft(
     cost: {
       fixed: draft.fixedCost,
       effectLevels: {
-        positive: positiveLevels > 0 ? positiveLevels : undefined,
+        positive: paidPositiveLevels > 0 ? paidPositiveLevels : undefined,
         negative: negativeLevels > 0 ? negativeLevels : undefined,
       },
     },
@@ -267,11 +268,16 @@ export function itemDraftFromDefinition(
 export function estimateItemPointCost(item: ItemDefinition): number {
   const positiveLevel = item.cost.effectLevels?.positive ?? 0;
   const negativeLevel = item.cost.effectLevels?.negative ?? 0;
-  const positiveCost =
-    positiveLevel > 0 ? (100 * positiveLevel * (positiveLevel + 1)) / 2 : 0;
-  const negativeCost =
-    negativeLevel > 0 ? -((100 * negativeLevel * (negativeLevel + 1)) / 2) : 0;
-  return (item.cost.fixed ?? 0) + positiveCost + negativeCost;
+  const positiveCost = majorEffectCost(positiveLevel);
+  const restrictionDiscount = Math.min(
+    positiveCost,
+    majorEffectCost(negativeLevel),
+  );
+  return (
+    Math.max(0, item.cost.fixed ?? 0) +
+    positiveCost -
+    restrictionDiscount
+  );
 }
 
 export function previewItemDraft(

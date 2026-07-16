@@ -66,13 +66,13 @@ function describeAction(
   const prefix = itemName ? `${itemName}: ` : "";
   if (action.type === "attack") {
     const parts = [
-      `${locale === "pl" ? "test" : "test"} ${action.testStat ?? "MS"}`,
+      action.testStat ?? "MS",
       `DMG ${action.damage ?? 1}`,
     ];
     if (action.requiresLineOfSight) {
       parts.push("LoS");
     }
-    return `${prefix}${parts.join(", ")}.`;
+    return `${prefix}${parts.join(" · ")}`;
   }
   return `${prefix}${localize(action.name, locale)}.`;
 }
@@ -133,8 +133,24 @@ function buildEquipmentEntries(
     if (!resolvedSlot?.item) {
       continue;
     }
+    const action = resolved.actions.find(
+      (entry) =>
+        entry.sourceSlot === slot && entry.sourceId === resolvedSlot.item?.id,
+    );
+    const details = [
+      ...(action ? [describeAction(action, locale)] : []),
+      ...resolvedSlot.item.effects
+        .filter((effect) => !action || effect.type !== "modifyDamage")
+        .flatMap((effect) =>
+          effect.display ? [localize(effect.display, locale)] : [],
+        ),
+      ...resolvedSlot.item.restrictions.flatMap((restriction) =>
+        restriction.display ? [localize(restriction.display, locale)] : [],
+      ),
+    ];
     const cardEntry: EquipmentCardEntry = {
       name: localize(resolvedSlot.item.name, locale),
+      description: [...new Set(details)].join(" · ") || undefined,
     };
     entries[slot] = cardEntry;
   }
@@ -145,30 +161,14 @@ function buildAbilityEntries(
   resolved: ResolvedCharacter,
   locale: "pl" | "en",
 ): AbilityCardEntry[] {
-  const mainWeapon = resolved.equipment.find(
-    (entry) => entry.slot === "mainWeapon",
-  )?.item;
-  const offhand = resolved.equipment.find((entry) => entry.slot === "offhand")?.item;
-
   return resolved.actions
-    .filter((action) => action.name.pl !== "—" && action.name.en !== "—")
-    .slice(0, DEFAULT_RULESET.cards.actionSlotCount)
-    .map((action) => {
-      const isEquipmentRow = action.slotIndex <= 2;
-      const itemName =
-        action.slotIndex === 1 && mainWeapon
-          ? localize(mainWeapon.name, locale)
-          : action.slotIndex === 2 && offhand
-            ? localize(offhand.name, locale)
-            : undefined;
-      return {
-        name: abilityLabel(action, locale),
-        description: isEquipmentRow
-          ? describeAction(action, locale, itemName)
-          : describeTalent(action, locale),
-        type: inferAbilityType(action),
-      };
-    });
+    .filter((action) => resolved.source.talentIds.includes(action.sourceId))
+    .slice(0, DEFAULT_RULESET.cards.talentSlotCount)
+    .map((action) => ({
+      name: abilityLabel(action, locale),
+      description: describeTalent(action, locale),
+      type: inferAbilityType(action),
+    }));
 }
 
 export function buildCharacterCard(

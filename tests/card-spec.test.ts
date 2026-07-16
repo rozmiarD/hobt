@@ -42,7 +42,11 @@ describe("buildCharacterCard", () => {
     expect(card.equipment.mainWeapon?.name).toBe("Miecz");
     expect(card.equipment.offhand?.name).toBe("Tarcza");
     expect(card.abilities.length).toBeGreaterThan(0);
-    expect(card.abilities[0]?.name).toBe("Atak główny");
+    expect(card.equipment.mainWeapon?.description).toContain("DMG 2");
+    expect(card.abilities[0]?.name).toBe("Silny cios");
+    expect(card.abilities.some((entry) => entry.name === "Atak główny")).toBe(
+      false,
+    );
     expect(card.template.id).toBe("fantasy");
   });
 

@@ -451,6 +451,37 @@ describe("bootstrap talents", () => {
   });
 });
 
+describe("bootstrap equipment", () => {
+  it("keeps every baseline item at zero points", () => {
+    for (const item of Object.values(DEFAULT_CATALOG.items)) {
+      const slot = item.allowedSlots[0]!;
+      const resolved = resolveCharacter(
+        makeCharacter({
+          baseStats: { MS: 2, RS: 2, LS: 2, KS: 2, HP: 3, MP: 3 },
+          equipment: { [slot]: { itemId: item.id } },
+        }),
+        DEFAULT_RULESET,
+        DEFAULT_CATALOG,
+      );
+      expect(
+        resolved.cost.equipment.reduce((sum, entry) => sum + entry.amount, 0),
+        item.id,
+      ).toBe(0);
+    }
+  });
+
+  it("provides free physical items for every character coefficient", () => {
+    const stats = new Set(
+      Object.values(DEFAULT_CATALOG.items).flatMap((item) =>
+        item.effects.flatMap((effect) =>
+          effect.type === "modifyStat" && effect.stat ? [effect.stat] : [],
+        ),
+      ),
+    );
+    expect(stats).toEqual(new Set(["MS", "RS", "LS", "KS", "HP", "MP", "AC"]));
+  });
+});
+
 describe("team validation", () => {
   const characterAt200 = (): CharacterBuild =>
     makeCharacter({

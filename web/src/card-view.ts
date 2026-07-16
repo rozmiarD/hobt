@@ -57,6 +57,7 @@ function renderEquipment(locale: Locale, card: CharacterCard): string {
         <span class="hero-card-row-icon">${icon(EQUIPMENT_ICONS[slot])}</span>
         <span class="hero-card-row-label">${escapeHtml(t(locale, SLOT_KEYS[slot]))}</span>
         <strong>${escapeHtml(entry.name)}</strong>
+        ${entry.description ? `<small>${escapeHtml(entry.description)}</small>` : ""}
       </li>`;
   });
 
@@ -98,7 +99,7 @@ export function renderHeroCard(
       : card.name.length > 11
         ? "is-long"
         : "";
-  const abilityCount = Math.min(5, card.abilities.length);
+  const abilityCount = Math.min(3, card.abilities.length);
 
   return `
     <article

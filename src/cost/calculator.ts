@@ -8,7 +8,7 @@ import type {
   PurchasableStat,
   Ruleset,
 } from "../types/index.js";
-import { attributeCost } from "../rules/default-ruleset.js";
+import { attributeCost, majorEffectCost } from "../rules/default-ruleset.js";
 
 const STAT_LABELS: Record<PurchasableStat, { pl: string; en: string }> = {
   MS: { pl: "Walka Wręcz", en: "Melee Skill" },
@@ -32,32 +32,37 @@ function itemEffectCost(item: ItemDefinition): {
 
   const positiveLevel = item.cost.effectLevels?.positive ?? 0;
   const negativeLevel = item.cost.effectLevels?.negative ?? 0;
+  const fixedAmount = Math.max(0, item.cost.fixed ?? 0);
 
-  if (positiveLevel > 0) {
-    const amount = (100 * positiveLevel * (positiveLevel + 1)) / 2;
+  const positiveAmount = majorEffectCost(positiveLevel);
+  const restrictionDiscount = Math.min(
+    positiveAmount,
+    majorEffectCost(negativeLevel),
+  );
+
+  if (positiveAmount > 0) {
     positive.push({
       id: `${item.id}:positive-effects`,
       label: item.name,
-      amount,
+      amount: positiveAmount,
       source: "effect",
     });
   }
 
-  if (negativeLevel > 0) {
-    const amount = -((100 * negativeLevel * (negativeLevel + 1)) / 2);
+  if (restrictionDiscount > 0) {
     negative.push({
       id: `${item.id}:negative-restrictions`,
       label: item.name,
-      amount,
+      amount: -restrictionDiscount,
       source: "restriction",
     });
   }
 
-  if (item.cost.fixed) {
+  if (fixedAmount > 0) {
     positive.push({
       id: `${item.id}:fixed`,
       label: item.name,
-      amount: item.cost.fixed,
+      amount: fixedAmount,
       source: "equipment",
     });
   }

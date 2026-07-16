@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
   buildItemFromDraft,
   createEmptyItemDraft,
+  estimateItemPointCost,
   getBaselineCatalogDocument,
   loadCatalogFromJson,
   mergeCatalogDocuments,
@@ -13,11 +14,17 @@ import {
 describe("catalog document", () => {
   it("loads baseline with weapon subtypes and items", () => {
     const doc = getBaselineCatalogDocument();
-    expect(doc.version).toBe("1.1.0");
+    expect(doc.version).toBe("1.2.0");
     expect(doc.weaponSubtypes.melee.length).toBeGreaterThanOrEqual(8);
     expect(doc.weaponSubtypes.ranged.length).toBeGreaterThanOrEqual(5);
     expect(doc.catalog.items["melee-sword"]).toBeDefined();
     expect(doc.catalog.items["leather-armor"]?.meta?.family).toBe("armor");
+    expect(Object.keys(doc.catalog.items)).toHaveLength(29);
+    expect(
+      Object.values(doc.catalog.items).every(
+        (item) => validateItemDefinition(item).valid,
+      ),
+    ).toBe(true);
   });
 
   it("round-trips through JSON", () => {
@@ -95,5 +102,59 @@ describe("item family validation", () => {
     expect(preview.item.actions[0]?.attackType).toBe("ranged");
     expect(preview.cost).toBe(100);
     expect(preview.validation.valid).toBe(true);
+  });
+
+  it("charges only for bonuses after the first one", () => {
+    const doc = getBaselineCatalogDocument();
+    const firstBonus = previewItemDraft(
+      {
+        ...createEmptyItemDraft("utility_item"),
+        id: "free-kit",
+        name: { pl: "Darmowy zestaw", en: "Free kit" },
+        selectedTraitIds: ["utility-hp-plus1"],
+      },
+      doc,
+    );
+    const secondBonus = previewItemDraft(
+      {
+        ...createEmptyItemDraft("utility_item"),
+        id: "advanced-kit",
+        name: { pl: "Lepszy zestaw", en: "Advanced kit" },
+        selectedTraitIds: ["utility-hp-plus1", "utility-mp-plus1"],
+      },
+      doc,
+    );
+    const thirdBonus = previewItemDraft(
+      {
+        ...createEmptyItemDraft("utility_item"),
+        id: "masterwork-kit",
+        name: { pl: "Mistrzowski zestaw", en: "Masterwork kit" },
+        selectedTraitIds: [
+          "utility-hp-plus1",
+          "utility-mp-plus1",
+          "utility-ac-plus1",
+        ],
+      },
+      doc,
+    );
+    expect(firstBonus.cost).toBe(0);
+    expect(secondBonus.cost).toBe(100);
+    expect(thirdBonus.cost).toBe(300);
+    expect(thirdBonus.validation.valid).toBe(true);
+  });
+
+  it("does not let equipment restrictions generate negative points", () => {
+    const doc = getBaselineCatalogDocument();
+    const twoHanded = previewItemDraft(
+      {
+        ...createEmptyItemDraft("melee_weapon"),
+        id: "training-polearm",
+        name: { pl: "Drzewcowa", en: "Polearm" },
+        twoHanded: true,
+      },
+      doc,
+    );
+    expect(twoHanded.cost).toBe(0);
+    expect(estimateItemPointCost(twoHanded.item)).toBe(0);
   });
 });

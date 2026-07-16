@@ -181,7 +181,8 @@ const UI = {
     itemFixedCost: "Koszt stały (pkt)",
     itemTwoHanded: "Broń dwuręczna",
     itemTraits: "Cechy przedmiotu",
-    itemTraitsHint: "Dostępne cechy zależą od rodziny — np. broń melee nie obniża RS.",
+    itemTraitsHint:
+      "Pierwszy bonus +1 jest darmowy. Drugi kosztuje 100 pkt, trzeci 300 pkt. Ograniczenia nie obniżają kosztu przedmiotu poniżej 0.",
     saveCatalogItem: "Zapisz w katalogu",
     deleteCatalogItem: "Usuń przedmiot",
     itemPreview: "Podgląd",
@@ -503,7 +504,8 @@ const UI = {
     itemFixedCost: "Fixed cost (pts)",
     itemTwoHanded: "Two-handed weapon",
     itemTraits: "Item traits",
-    itemTraitsHint: "Available traits depend on family — e.g. melee weapons cannot lower RS.",
+    itemTraitsHint:
+      "The first +1 bonus is free. The second costs 100 pts and the third 300 pts. Restrictions cannot reduce an item's cost below 0.",
     saveCatalogItem: "Save to catalog",
     deleteCatalogItem: "Delete item",
     itemPreview: "Preview",

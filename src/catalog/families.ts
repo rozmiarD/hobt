@@ -75,12 +75,12 @@ export const FAMILY_PROFILES: Record<ItemFamily, FamilyProfile> = {
     label: { pl: "Przedmiot", en: "Utility item" },
     defaultSlots: ["item1", "item2"],
     defaultTags: ["item", "utility"],
-    allowedStats: ["HP", "MP", "AC", "LS", "KS"],
+    allowedStats: ["MS", "RS", "LS", "KS", "HP", "MP", "AC"],
     forbiddenNegativeStats: ["MS", "RS"],
-    maxPositiveEffectLevels: 1,
+    maxPositiveEffectLevels: 2,
     maxNegativeEffectLevels: 1,
     maxFixedCost: 200,
-    minFixedCost: -100,
+    minFixedCost: 0,
   },
 };
 
@@ -278,6 +278,86 @@ export const FAMILY_TRAIT_TEMPLATES: TraitTemplate[] = [
     label: { pl: "Atak pomocniczy melee", en: "Offhand melee attack" },
     polarity: "positive",
     effects: [],
+    effectLevelContribution: { positive: 1 },
+  },
+  {
+    id: "utility-ms-plus1",
+    family: "utility_item",
+    label: { pl: "+1 MS", en: "+1 MS" },
+    polarity: "positive",
+    effects: [
+      {
+        id: "trait-utility-ms",
+        type: "modifyStat",
+        stat: "MS",
+        value: 1,
+        display: { pl: "+1 MS", en: "+1 MS" },
+      },
+    ],
+    effectLevelContribution: { positive: 1 },
+  },
+  {
+    id: "utility-rs-plus1",
+    family: "utility_item",
+    label: { pl: "+1 RS", en: "+1 RS" },
+    polarity: "positive",
+    effects: [
+      {
+        id: "trait-utility-rs",
+        type: "modifyStat",
+        stat: "RS",
+        value: 1,
+        display: { pl: "+1 RS", en: "+1 RS" },
+      },
+    ],
+    effectLevelContribution: { positive: 1 },
+  },
+  {
+    id: "utility-ls-plus1",
+    family: "utility_item",
+    label: { pl: "+1 LS", en: "+1 LS" },
+    polarity: "positive",
+    effects: [
+      {
+        id: "trait-utility-ls",
+        type: "modifyStat",
+        stat: "LS",
+        value: 1,
+        display: { pl: "+1 LS", en: "+1 LS" },
+      },
+    ],
+    effectLevelContribution: { positive: 1 },
+  },
+  {
+    id: "utility-ks-plus1",
+    family: "utility_item",
+    label: { pl: "+1 KS", en: "+1 KS" },
+    polarity: "positive",
+    effects: [
+      {
+        id: "trait-utility-ks",
+        type: "modifyStat",
+        stat: "KS",
+        value: 1,
+        display: { pl: "+1 KS", en: "+1 KS" },
+      },
+    ],
+    effectLevelContribution: { positive: 1 },
+  },
+  {
+    id: "utility-ac-plus1",
+    family: "utility_item",
+    label: { pl: "+1 AC", en: "+1 AC" },
+    polarity: "positive",
+    effects: [
+      {
+        id: "trait-utility-ac",
+        type: "modifyStat",
+        stat: "AC",
+        value: 1,
+        display: { pl: "+1 AC", en: "+1 AC" },
+      },
+    ],
     effectLevelContribution: { positive: 1 },
   },
   {

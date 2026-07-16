@@ -46,11 +46,24 @@ Mechanical identity is independent of LEGO appearance, setting, or weapon cosmet
 
 ### Bootstrap talent catalog
 
-Catalog version `1.1.0` contains ten level-one choices. Positive talents cost
+Catalog version `1.2.0` contains ten level-one choices. Positive talents cost
 100 points: Two-weapon fighting, Strong blow, Eagle eye, Watchful guard, Tough,
 and Quick step. Drawbacks refund 100 points when their restriction is relevant:
 Great-weapon fighting, Heavy gear, Fragile, and Unarmoured. A character may
 select at most three talents or drawbacks in total.
+
+### Bootstrap equipment catalog
+
+The baseline contains 29 physical-accessory-friendly items, including eight
+melee weapons, eight ranged weapons, a great axe, shields and armor, and utility
+gear covering MS, RS, LS, KS, HP, MP, and AC. The first +1 bonus on an item is
+free. Additional bonuses use the major-effect progression: the second bonus
+costs 100 points and the third costs 300 points. Item restrictions may discount
+paid bonuses, but equipment cannot generate a negative point cost.
+
+The character card presents equipment and talents as separate full-width rows.
+Weapon rows include the resolved test stat and damage, while other equipment
+shows its stat modifier.
 
 ### Quick start
 

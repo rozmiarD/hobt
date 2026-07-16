@@ -1,5 +1,5 @@
 {
-  "version": "1.1.0",
+  "version": "1.2.0",
   "weaponSubtypes": {
     "melee": [
       { "id": "sword", "name": { "pl": "Miecz", "en": "Sword" } },
@@ -11,7 +11,9 @@
       { "id": "staff", "name": { "pl": "Kostur", "en": "Staff" } },
       { "id": "hammer", "name": { "pl": "Młot", "en": "Hammer" } },
       { "id": "flail", "name": { "pl": "Kij z łańcuchem", "en": "Flail" } },
-      { "id": "halberd", "name": { "pl": "Halabarda", "en": "Halberd" } }
+      { "id": "halberd", "name": { "pl": "Halabarda", "en": "Halberd" } },
+      { "id": "katana", "name": { "pl": "Katana", "en": "Katana" } },
+      { "id": "rapier", "name": { "pl": "Rapier", "en": "Rapier" } }
     ],
     "ranged": [
       { "id": "bow", "name": { "pl": "Łuk", "en": "Bow" } },
@@ -19,7 +21,13 @@
       { "id": "sling", "name": { "pl": "Proca", "en": "Sling" } },
       { "id": "thrown", "name": { "pl": "Broń miotana", "en": "Thrown weapon" } },
       { "id": "javelin", "name": { "pl": "Oszczep", "en": "Javelin" } },
-      { "id": "blowgun", "name": { "pl": "Dmuchawka", "en": "Blowgun" } }
+      { "id": "blowgun", "name": { "pl": "Dmuchawka", "en": "Blowgun" } },
+      { "id": "pistol", "name": { "pl": "Pistolet", "en": "Pistol" } },
+      { "id": "revolver", "name": { "pl": "Rewolwer", "en": "Revolver" } },
+      { "id": "rifle", "name": { "pl": "Karabin", "en": "Rifle" } },
+      { "id": "musket", "name": { "pl": "Muszkiet", "en": "Musket" } },
+      { "id": "blaster", "name": { "pl": "Blaster", "en": "Blaster" } },
+      { "id": "plasma-rifle", "name": { "pl": "Karabin plazmowy", "en": "Plasma rifle" } }
     ]
   },
   "catalog": {
@@ -44,6 +52,132 @@
         "cost": { "fixed": 0 },
         "meta": { "family": "melee_weapon", "subtypeId": "sword" }
       },
+      "melee-katana": {
+        "id": "melee-katana",
+        "name": { "pl": "Katana", "en": "Katana" },
+        "allowedSlots": ["mainWeapon", "offhand"],
+        "tags": ["weapon", "melee"],
+        "actions": [{
+          "id": "katana-attack",
+          "type": "attack",
+          "name": { "pl": "Atak w zwarciu", "en": "Melee attack" },
+          "attackType": "melee",
+          "testStat": "MS",
+          "damage": 1
+        }],
+        "effects": [],
+        "restrictions": [],
+        "cost": { "fixed": 0 },
+        "meta": { "family": "melee_weapon", "subtypeId": "katana" }
+      },
+      "melee-dagger": {
+        "id": "melee-dagger",
+        "name": { "pl": "Sztylet", "en": "Dagger" },
+        "allowedSlots": ["mainWeapon", "offhand"],
+        "tags": ["weapon", "melee"],
+        "actions": [{
+          "id": "dagger-attack",
+          "type": "attack",
+          "name": { "pl": "Atak w zwarciu", "en": "Melee attack" },
+          "attackType": "melee",
+          "testStat": "MS",
+          "damage": 1
+        }],
+        "effects": [],
+        "restrictions": [],
+        "cost": { "fixed": 0 },
+        "meta": { "family": "melee_weapon", "subtypeId": "dagger" }
+      },
+      "melee-axe": {
+        "id": "melee-axe",
+        "name": { "pl": "Topór", "en": "Axe" },
+        "allowedSlots": ["mainWeapon", "offhand"],
+        "tags": ["weapon", "melee"],
+        "actions": [{
+          "id": "axe-attack",
+          "type": "attack",
+          "name": { "pl": "Atak w zwarciu", "en": "Melee attack" },
+          "attackType": "melee",
+          "testStat": "MS",
+          "damage": 1
+        }],
+        "effects": [],
+        "restrictions": [],
+        "cost": { "fixed": 0 },
+        "meta": { "family": "melee_weapon", "subtypeId": "axe" }
+      },
+      "melee-hammer": {
+        "id": "melee-hammer",
+        "name": { "pl": "Młot", "en": "Hammer" },
+        "allowedSlots": ["mainWeapon", "offhand"],
+        "tags": ["weapon", "melee"],
+        "actions": [{
+          "id": "hammer-attack",
+          "type": "attack",
+          "name": { "pl": "Atak w zwarciu", "en": "Melee attack" },
+          "attackType": "melee",
+          "testStat": "MS",
+          "damage": 1
+        }],
+        "effects": [],
+        "restrictions": [],
+        "cost": { "fixed": 0 },
+        "meta": { "family": "melee_weapon", "subtypeId": "hammer" }
+      },
+      "melee-mace": {
+        "id": "melee-mace",
+        "name": { "pl": "Maczuga", "en": "Mace" },
+        "allowedSlots": ["mainWeapon", "offhand"],
+        "tags": ["weapon", "melee"],
+        "actions": [{
+          "id": "mace-attack",
+          "type": "attack",
+          "name": { "pl": "Atak w zwarciu", "en": "Melee attack" },
+          "attackType": "melee",
+          "testStat": "MS",
+          "damage": 1
+        }],
+        "effects": [],
+        "restrictions": [],
+        "cost": { "fixed": 0 },
+        "meta": { "family": "melee_weapon", "subtypeId": "mace" }
+      },
+      "melee-spear": {
+        "id": "melee-spear",
+        "name": { "pl": "Włócznia", "en": "Spear" },
+        "allowedSlots": ["mainWeapon", "offhand"],
+        "tags": ["weapon", "melee"],
+        "actions": [{
+          "id": "spear-attack",
+          "type": "attack",
+          "name": { "pl": "Atak w zwarciu", "en": "Melee attack" },
+          "attackType": "melee",
+          "testStat": "MS",
+          "damage": 1
+        }],
+        "effects": [],
+        "restrictions": [],
+        "cost": { "fixed": 0 },
+        "meta": { "family": "melee_weapon", "subtypeId": "spear" }
+      },
+      "melee-rapier": {
+        "id": "melee-rapier",
+        "name": { "pl": "Rapier", "en": "Rapier" },
+        "allowedSlots": ["mainWeapon", "offhand"],
+        "tags": ["weapon", "melee"],
+        "actions": [{
+          "id": "rapier-attack",
+          "type": "attack",
+          "name": { "pl": "Atak w zwarciu", "en": "Melee attack" },
+          "attackType": "melee",
+          "testStat": "MS",
+          "damage": 1
+        }],
+        "effects": [],
+        "restrictions": [],
+        "cost": { "fixed": 0 },
+        "meta": { "family": "melee_weapon", "subtypeId": "rapier" }
+      },
       "ranged-bow": {
         "id": "ranged-bow",
         "name": { "pl": "Łuk", "en": "Bow" },
@@ -65,6 +199,139 @@
         "cost": { "fixed": 0 },
         "meta": { "family": "ranged_weapon", "subtypeId": "bow" }
       },
+      "ranged-crossbow": {
+        "id": "ranged-crossbow",
+        "name": { "pl": "Kusza", "en": "Crossbow" },
+        "allowedSlots": ["mainWeapon"],
+        "tags": ["weapon", "ranged"],
+        "actions": [{
+          "id": "crossbow-attack",
+          "type": "attack",
+          "name": { "pl": "Atak dystansowy", "en": "Ranged attack" },
+          "attackType": "ranged",
+          "testStat": "RS",
+          "damage": 1,
+          "requiresLineOfSight": true
+        }],
+        "effects": [],
+        "restrictions": [],
+        "cost": { "fixed": 0 },
+        "meta": { "family": "ranged_weapon", "subtypeId": "crossbow" }
+      },
+      "ranged-pistol": {
+        "id": "ranged-pistol",
+        "name": { "pl": "Pistolet", "en": "Pistol" },
+        "allowedSlots": ["mainWeapon"],
+        "tags": ["weapon", "ranged"],
+        "actions": [{
+          "id": "pistol-attack",
+          "type": "attack",
+          "name": { "pl": "Atak dystansowy", "en": "Ranged attack" },
+          "attackType": "ranged",
+          "testStat": "RS",
+          "damage": 1,
+          "requiresLineOfSight": true
+        }],
+        "effects": [],
+        "restrictions": [],
+        "cost": { "fixed": 0 },
+        "meta": { "family": "ranged_weapon", "subtypeId": "pistol" }
+      },
+      "ranged-revolver": {
+        "id": "ranged-revolver",
+        "name": { "pl": "Rewolwer", "en": "Revolver" },
+        "allowedSlots": ["mainWeapon"],
+        "tags": ["weapon", "ranged"],
+        "actions": [{
+          "id": "revolver-attack",
+          "type": "attack",
+          "name": { "pl": "Atak dystansowy", "en": "Ranged attack" },
+          "attackType": "ranged",
+          "testStat": "RS",
+          "damage": 1,
+          "requiresLineOfSight": true
+        }],
+        "effects": [],
+        "restrictions": [],
+        "cost": { "fixed": 0 },
+        "meta": { "family": "ranged_weapon", "subtypeId": "revolver" }
+      },
+      "ranged-rifle": {
+        "id": "ranged-rifle",
+        "name": { "pl": "Karabin", "en": "Rifle" },
+        "allowedSlots": ["mainWeapon"],
+        "tags": ["weapon", "ranged"],
+        "actions": [{
+          "id": "rifle-attack",
+          "type": "attack",
+          "name": { "pl": "Atak dystansowy", "en": "Ranged attack" },
+          "attackType": "ranged",
+          "testStat": "RS",
+          "damage": 1,
+          "requiresLineOfSight": true
+        }],
+        "effects": [],
+        "restrictions": [],
+        "cost": { "fixed": 0 },
+        "meta": { "family": "ranged_weapon", "subtypeId": "rifle" }
+      },
+      "ranged-musket": {
+        "id": "ranged-musket",
+        "name": { "pl": "Muszkiet", "en": "Musket" },
+        "allowedSlots": ["mainWeapon"],
+        "tags": ["weapon", "ranged"],
+        "actions": [{
+          "id": "musket-attack",
+          "type": "attack",
+          "name": { "pl": "Atak dystansowy", "en": "Ranged attack" },
+          "attackType": "ranged",
+          "testStat": "RS",
+          "damage": 1,
+          "requiresLineOfSight": true
+        }],
+        "effects": [],
+        "restrictions": [],
+        "cost": { "fixed": 0 },
+        "meta": { "family": "ranged_weapon", "subtypeId": "musket" }
+      },
+      "ranged-blaster": {
+        "id": "ranged-blaster",
+        "name": { "pl": "Blaster", "en": "Blaster" },
+        "allowedSlots": ["mainWeapon"],
+        "tags": ["weapon", "ranged"],
+        "actions": [{
+          "id": "blaster-attack",
+          "type": "attack",
+          "name": { "pl": "Atak dystansowy", "en": "Ranged attack" },
+          "attackType": "ranged",
+          "testStat": "RS",
+          "damage": 1,
+          "requiresLineOfSight": true
+        }],
+        "effects": [],
+        "restrictions": [],
+        "cost": { "fixed": 0 },
+        "meta": { "family": "ranged_weapon", "subtypeId": "blaster" }
+      },
+      "ranged-plasma-rifle": {
+        "id": "ranged-plasma-rifle",
+        "name": { "pl": "Karabin plazmowy", "en": "Plasma rifle" },
+        "allowedSlots": ["mainWeapon"],
+        "tags": ["weapon", "ranged"],
+        "actions": [{
+          "id": "plasma-rifle-attack",
+          "type": "attack",
+          "name": { "pl": "Atak dystansowy", "en": "Ranged attack" },
+          "attackType": "ranged",
+          "testStat": "RS",
+          "damage": 1,
+          "requiresLineOfSight": true
+        }],
+        "effects": [],
+        "restrictions": [],
+        "cost": { "fixed": 0 },
+        "meta": { "family": "ranged_weapon", "subtypeId": "plasma-rifle" }
+      },
       "great-axe": {
         "id": "great-axe",
         "name": { "pl": "Wielki topór", "en": "Great axe" },
@@ -77,7 +344,7 @@
             "name": { "pl": "Atak wielką bronią", "en": "Great weapon attack" },
             "attackType": "melee",
             "testStat": "MS",
-            "damage": 2
+            "damage": 1
           }
         ],
         "effects": [
@@ -150,7 +417,7 @@
           }
         ],
         "restrictions": [],
-        "cost": { "fixed": 100, "effectLevels": { "positive": 1 } },
+        "cost": { "fixed": 0 },
         "meta": { "family": "armor" }
       },
       "lucky-charm": {
@@ -169,8 +436,161 @@
           }
         ],
         "restrictions": [],
-        "cost": { "fixed": 0, "effectLevels": { "positive": 1 } },
+        "cost": { "fixed": 0 },
         "meta": { "family": "utility_item" }
+      },
+      "armor-breastplate": {
+        "id": "armor-breastplate",
+        "name": { "pl": "Napierśnik", "en": "Breastplate" },
+        "allowedSlots": ["armor"],
+        "tags": ["armor", "defensive"],
+        "actions": [],
+        "effects": [{
+          "id": "breastplate-ac",
+          "type": "modifyStat",
+          "stat": "AC",
+          "value": 1,
+          "display": { "pl": "+1 AC", "en": "+1 AC" }
+        }],
+        "restrictions": [],
+        "cost": { "fixed": 0 },
+        "meta": { "family": "armor" }
+      },
+      "heavy-helmet": {
+        "id": "heavy-helmet",
+        "name": { "pl": "Hełm ciężki", "en": "Heavy helmet" },
+        "allowedSlots": ["item1", "item2"],
+        "tags": ["item", "utility", "helmet", "defensive"],
+        "actions": [],
+        "effects": [{
+          "id": "heavy-helmet-ac",
+          "type": "modifyStat",
+          "stat": "AC",
+          "value": 1,
+          "display": { "pl": "+1 AC", "en": "+1 AC" }
+        }],
+        "restrictions": [],
+        "cost": { "fixed": 0 },
+        "meta": { "family": "utility_item", "notes": "Visored minifigure helmet" }
+      },
+      "cape": {
+        "id": "cape",
+        "name": { "pl": "Płaszcz", "en": "Cape" },
+        "allowedSlots": ["item1", "item2"],
+        "tags": ["item", "utility", "cape", "defensive"],
+        "actions": [],
+        "effects": [{
+          "id": "cape-ac",
+          "type": "modifyStat",
+          "stat": "AC",
+          "value": 1,
+          "display": { "pl": "+1 AC", "en": "+1 AC" }
+        }],
+        "restrictions": [],
+        "cost": { "fixed": 0 },
+        "meta": { "family": "utility_item", "notes": "Minifigure cloth cape" }
+      },
+      "medkit": {
+        "id": "medkit",
+        "name": { "pl": "Apteczka", "en": "Medkit" },
+        "allowedSlots": ["item1", "item2"],
+        "tags": ["item", "utility", "medical"],
+        "actions": [],
+        "effects": [{
+          "id": "medkit-hp",
+          "type": "modifyStat",
+          "stat": "HP",
+          "value": 1,
+          "display": { "pl": "+1 HP", "en": "+1 HP" }
+        }],
+        "restrictions": [],
+        "cost": { "fixed": 0 },
+        "meta": { "family": "utility_item", "notes": "Printed case, bag or medical tile" }
+      },
+      "jetpack": {
+        "id": "jetpack",
+        "name": { "pl": "Plecak odrzutowy", "en": "Jetpack" },
+        "allowedSlots": ["item1", "item2"],
+        "tags": ["item", "utility", "movement"],
+        "actions": [],
+        "effects": [{
+          "id": "jetpack-mp",
+          "type": "modifyStat",
+          "stat": "MP",
+          "value": 1,
+          "display": { "pl": "+1 MP", "en": "+1 MP" }
+        }],
+        "restrictions": [],
+        "cost": { "fixed": 0 },
+        "meta": { "family": "utility_item", "notes": "Minifigure jet pack or air-tank body wear" }
+      },
+      "banner": {
+        "id": "banner",
+        "name": { "pl": "Sztandar", "en": "Banner" },
+        "allowedSlots": ["item1", "item2"],
+        "tags": ["item", "utility", "command"],
+        "actions": [],
+        "effects": [{
+          "id": "banner-ls",
+          "type": "modifyStat",
+          "stat": "LS",
+          "value": 1,
+          "display": { "pl": "+1 LS", "en": "+1 LS" }
+        }],
+        "restrictions": [],
+        "cost": { "fixed": 0 },
+        "meta": { "family": "utility_item", "notes": "Flag on a bar or lance" }
+      },
+      "book": {
+        "id": "book",
+        "name": { "pl": "Księga", "en": "Book" },
+        "allowedSlots": ["item1", "item2"],
+        "tags": ["item", "utility", "knowledge"],
+        "actions": [],
+        "effects": [{
+          "id": "book-ks",
+          "type": "modifyStat",
+          "stat": "KS",
+          "value": 1,
+          "display": { "pl": "+1 KS", "en": "+1 KS" }
+        }],
+        "restrictions": [],
+        "cost": { "fixed": 0 },
+        "meta": { "family": "utility_item", "notes": "Minifigure book or book cover" }
+      },
+      "scope": {
+        "id": "scope",
+        "name": { "pl": "Luneta", "en": "Scope" },
+        "allowedSlots": ["item1", "item2"],
+        "tags": ["item", "utility", "ranged"],
+        "actions": [],
+        "effects": [{
+          "id": "scope-rs",
+          "type": "modifyStat",
+          "stat": "RS",
+          "value": 1,
+          "display": { "pl": "+1 RS", "en": "+1 RS" }
+        }],
+        "restrictions": [],
+        "cost": { "fixed": 0 },
+        "meta": { "family": "utility_item", "notes": "Telescope or binocular accessory" }
+      },
+      "gauntlets": {
+        "id": "gauntlets",
+        "name": { "pl": "Rękawice", "en": "Gauntlets" },
+        "allowedSlots": ["item1", "item2"],
+        "tags": ["item", "utility", "melee"],
+        "actions": [],
+        "effects": [{
+          "id": "gauntlets-ms",
+          "type": "modifyStat",
+          "stat": "MS",
+          "value": 1,
+          "display": { "pl": "+1 MS", "en": "+1 MS" }
+        }],
+        "restrictions": [],
+        "cost": { "fixed": 0 },
+        "meta": { "family": "utility_item", "notes": "Boxing gloves or gauntlet accessories" }
       }
     },
     "abilities": {
