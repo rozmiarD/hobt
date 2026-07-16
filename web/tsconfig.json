@@ -1,0 +1,16 @@
+{
+  "extends": "../tsconfig.json",
+  "compilerOptions": {
+    "baseUrl": "..",
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+    "noEmit": true,
+    "rootDir": "..",
+    "types": ["vite/client"],
+    "paths": {
+      "@hobt/lego-skirmish": ["src/index.ts"],
+      "@hobt/lego-skirmish/*": ["src/*"]
+    }
+  },
+  "include": ["src/**/*.ts"]
+}

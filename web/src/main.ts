@@ -12,6 +12,7 @@ import {
   addDraftToTeam,
   deleteCatalogAbility,
   deleteCatalogItem,
+  duplicateCharacter,
   loadState,
   removeFromTeam,
   resetCatalogToBaseline,
@@ -35,6 +36,7 @@ import {
   setDraftFaction,
   setDraftName,
   setDraftPortrait,
+  setDraftPortraitCrop,
   setDraftStat,
   setDraftSubtitle,
   setItemDraftFamily,
@@ -44,28 +46,35 @@ import {
   setItemDraftSubtype,
   setItemDraftTwoHanded,
   setLocale,
+  setMobileBuilderView,
+  setPrintCopies,
+  setShowCutLines,
   setTeamName,
   openCatalog,
   startNewCatalogAbility,
   startNewCatalogItem,
   startNewCharacter,
+  selectAllForPrint,
   toggleAbilityDraftRequirement,
   toggleAbilityDraftTrait,
   toggleDraftTalent,
   toggleItemDraftTrait,
+  togglePrintSelection,
   type AppMode,
   type AppState,
   type CatalogEditorTab,
   type EditorStep,
+  type MobileBuilderView,
 } from "./state.js";
 import { t, type Locale } from "./i18n.js";
 
 let state = loadState();
-const root = document.querySelector<HTMLElement>("#app");
+const rootNode = document.querySelector<HTMLElement>("#app");
 
-if (!root) {
+if (!rootNode) {
   throw new Error("Missing #app root element");
 }
+const root: HTMLElement = rootNode;
 
 interface FocusSnapshot {
   action: string;
@@ -88,7 +97,9 @@ function captureFocus(): FocusSnapshot | null {
   }
 
   const hasSelection =
-    active instanceof HTMLInputElement || active instanceof HTMLTextAreaElement;
+    active instanceof HTMLTextAreaElement ||
+    (active instanceof HTMLInputElement &&
+      ["text", "search", "tel", "url", "password"].includes(active.type));
 
   return {
     action,
@@ -131,8 +142,9 @@ function restoreFocus(snapshot: FocusSnapshot | null): void {
   target.focus();
 
   if (
-    target instanceof HTMLInputElement ||
-    target instanceof HTMLTextAreaElement
+    target instanceof HTMLTextAreaElement ||
+    (target instanceof HTMLInputElement &&
+      ["text", "search", "tel", "url", "password"].includes(target.type))
   ) {
     const start = snapshot.selectionStart ?? target.value.length;
     const end = snapshot.selectionEnd ?? start;
@@ -175,14 +187,40 @@ function downloadJson(filename: string, content: string): void {
   URL.revokeObjectURL(url);
 }
 
-function showCatalogToast(message: string): void {
-  const node = root.querySelector<HTMLElement>('[data-role="catalog-toast"]');
+function showToast(message: string): void {
+  const node = root.querySelector<HTMLElement>('[data-role="app-toast"]');
   if (!node) {
     return;
   }
   node.textContent = message;
   node.classList.remove("hidden");
   window.setTimeout(() => node.classList.add("hidden"), 3200);
+}
+
+function updatePortraitCropLive(
+  property: "portraitPositionX" | "portraitPositionY" | "portraitZoom",
+  value: number,
+  control: HTMLInputElement,
+): void {
+  state = setDraftPortraitCrop(state, property, value);
+  saveState(state);
+
+  const x = state.draft.cosmetics.portraitPositionX ?? 50;
+  const y = state.draft.cosmetics.portraitPositionY ?? 50;
+  const zoom = state.draft.cosmetics.portraitZoom ?? 1;
+  for (const image of root.querySelectorAll<HTMLImageElement>(
+    ".portrait-workbench img, .hero-card-portrait img",
+  )) {
+    image.style.objectPosition = `${x}% ${y}%`;
+    image.style.transform = `scale(${zoom})`;
+    image.style.transformOrigin = `${x}% ${y}%`;
+  }
+
+  const output = control.closest(".range-field")?.querySelector("output");
+  if (output) {
+    output.textContent =
+      property === "portraitZoom" ? `${zoom.toFixed(2)}×` : `${Math.round(value)}%`;
+  }
 }
 
 root.addEventListener("click", (event) => {
@@ -312,6 +350,7 @@ root.addEventListener("click", (event) => {
 
   if (action === "add-to-team") {
     update(addDraftToTeam);
+    showToast(t(state.locale, "heroSaved"));
     return;
   }
 
@@ -327,6 +366,42 @@ root.addEventListener("click", (event) => {
 
   if (action === "select-character" && button.dataset.character) {
     update((current) => selectTeamCharacter(current, button.dataset.character!));
+    return;
+  }
+
+  if (action === "duplicate-character" && button.dataset.character) {
+    update((current) => duplicateCharacter(current, button.dataset.character!));
+    showToast(t(state.locale, "heroDuplicated"));
+    return;
+  }
+
+  if (action === "remove-character" && button.dataset.character) {
+    if (window.confirm(t(state.locale, "deleteHeroConfirm"))) {
+      update((current) => removeFromTeam(current, button.dataset.character!));
+      showToast(t(state.locale, "heroDeleted"));
+    }
+    return;
+  }
+
+  if (action === "mobile-view" && button.dataset.view) {
+    update((current) =>
+      setMobileBuilderView(
+        current,
+        button.dataset.view as MobileBuilderView,
+      ),
+    );
+    return;
+  }
+
+  if (action === "print-select-all") {
+    update((current) =>
+      selectAllForPrint(current, button.dataset.selected !== "true"),
+    );
+    return;
+  }
+
+  if (action === "print-now") {
+    window.print();
   }
 });
 
@@ -356,6 +431,48 @@ root.addEventListener("input", (event) => {
 
   if (action === "team-name" && target instanceof HTMLInputElement) {
     update((current) => setTeamName(current, target.value));
+    return;
+  }
+
+  if (target instanceof HTMLInputElement && action === "portrait-x") {
+    updatePortraitCropLive(
+      "portraitPositionX",
+      Number.parseFloat(target.value),
+      target,
+    );
+    return;
+  }
+
+  if (target instanceof HTMLInputElement && action === "portrait-y") {
+    updatePortraitCropLive(
+      "portraitPositionY",
+      Number.parseFloat(target.value),
+      target,
+    );
+    return;
+  }
+
+  if (target instanceof HTMLInputElement && action === "portrait-zoom") {
+    updatePortraitCropLive(
+      "portraitZoom",
+      Number.parseFloat(target.value),
+      target,
+    );
+    return;
+  }
+
+  if (
+    target instanceof HTMLInputElement &&
+    action === "print-copies" &&
+    target.dataset.character
+  ) {
+    update((current) =>
+      setPrintCopies(
+        current,
+        target.dataset.character!,
+        Number.parseInt(target.value, 10) || 1,
+      ),
+    );
     return;
   }
 
@@ -391,6 +508,25 @@ root.addEventListener("input", (event) => {
 
 root.addEventListener("change", async (event) => {
   const target = event.target as HTMLElement;
+
+  if (
+    target instanceof HTMLInputElement &&
+    target.dataset.action === "print-select" &&
+    target.dataset.character
+  ) {
+    update((current) =>
+      togglePrintSelection(current, target.dataset.character!),
+    );
+    return;
+  }
+
+  if (
+    target instanceof HTMLInputElement &&
+    target.dataset.action === "cut-lines"
+  ) {
+    update((current) => setShowCutLines(current, target.checked));
+    return;
+  }
 
   if (
     target instanceof HTMLInputElement &&
@@ -463,9 +599,9 @@ root.addEventListener("change", async (event) => {
       const text = await file.text();
       const document = loadCatalogFromJson(text);
       update((current) => setCatalogDocument(current, document));
-      showCatalogToast(t(state.locale, "catalogImportSuccess"));
+      showToast(t(state.locale, "catalogImportSuccess"));
     } catch {
-      showCatalogToast(t(state.locale, "catalogImportError"));
+      showToast(t(state.locale, "catalogImportError"));
     } finally {
       target.value = "";
     }

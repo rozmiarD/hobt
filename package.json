@@ -18,6 +18,7 @@
     "build": "tsc",
     "build:web": "npm run build -w @hobt/configurator",
     "typecheck": "tsc --noEmit",
+    "typecheck:web": "npm run typecheck -w @hobt/configurator",
     "test": "vitest run",
     "test:watch": "vitest",
     "dev:web": "npm run dev -w @hobt/configurator"

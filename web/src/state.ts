@@ -25,12 +25,19 @@ import type { AbilityCategory } from "@hobt/lego-skirmish";
 import { DEFAULT_RULESET } from "@hobt/lego-skirmish/rules/default-ruleset.js";
 import type { Locale } from "./i18n.js";
 
-const STORAGE_KEY = "hobt-configurator-state-v2";
+const STORAGE_KEY = "hobt-configurator-state-v3";
+const LEGACY_STORAGE_KEY = "hobt-configurator-state-v2";
 
-export type AppMode = "team" | "catalog";
+export type AppMode = "builder" | "collection" | "print" | "catalog";
 export type CatalogEditorTab = "items" | "abilities";
 
-export type EditorStep = "identity" | "stats" | "equipment" | "talents";
+export type EditorStep =
+  | "identity"
+  | "stats"
+  | "equipment"
+  | "talents"
+  | "summary";
+export type MobileBuilderView = "editor" | "preview";
 
 export type CatalogSort = "cost-asc" | "cost-desc" | "name-asc";
 export type TalentFilter = "all" | "positive" | "negative";
@@ -48,7 +55,11 @@ export interface AppState {
   team: Team;
   activeCharacterId: string | null;
   activeEditorStep: EditorStep;
+  mobileBuilderView: MobileBuilderView;
   draft: CharacterBuild;
+  selectedForPrint: string[];
+  printCopies: Record<string, number>;
+  showCutLines: boolean;
   searchQuery: string;
   catalogSort: CatalogSort;
   equipmentSlotFilter: EquipmentSlot;
@@ -75,7 +86,7 @@ export function createInitialState(): AppState {
   const draft = createEmptyCharacter();
   return {
     locale: "pl",
-    appMode: "team",
+    appMode: "builder",
     catalogEditorTab: "items",
     catalogDocument: structuredClone(getBaselineCatalogDocument()),
     itemDraft: createEmptyItemDraft(),
@@ -88,11 +99,15 @@ export function createInitialState(): AppState {
       rulesetId: DEFAULT_RULESET.id,
       budget: DEFAULT_RULESET.team.budget,
       characters: [],
-      cardTheme: { templateId: "universal-clean", decorLevel: "standard" },
+      cardTheme: { templateId: "field-kit", decorLevel: "standard" },
     },
     activeCharacterId: null,
     activeEditorStep: "identity",
+    mobileBuilderView: "editor",
     draft,
+    selectedForPrint: [],
+    printCopies: {},
+    showCutLines: true,
     searchQuery: "",
     catalogSort: "cost-asc",
     equipmentSlotFilter: "mainWeapon",
@@ -104,19 +119,43 @@ export function createInitialState(): AppState {
 
 export function loadState(): AppState {
   try {
-    const raw = localStorage.getItem(STORAGE_KEY);
+    const raw =
+      localStorage.getItem(STORAGE_KEY) ?? localStorage.getItem(LEGACY_STORAGE_KEY);
     if (!raw) {
       return createInitialState();
     }
-    const parsed = JSON.parse(raw) as AppState;
-    const maxId = parsed.team.characters
-      .concat(parsed.draft)
+    const parsed = JSON.parse(raw) as Omit<Partial<AppState>, "appMode"> & {
+      appMode?: AppMode | "team";
+    };
+    const initial = createInitialState();
+    const team = parsed.team ?? initial.team;
+    const draft = parsed.draft ?? initial.draft;
+    const maxId = team.characters
+      .concat(draft)
       .map((character) => Number(character.id.replace(/\D/g, "")) || 0)
       .reduce((max, value) => Math.max(max, value), 0);
     nextId = maxId + 1;
+    const appMode =
+      parsed.appMode === "team" || !parsed.appMode ? "builder" : parsed.appMode;
+    const storedThemeId = team.cardTheme?.templateId;
+    const templateId =
+      storedThemeId === "field-kit" || storedThemeId === "field-kit-crimson"
+        ? storedThemeId
+        : "field-kit";
+    const selectedForPrint = (parsed.selectedForPrint ?? []).filter((id) =>
+      team.characters.some((character) => character.id === id),
+    );
     return {
-      ...createInitialState(),
+      ...initial,
       ...parsed,
+      appMode,
+      team: {
+        ...team,
+        cardTheme: {
+          templateId,
+          decorLevel: team.cardTheme?.decorLevel ?? "standard",
+        },
+      },
       catalogDocument:
         parsed.catalogDocument ?? structuredClone(getBaselineCatalogDocument()),
       itemDraft: parsed.itemDraft ?? createEmptyItemDraft(),
@@ -124,9 +163,12 @@ export function loadState(): AppState {
       catalogSelectionId: parsed.catalogSelectionId ?? null,
       catalogAbilitySelectionId: parsed.catalogAbilitySelectionId ?? null,
       catalogEditorTab: parsed.catalogEditorTab ?? "items",
-      appMode: parsed.appMode ?? "team",
-      draft: parsed.draft ?? createEmptyCharacter(),
+      draft,
       activeEditorStep: parsed.activeEditorStep ?? "identity",
+      mobileBuilderView: parsed.mobileBuilderView ?? "editor",
+      selectedForPrint,
+      printCopies: parsed.printCopies ?? {},
+      showCutLines: parsed.showCutLines ?? true,
       searchQuery: parsed.searchQuery ?? "",
       catalogSort: parsed.catalogSort ?? "cost-asc",
       equipmentSlotFilter: parsed.equipmentSlotFilter ?? "mainWeapon",
@@ -140,7 +182,12 @@ export function loadState(): AppState {
 }
 
 export function saveState(state: AppState): void {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+  } catch {
+    // Keep the current in-memory session usable if the browser storage quota
+    // is exhausted (usually by several large portrait images).
+  }
 }
 
 export function setActiveEditorStep(
@@ -177,6 +224,31 @@ export function setDraftPortrait(
       cosmetics: {
         ...state.draft.cosmetics,
         portraitDataUrl,
+        portraitPositionX: portraitDataUrl ? 50 : undefined,
+        portraitPositionY: portraitDataUrl ? 50 : undefined,
+        portraitZoom: portraitDataUrl ? 1 : undefined,
+      },
+    },
+  };
+}
+
+export function setDraftPortraitCrop(
+  state: AppState,
+  property: "portraitPositionX" | "portraitPositionY" | "portraitZoom",
+  value: number,
+): AppState {
+  const limits =
+    property === "portraitZoom"
+      ? { min: 1, max: 2 }
+      : { min: 0, max: 100 };
+  const normalized = Math.max(limits.min, Math.min(limits.max, value));
+  return {
+    ...state,
+    draft: {
+      ...state.draft,
+      cosmetics: {
+        ...state.draft.cosmetics,
+        [property]: normalized,
       },
     },
   };
@@ -254,6 +326,13 @@ export function addDraftToTeam(state: AppState): AppState {
     ...state,
     team: { ...state.team, characters },
     activeCharacterId: state.draft.id,
+    selectedForPrint: state.selectedForPrint.includes(state.draft.id)
+      ? state.selectedForPrint
+      : [...state.selectedForPrint, state.draft.id],
+    printCopies: {
+      ...state.printCopies,
+      [state.draft.id]: state.printCopies[state.draft.id] ?? 1,
+    },
   };
 }
 
@@ -264,6 +343,10 @@ export function removeFromTeam(state: AppState, characterId: string): AppState {
   return {
     ...state,
     team: { ...state.team, characters },
+    selectedForPrint: state.selectedForPrint.filter((id) => id !== characterId),
+    printCopies: Object.fromEntries(
+      Object.entries(state.printCopies).filter(([id]) => id !== characterId),
+    ),
     activeCharacterId:
       state.activeCharacterId === characterId ? null : state.activeCharacterId,
   };
@@ -281,6 +364,7 @@ export function selectTeamCharacter(
   }
   return {
     ...state,
+    appMode: "builder",
     activeCharacterId: characterId,
     draft: structuredClone(character),
   };
@@ -289,12 +373,103 @@ export function selectTeamCharacter(
 export function startNewCharacter(state: AppState): AppState {
   return {
     ...state,
+    appMode: "builder",
     activeCharacterId: null,
     activeEditorStep: "identity",
+    mobileBuilderView: "editor",
     draft: createEmptyCharacter(
       state.locale === "pl" ? "Nowa postać" : "New character",
     ),
   };
+}
+
+export function duplicateCharacter(
+  state: AppState,
+  characterId: string,
+): AppState {
+  const source = state.team.characters.find(
+    (character) => character.id === characterId,
+  );
+  if (!source) {
+    return state;
+  }
+  const copy = structuredClone(source);
+  copy.id = `char-${nextId++}`;
+  copy.name =
+    state.locale === "pl" ? `${source.name} — kopia` : `${source.name} — copy`;
+  return {
+    ...state,
+    appMode: "builder",
+    activeCharacterId: copy.id,
+    activeEditorStep: "identity",
+    draft: copy,
+    team: {
+      ...state.team,
+      characters: [...state.team.characters, copy],
+    },
+  };
+}
+
+export function setMobileBuilderView(
+  state: AppState,
+  mobileBuilderView: MobileBuilderView,
+): AppState {
+  return { ...state, mobileBuilderView };
+}
+
+export function togglePrintSelection(
+  state: AppState,
+  characterId: string,
+): AppState {
+  const selected = new Set(state.selectedForPrint);
+  if (selected.has(characterId)) {
+    selected.delete(characterId);
+  } else {
+    selected.add(characterId);
+  }
+  return {
+    ...state,
+    selectedForPrint: [...selected],
+    printCopies: {
+      ...state.printCopies,
+      [characterId]: state.printCopies[characterId] ?? 1,
+    },
+  };
+}
+
+export function selectAllForPrint(
+  state: AppState,
+  selected: boolean,
+): AppState {
+  const ids = selected
+    ? state.team.characters.map((character) => character.id)
+    : [];
+  const printCopies = { ...state.printCopies };
+  for (const id of ids) {
+    printCopies[id] = printCopies[id] ?? 1;
+  }
+  return { ...state, selectedForPrint: ids, printCopies };
+}
+
+export function setPrintCopies(
+  state: AppState,
+  characterId: string,
+  copies: number,
+): AppState {
+  return {
+    ...state,
+    printCopies: {
+      ...state.printCopies,
+      [characterId]: Math.max(1, Math.min(9, copies)),
+    },
+  };
+}
+
+export function setShowCutLines(
+  state: AppState,
+  showCutLines: boolean,
+): AppState {
+  return { ...state, showCutLines };
 }
 
 export function setSearchQuery(state: AppState, searchQuery: string): AppState {

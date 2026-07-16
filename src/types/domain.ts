@@ -62,6 +62,9 @@ export interface CharacterCosmetics {
   cardStyle?: string;
   imageRef?: string;
   portraitDataUrl?: string;
+  portraitPositionX?: number;
+  portraitPositionY?: number;
+  portraitZoom?: number;
 }
 
 export interface CharacterBuild {
@@ -375,6 +378,9 @@ export interface CharacterCardStats {
 export interface CharacterCardPortrait {
   url: string;
   fit?: "contain" | "cover";
+  positionX?: number;
+  positionY?: number;
+  zoom?: number;
 }
 
 export interface CharacterCard {

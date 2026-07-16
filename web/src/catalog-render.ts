@@ -509,7 +509,9 @@ function renderAbilitiesEditor(state: AppState): string {
 }
 
 export function renderCatalogMode(state: AppState): string {
-  return state.catalogEditorTab === "abilities"
-    ? renderAbilitiesEditor(state)
-    : renderItemsEditor(state);
+  const editor =
+    state.catalogEditorTab === "abilities"
+      ? renderAbilitiesEditor(state)
+      : renderItemsEditor(state);
+  return `${renderCatalogTabs(state)}${editor}`;
 }

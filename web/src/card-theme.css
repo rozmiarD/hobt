@@ -1,119 +1,66 @@
-/* Dossier card theme accents */
-
-.dossier-card .card-titles h3 {
-  font-family: var(--font-card-title, "Oswald", sans-serif);
+.hero-card {
+  --card-paper: #f4edda;
+  --card-paper-strong: #fffaf0;
+  --card-ink: #18242d;
+  --card-muted: #6d6c63;
+  --card-line: #b9ad91;
+  --card-accent: #d59628;
+  --card-accent-dark: #8f5e10;
+  --card-secondary: #1f5368;
+  --card-danger: #a83d35;
+  --card-frame: #172933;
+  --card-portrait-back: #b7c4bd;
+  --card-title-font: "Oswald", "Arial Narrow", sans-serif;
+  --card-body-font: "Inter", system-ui, sans-serif;
+  --card-number-font: "JetBrains Mono", monospace;
 }
 
-.dossier-card .card-titles p,
-.dossier-card .card-abilities,
-.dossier-card .card-equip-list li {
-  font-family: var(--font-card-body, "Inter", sans-serif);
+.theme-field-kit {
+  --card-paper: #f3ecd9;
+  --card-paper-strong: #fffaf0;
+  --card-ink: #18242d;
+  --card-muted: #696b65;
+  --card-line: #b6aa8d;
+  --card-accent: #d89a2b;
+  --card-accent-dark: #8d5d12;
+  --card-secondary: #1f596d;
+  --card-danger: #aa4137;
+  --card-frame: #172b35;
+  --card-portrait-back: #aebdb7;
 }
 
-.dossier-card .faction-chip,
-.dossier-card .card-section-label,
-.dossier-card .stamp .l {
-  font-family: var(--font-card-section, "Oswald", sans-serif);
+.theme-field-kit-crimson {
+  --card-paper: #f2e9dc;
+  --card-paper-strong: #fff9f0;
+  --card-ink: #2b2021;
+  --card-muted: #746766;
+  --card-line: #b8a195;
+  --card-accent: #bf6b32;
+  --card-accent-dark: #7e3a25;
+  --card-secondary: #7c2930;
+  --card-danger: #8d282d;
+  --card-frame: #322126;
+  --card-portrait-back: #b9ada7;
 }
 
-.dossier-card .card-stats .val,
-.dossier-card .stamp .n {
-  font-family: var(--font-heading, "JetBrains Mono", monospace);
-}
-
-.theme-universal-clean {
-  --font-card-title: "Oswald", sans-serif;
-  --font-card-body: "Inter", sans-serif;
-  --font-card-section: "Oswald", sans-serif;
-  --font-heading: "JetBrains Mono", monospace;
-  --card-accent: #c45c26;
-  --card-ink: #1f1a14;
-}
-
-.theme-fantasy {
-  --font-card-title: "Cormorant Garamond", "Times New Roman", serif;
-  --font-card-body: "EB Garamond", Georgia, serif;
-  --font-card-section: "Cinzel", serif;
-  --card-accent: #8b5a2b;
-  --card-ink: #2a1f14;
-}
-
-.theme-gothic {
-  --font-card-title: "Cinzel", serif;
-  --font-card-body: "EB Garamond", serif;
-  --font-card-section: "Cinzel", serif;
-  --card-accent: #5c1f2a;
-  --card-ink: #1a1218;
-}
-
-.theme-historical {
-  --font-card-title: "Cinzel", serif;
-  --font-card-body: "EB Garamond", serif;
-  --font-card-section: "Oswald", sans-serif;
-  --card-accent: #6b4f2d;
-  --card-ink: #241c14;
-}
-
-.theme-modern-tactical {
-  --font-card-title: "Rajdhani", "Arial Narrow", sans-serif;
-  --font-card-body: "IBM Plex Sans", sans-serif;
-  --font-card-section: "Rajdhani", sans-serif;
-  --card-accent: #3d6b52;
-  --card-ink: #142018;
-}
-
-.theme-post-apocalypse {
-  --font-card-title: "Special Elite", "Courier New", monospace;
-  --font-card-body: "Inter", sans-serif;
-  --font-card-section: "Oswald", sans-serif;
-  --card-accent: #9a6a12;
-  --card-ink: #1c1810;
-}
-
-.theme-sci-fi-clean {
-  --font-card-title: "Orbitron", sans-serif;
-  --font-card-body: "Exo 2", sans-serif;
-  --font-card-section: "Orbitron", sans-serif;
-  --card-accent: #2f6f9c;
-  --card-ink: #0f1a24;
-}
-
+/* Safe fallback for cards saved with themes from earlier app versions. */
+.theme-universal-clean,
+.theme-fantasy,
+.theme-gothic,
+.theme-historical,
+.theme-modern-tactical,
+.theme-post-apocalypse,
+.theme-sci-fi-clean,
 .theme-industrial-retro {
-  --font-card-title: "Share Tech Mono", monospace;
-  --font-card-body: "Inter", sans-serif;
-  --font-card-section: "Oswald", sans-serif;
-  --card-accent: #8a4b28;
-  --card-ink: #1a1410;
-}
-
-.dossier-theme-universal-clean {
-  border-color: #cdc19a;
-}
-
-.dossier-theme-fantasy {
-  border-color: #b8a67a;
-}
-
-.dossier-theme-gothic {
-  border-color: #8a6a72;
-}
-
-.dossier-theme-historical {
-  border-color: #b7a482;
-}
-
-.dossier-theme-modern-tactical {
-  border-color: #8aa89a;
-}
-
-.dossier-theme-post-apocalypse {
-  border-color: #b8a060;
-}
-
-.dossier-theme-sci-fi-clean {
-  border-color: #7aa0b8;
-}
-
-.dossier-theme-industrial-retro {
-  border-color: #a89078;
+  --card-paper: #f3ecd9;
+  --card-paper-strong: #fffaf0;
+  --card-ink: #18242d;
+  --card-muted: #696b65;
+  --card-line: #b6aa8d;
+  --card-accent: #d89a2b;
+  --card-accent-dark: #8d5d12;
+  --card-secondary: #1f596d;
+  --card-danger: #aa4137;
+  --card-frame: #172b35;
+  --card-portrait-back: #aebdb7;
 }

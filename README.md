@@ -6,6 +6,25 @@ Heroes of Brick & Tactics is a tactics game built around the **LEGO Skirmish** r
 
 **Live configurator:** [https://rozmiard.github.io/hobt/](https://rozmiard.github.io/hobt/)
 
+## Hero workshop
+
+The web application is a complete, static character-card workshop:
+
+- build a hero from the actual rules catalog,
+- edit identity, stats, equipment, talents, and drawbacks,
+- upload, crop, move, and zoom a portrait locally,
+- see the tarot-format card update immediately,
+- save, reopen, duplicate, and delete cards in the team collection,
+- select cards and copy counts for fixed-size A4 printing,
+- switch between editor and preview on mobile devices.
+
+The same card renderer is used by the builder, collection, and print layout.
+Cards are printed at **70 × 120 mm**; the browser print dialog should use
+**100% scale** with background graphics enabled.
+
+All application data is stored in the current browser using `localStorage`.
+There are no user accounts, external APIs, application servers, or databases.
+
 ## LEGO Skirmish core
 
 The first implementation stage delivers a data-driven TypeScript rules engine for:
@@ -64,21 +83,59 @@ const card = buildCharacterCardSnapshot(resolved);
 
 Stage 1–2: model, math, validation, card snapshot foundation.
 
-Stage 3: web configurator with live cost/validation, team builder, and card preview.
+Stage 3: complete browser-based hero workshop with:
 
-### Local development
+- a guided character builder powered by the live rules catalog,
+- a shared tarot-format card renderer for editing, collection, and print,
+- local portrait upload with crop, position, and zoom controls,
+- a locally persisted card collection with edit, duplicate, delete, and print selection,
+- A4 print sheets with fixed 70 × 120 mm cards, copy counts, and optional cut lines,
+- responsive editor/preview switching for phones and a side-by-side desktop workspace.
+
+Character, team, catalog, portrait, and print-selection data is stored locally in
+the browser. The GitHub Pages deployment does not require a backend.
+
+## Local development
 
 ```bash
 npm install
 npm test
+npm run typecheck
+npm run typecheck:web
 npm run dev:web
 ```
 
-Open `http://localhost:5173`.
+Open `http://localhost:5173/hobt/`.
 
-### GitHub Pages
+The Vite development server is only for local development and verification. It
+is not part of the production hosting architecture.
 
-Pushes to `main` run tests, build `web/dist`, and deploy to GitHub Pages.
-In repository settings, set **Pages → Build and deployment → Source: GitHub Actions** once if the site is not live yet.
+To inspect the production build locally:
+
+```bash
+npm run build:web
+npm run preview --workspace @hobt/configurator
+```
+
+## GitHub Pages deployment
+
+Production is hosted as a static GitHub Pages site:
+
+1. A commit is pushed to `main`.
+2. [`.github/workflows/pages.yml`](.github/workflows/pages.yml) installs
+   dependencies with `npm ci`.
+3. The workflow runs tests, core build, frontend typecheck, and the Vite build.
+4. Vite writes the static application to `web/dist`.
+5. `actions/deploy-pages` publishes that directory at
+   [https://rozmiard.github.io/hobt/](https://rozmiard.github.io/hobt/).
+
+The Vite base path is `/hobt/`, matching the GitHub Pages project URL. The
+generated `web/dist` directory is a build artifact and does not need to be
+committed.
+
+The workflow can also be started manually using **Actions → CI and Pages → Run
+workflow**.
+
+Repository setting: **Pages → Build and deployment → Source: GitHub Actions**.
 
 Unresolved gameplay topics are explicitly marked `UNRESOLVED` in code and are not hardcoded as rules.

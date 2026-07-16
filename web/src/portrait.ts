@@ -1,5 +1,5 @@
-export const PORTRAIT_MAX_BYTES = 2 * 1024 * 1024;
-export const PORTRAIT_MAX_DIMENSION = 1200;
+export const PORTRAIT_MAX_BYTES = 12 * 1024 * 1024;
+export const PORTRAIT_MAX_DIMENSION = 1400;
 
 export class PortraitError extends Error {
   constructor(
@@ -16,7 +16,7 @@ export async function processPortraitFile(file: File): Promise<string> {
     throw new PortraitError("Invalid file type.", "invalid_type");
   }
   if (file.size > PORTRAIT_MAX_BYTES) {
-    throw new PortraitError("Image exceeds 2 MB.", "too_large");
+    throw new PortraitError("Image exceeds 12 MB.", "too_large");
   }
 
   const dataUrl = await readFileAsDataUrl(file);
@@ -33,7 +33,7 @@ export async function processPortraitFile(file: File): Promise<string> {
     throw new PortraitError("Could not process image.", "processing_failed");
   }
   context.drawImage(image, 0, 0, canvas.width, canvas.height);
-  return canvas.toDataURL("image/jpeg", 0.88);
+  return canvas.toDataURL("image/jpeg", 0.82);
 }
 
 function readFileAsDataUrl(file: File): Promise<string> {

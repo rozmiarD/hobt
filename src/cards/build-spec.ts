@@ -186,7 +186,13 @@ export function buildCharacterCard(
     team: context.teamName?.trim() || undefined,
     points: resolved.cost.total,
     portrait: source.cosmetics.portraitDataUrl
-      ? { url: source.cosmetics.portraitDataUrl, fit: "cover" }
+      ? {
+          url: source.cosmetics.portraitDataUrl,
+          fit: "cover",
+          positionX: source.cosmetics.portraitPositionX ?? 50,
+          positionY: source.cosmetics.portraitPositionY ?? 50,
+          zoom: source.cosmetics.portraitZoom ?? 1,
+        }
       : undefined,
     stats: {
       hp: resolved.derivedStats.HP,
