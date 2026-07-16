@@ -2576,10 +2576,15 @@ select {
   }
 
   .hero-card-print {
-    width: 350px !important;
-    height: 600px !important;
+    /*
+     * Firefox resolves container query units against the printed viewport.
+     * Rendering at the A4 inline size and scaling by exactly 1/3 keeps both
+     * viewport- and container-based cqw values at the intended 70 x 120 mm.
+     */
+    width: 210mm !important;
+    height: 360mm !important;
     max-width: none !important;
-    transform: scale(0.7559055) !important;
+    transform: scale(0.3333333) !important;
     transform-origin: top left !important;
   }
 

@@ -3,7 +3,7 @@ import type {
   EquipmentSlot,
 } from "@hobt/lego-skirmish/types/domain.js";
 import { t, type Locale } from "./i18n.js";
-import { EQUIPMENT_ICONS, icon } from "./icons.js";
+import { BANNER_STAT_ICONS, EQUIPMENT_ICONS, icon } from "./icons.js";
 
 const EQUIPMENT_SLOTS: EquipmentSlot[] = [
   "mainWeapon",
@@ -132,9 +132,21 @@ export function renderHeroCard(
           <span class="hero-card-portrait-grid" aria-hidden="true"></span>
         </div>
         <div class="hero-card-vitals" aria-label="${escapeHtml(t(locale, "vitals"))}">
-          <div class="hero-card-vital hp"><span>HP</span><strong>${card.stats.hp}</strong></div>
-          <div class="hero-card-vital mp"><span>MP</span><strong>${card.stats.mp}</strong></div>
-          <div class="hero-card-vital ac"><span>AC</span><strong>${card.stats.ac}</strong></div>
+          <div class="hero-card-vital hp">
+            <span class="hero-card-vital-icon">${icon("heart")}</span>
+            <span class="hero-card-vital-label">HP</span>
+            <strong>${card.stats.hp}</strong>
+          </div>
+          <div class="hero-card-vital mp">
+            <span class="hero-card-vital-icon">${icon("shoe-prints")}</span>
+            <span class="hero-card-vital-label">MP</span>
+            <strong>${card.stats.mp}</strong>
+          </div>
+          <div class="hero-card-vital ac">
+            <span class="hero-card-vital-icon">${icon("shield")}</span>
+            <span class="hero-card-vital-label">AC</span>
+            <strong>${card.stats.ac}</strong>
+          </div>
         </div>
       </section>
 
@@ -143,8 +155,11 @@ export function renderHeroCard(
           .map(
             (stat) => `
             <div class="hero-card-stat">
-              <span>${stat.toUpperCase()}</span>
-              <strong>${card.stats[stat]}</strong>
+              <span class="hero-card-stat-icon">${icon(BANNER_STAT_ICONS[stat])}</span>
+              <span class="hero-card-stat-copy">
+                <small>${stat.toUpperCase()}</small>
+                <strong>${card.stats[stat]}</strong>
+              </span>
             </div>`,
           )
           .join("")}
@@ -152,11 +167,11 @@ export function renderHeroCard(
 
       <section class="hero-card-loadout">
         <div class="hero-card-section hero-card-equipment">
-          <h4><span></span>${escapeHtml(t(locale, "equipmentOnCard"))}</h4>
+          <h4><span>${icon("box-open")}</span><b>${escapeHtml(t(locale, "equipmentOnCard"))}</b></h4>
           <ul>${renderEquipment(locale, card)}</ul>
         </div>
         <div class="hero-card-section hero-card-abilities">
-          <h4><span></span>${escapeHtml(t(locale, "abilitiesOnCard"))}</h4>
+          <h4><span>${icon("sparkle")}</span><b>${escapeHtml(t(locale, "abilitiesOnCard"))}</b></h4>
           <ul>${renderAbilities(locale, card)}</ul>
         </div>
       </section>

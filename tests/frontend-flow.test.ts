@@ -34,6 +34,10 @@ describe("frontend character flow", () => {
 
     expect(builder).toContain("Mira Żelazna");
     expect(builder).toContain("hero-card-preview");
+    expect(builder).toContain("hero-card-vital-icon");
+    expect(builder).toContain("hero-card-stat-icon");
+    expect(builder).toContain("fa-heart");
+    expect(builder).toContain("fa-crosshairs");
     expect(builder).not.toContain('data-action="add-to-team" disabled');
 
     state = addDraftToTeam(state);
