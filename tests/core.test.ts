@@ -355,6 +355,102 @@ describe("derived stats separation", () => {
   });
 });
 
+describe("bootstrap talents", () => {
+  const validStats = { MS: 2, RS: 2, LS: 0, KS: 0, HP: 3, MP: 3 };
+
+  it("ships ten level-one talents with standard signed costs", () => {
+    const talents = Object.values(DEFAULT_CATALOG.abilities);
+    expect(talents).toHaveLength(10);
+    expect(talents.every((talent) => talent.level === 1)).toBe(true);
+    expect(
+      talents.every((talent) =>
+        talent.polarity === "negative"
+          ? talent.cost === -100
+          : talent.cost === 100,
+      ),
+    ).toBe(true);
+  });
+
+  it("applies the ranged damage talent to a ranged weapon", () => {
+    const resolved = resolveCharacter(
+      makeCharacter({
+        baseStats: validStats,
+        equipment: { mainWeapon: { itemId: "ranged-bow" } },
+        talentIds: ["eagle-eye"],
+      }),
+      DEFAULT_RULESET,
+      DEFAULT_CATALOG,
+    );
+    const rangedAttack = resolved.actions.find(
+      (action) => action.attackType === "ranged",
+    );
+    expect(resolved.validation.valid).toBe(true);
+    expect(rangedAttack?.damage).toBe(2);
+  });
+
+  it("requires a ranged action for the ranged damage talent", () => {
+    const resolved = resolveCharacter(
+      makeCharacter({
+        baseStats: validStats,
+        equipment: { mainWeapon: { itemId: "melee-sword" } },
+        talentIds: ["eagle-eye"],
+      }),
+      DEFAULT_RULESET,
+      DEFAULT_CATALOG,
+    );
+    expect(resolved.validation.valid).toBe(false);
+    expect(
+      resolved.validation.errors.some(
+        (error) => error.code === "ability_requirement_unmet",
+      ),
+    ).toBe(true);
+  });
+
+  it("applies the defensive, health, and movement talents", () => {
+    const resolved = resolveCharacter(
+      makeCharacter({
+        baseStats: validStats,
+        talentIds: ["watchful-guard", "tough", "quick-step"],
+      }),
+      DEFAULT_RULESET,
+      DEFAULT_CATALOG,
+    );
+    expect(resolved.validation.valid).toBe(true);
+    expect(resolved.derivedStats.AC).toBe(1);
+    expect(resolved.derivedStats.HP).toBe(4);
+    expect(resolved.derivedStats.MP).toBe(4);
+  });
+
+  it("blocks armor when the unarmoured drawback is selected", () => {
+    const legal = resolveCharacter(
+      makeCharacter({
+        baseStats: validStats,
+        talentIds: ["unarmoured"],
+      }),
+      DEFAULT_RULESET,
+      DEFAULT_CATALOG,
+    );
+    expect(legal.validation.valid).toBe(true);
+    expect(legal.blockedSlots).toContain("armor");
+
+    const illegal = resolveCharacter(
+      makeCharacter({
+        baseStats: validStats,
+        equipment: { armor: { itemId: "leather-armor" } },
+        talentIds: ["unarmoured"],
+      }),
+      DEFAULT_RULESET,
+      DEFAULT_CATALOG,
+    );
+    expect(illegal.validation.valid).toBe(false);
+    expect(
+      illegal.validation.errors.some(
+        (error) => error.code === "blocked_slot_occupied",
+      ),
+    ).toBe(true);
+  });
+});
+
 describe("team validation", () => {
   const characterAt200 = (): CharacterBuild =>
     makeCharacter({

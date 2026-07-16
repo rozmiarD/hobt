@@ -12,6 +12,7 @@ import {
   createEmptyItemDraft,
   getBaselineCatalogDocument,
   itemDraftFromDefinition,
+  mergeCatalogDocuments,
   type AbilityDraft,
   type CatalogDocument,
   type ItemDraft,
@@ -156,8 +157,12 @@ export function loadState(): AppState {
           decorLevel: team.cardTheme?.decorLevel ?? "standard",
         },
       },
-      catalogDocument:
-        parsed.catalogDocument ?? structuredClone(getBaselineCatalogDocument()),
+      catalogDocument: parsed.catalogDocument
+        ? mergeCatalogDocuments(
+            structuredClone(getBaselineCatalogDocument()),
+            parsed.catalogDocument,
+          )
+        : structuredClone(getBaselineCatalogDocument()),
       itemDraft: parsed.itemDraft ?? createEmptyItemDraft(),
       abilityDraft: parsed.abilityDraft ?? createEmptyAbilityDraft(),
       catalogSelectionId: parsed.catalogSelectionId ?? null,

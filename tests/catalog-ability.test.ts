@@ -46,4 +46,18 @@ describe("ability builder", () => {
     );
     expect(rebuilt.requirements.length).toBeGreaterThan(0);
   });
+
+  it("round-trips the baseline armor-blocking drawback", () => {
+    const doc = getBaselineCatalogDocument();
+    const ability = doc.catalog.abilities["unarmoured"];
+    expect(ability).toBeDefined();
+    const draft = abilityDraftFromDefinition(ability!);
+    expect(draft.selectedTraitIds).toEqual(["ab-block-armor"]);
+    const rebuilt = buildAbilityFromDraft(draft);
+    expect(
+      rebuilt.effects.some(
+        (effect) => effect.type === "blockSlot" && effect.slot === "armor",
+      ),
+    ).toBe(true);
+  });
 });

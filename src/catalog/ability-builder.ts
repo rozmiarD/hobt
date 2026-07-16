@@ -135,8 +135,13 @@ export function abilityDraftFromDefinition(ability: AbilityDefinition): AbilityD
           abilityEffect.stat === effect.stat &&
           abilityEffect.value === effect.value &&
           abilityEffect.target === effect.target &&
+          abilityEffect.slot === effect.slot &&
+          abilityEffect.tag === effect.tag &&
+          abilityEffect.actionId === effect.actionId &&
           abilityEffect.trigger === effect.trigger &&
-          abilityEffect.result === effect.result,
+          abilityEffect.result === effect.result &&
+          abilityEffect.statusId === effect.statusId &&
+          abilityEffect.condition === effect.condition,
       ),
     );
     if (matches && trait.effects.length > 0) {

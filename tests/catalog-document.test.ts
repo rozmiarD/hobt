@@ -13,7 +13,7 @@ import {
 describe("catalog document", () => {
   it("loads baseline with weapon subtypes and items", () => {
     const doc = getBaselineCatalogDocument();
-    expect(doc.version).toBe("1.0.0");
+    expect(doc.version).toBe("1.1.0");
     expect(doc.weaponSubtypes.melee.length).toBeGreaterThanOrEqual(8);
     expect(doc.weaponSubtypes.ranged.length).toBeGreaterThanOrEqual(5);
     expect(doc.catalog.items["melee-sword"]).toBeDefined();

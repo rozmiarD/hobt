@@ -156,6 +156,29 @@ export const ABILITY_TRAIT_TEMPLATES: AbilityTraitTemplate[] = [
     ],
   },
   {
+    id: "ab-block-armor",
+    category: "drawback",
+    label: { pl: "Blokuje slot pancerza", en: "Blocks armor slot" },
+    polarity: "negative",
+    minLevel: 1,
+    effects: [
+      {
+        id: "ab-block-armor-effect",
+        type: "blockSlot",
+        slot: "armor",
+        display: { pl: "Blokuje pancerz", en: "Blocks armor" },
+      },
+    ],
+    restrictions: [
+      {
+        type: "blockSlot",
+        affects: ["armor"],
+        severity: 1,
+        display: { pl: "Blokuje pancerz", en: "Blocks armor" },
+      },
+    ],
+  },
+  {
     id: "ab-mp-penalty",
     category: "movement",
     label: { pl: "-1 MP", en: "-1 MP" },

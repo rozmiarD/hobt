@@ -1,5 +1,5 @@
 {
-  "version": "1.0.0",
+  "version": "1.1.0",
   "weaponSubtypes": {
     "melee": [
       { "id": "sword", "name": { "pl": "Miecz", "en": "Sword" } },
@@ -241,6 +241,83 @@
         ],
         "restrictions": []
       },
+      "eagle-eye": {
+        "id": "eagle-eye",
+        "name": { "pl": "Sokole oko", "en": "Eagle eye" },
+        "level": 1,
+        "polarity": "positive",
+        "cost": 100,
+        "requirements": [
+          { "type": "hasRangedAction" }
+        ],
+        "effects": [
+          {
+            "id": "eagle-eye-dmg",
+            "type": "modifyDamage",
+            "target": "rangedAttack",
+            "value": 1,
+            "display": {
+              "pl": "Wymaga akcji dystansowej. +1 DMG ataków dystansowych",
+              "en": "Requires a ranged action. +1 DMG to ranged attacks"
+            }
+          }
+        ],
+        "restrictions": []
+      },
+      "watchful-guard": {
+        "id": "watchful-guard",
+        "name": { "pl": "Czujna garda", "en": "Watchful guard" },
+        "level": 1,
+        "polarity": "positive",
+        "cost": 100,
+        "requirements": [],
+        "effects": [
+          {
+            "id": "watchful-guard-ac",
+            "type": "modifyStat",
+            "stat": "AC",
+            "value": 1,
+            "display": { "pl": "+1 AC", "en": "+1 AC" }
+          }
+        ],
+        "restrictions": []
+      },
+      "tough": {
+        "id": "tough",
+        "name": { "pl": "Twardziel", "en": "Tough" },
+        "level": 1,
+        "polarity": "positive",
+        "cost": 100,
+        "requirements": [],
+        "effects": [
+          {
+            "id": "tough-hp",
+            "type": "modifyStat",
+            "stat": "HP",
+            "value": 1,
+            "display": { "pl": "+1 HP", "en": "+1 HP" }
+          }
+        ],
+        "restrictions": []
+      },
+      "quick-step": {
+        "id": "quick-step",
+        "name": { "pl": "Szybki krok", "en": "Quick step" },
+        "level": 1,
+        "polarity": "positive",
+        "cost": 100,
+        "requirements": [],
+        "effects": [
+          {
+            "id": "quick-step-mp",
+            "type": "modifyStat",
+            "stat": "MP",
+            "value": 1,
+            "display": { "pl": "+1 MP", "en": "+1 MP" }
+          }
+        ],
+        "restrictions": []
+      },
       "heavy-gear": {
         "id": "heavy-gear",
         "name": { "pl": "Ciężki ekwipunek", "en": "Heavy gear" },
@@ -288,6 +365,30 @@
             "affects": ["HP"],
             "severity": 1,
             "display": { "pl": "-1 HP", "en": "-1 HP" }
+          }
+        ]
+      },
+      "unarmoured": {
+        "id": "unarmoured",
+        "name": { "pl": "Bez pancerza", "en": "Unarmoured" },
+        "level": 1,
+        "polarity": "negative",
+        "cost": -100,
+        "requirements": [],
+        "effects": [
+          {
+            "id": "unarmoured-block-armor",
+            "type": "blockSlot",
+            "slot": "armor",
+            "display": { "pl": "Nie może używać pancerza", "en": "Cannot use armor" }
+          }
+        ],
+        "restrictions": [
+          {
+            "type": "blockSlot",
+            "affects": ["armor"],
+            "severity": 1,
+            "display": { "pl": "Nie może używać pancerza", "en": "Cannot use armor" }
           }
         ]
       }

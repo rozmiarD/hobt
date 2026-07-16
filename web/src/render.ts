@@ -177,7 +177,10 @@ function abilityDescription(
   const restrictions = ability.restrictions.flatMap((restriction) =>
     restriction.display ? [localize(restriction.display, locale)] : [],
   );
-  return [...effects, ...restrictions].join(" · ") || localize(ability.name, locale);
+  return (
+    [...new Set([...effects, ...restrictions])].join(" · ") ||
+    localize(ability.name, locale)
+  );
 }
 
 function portraitStyle(character: CharacterBuild): string {
@@ -540,7 +543,11 @@ function renderEquipmentStep(
 
 function renderTalentsStep(state: AppState, catalog: GameCatalog): string {
   const locale = state.locale;
-  const abilities = listAbilities(catalog);
+  const abilities = listAbilities(catalog).sort(
+    (left, right) =>
+      Number(left.polarity === "negative") -
+      Number(right.polarity === "negative"),
+  );
   const selectedCount = state.draft.talentIds.length;
 
   return `

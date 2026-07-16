@@ -44,6 +44,14 @@ Mechanical identity is independent of LEGO appearance, setting, or weapon cosmet
 - ID: `lego-skirmish-core`
 - Version: `0.2.0-draft`
 
+### Bootstrap talent catalog
+
+Catalog version `1.1.0` contains ten level-one choices. Positive talents cost
+100 points: Two-weapon fighting, Strong blow, Eagle eye, Watchful guard, Tough,
+and Quick step. Drawbacks refund 100 points when their restriction is relevant:
+Great-weapon fighting, Heavy gear, Fragile, and Unarmoured. A character may
+select at most three talents or drawbacks in total.
+
 ### Quick start
 
 ```bash

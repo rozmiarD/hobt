@@ -16,7 +16,7 @@ import {
   collectBlockedSlots,
   collectEffects,
   getEquippedItem,
-  getMeleeDamageBonus,
+  getAttackDamageBonus,
   markInactiveEffects,
 } from "../effects/engine.js";
 
@@ -49,7 +49,7 @@ function cloneAction(
 function buildEquipmentActions(
   character: CharacterBuild,
   catalog: GameCatalog,
-  meleeDamageBonus: number,
+  damageBonuses: Record<"melee" | "ranged", number>,
 ): ResolvedAction[] {
   const actions: ResolvedAction[] = [];
 
@@ -57,8 +57,9 @@ function buildEquipmentActions(
   if (mainWeapon) {
     const attack = mainWeapon.actions.find((action) => action.type === "attack");
     if (attack) {
-      const bonus =
-        attack.attackType === "melee" ? meleeDamageBonus : 0;
+      const bonus = attack.attackType
+        ? damageBonuses[attack.attackType]
+        : 0;
       actions.push(
         cloneAction(attack, mainWeapon.id, "mainWeapon", 1, bonus),
       );
@@ -73,7 +74,9 @@ function buildEquipmentActions(
   if (offhand) {
     const attack = offhand.actions.find((action) => action.type === "attack");
     if (attack) {
-      const bonus = attack.attackType === "melee" ? meleeDamageBonus : 0;
+      const bonus = attack.attackType
+        ? damageBonuses[attack.attackType]
+        : 0;
       actions.push(cloneAction(attack, offhand.id, "offhand", 2, bonus));
     } else if (offhand.actions[0]) {
       actions.push(
@@ -168,12 +171,15 @@ export function resolveCharacter(
   );
   const blockedSlots = collectBlockedSlots(activeEffects);
   const derivedStats = applyStatModifiers(character.baseStats, activeEffects);
-  const meleeDamageBonus = getMeleeDamageBonus(activeEffects);
+  const damageBonuses = {
+    melee: getAttackDamageBonus(activeEffects, "melee"),
+    ranged: getAttackDamageBonus(activeEffects, "ranged"),
+  };
 
   const equipmentActions = buildEquipmentActions(
     character,
     catalog,
-    meleeDamageBonus,
+    damageBonuses,
   );
   const talentActions = buildTalentActions(character, catalog);
   const actions = padActions(

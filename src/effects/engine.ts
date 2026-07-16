@@ -188,15 +188,23 @@ export function markInactiveEffects(
   });
 }
 
-export function getMeleeDamageBonus(effects: ResolvedEffect[]): number {
+export function getAttackDamageBonus(
+  effects: ResolvedEffect[],
+  attackType: "melee" | "ranged",
+): number {
+  const target = attackType === "melee" ? "meleeAttack" : "rangedAttack";
   return effects
     .filter(
       (resolved) =>
         resolved.active &&
         resolved.effect.type === "modifyDamage" &&
-        resolved.effect.target === "meleeAttack",
+        resolved.effect.target === target,
     )
     .reduce((sum, resolved) => sum + (resolved.effect.value ?? 0), 0);
+}
+
+export function getMeleeDamageBonus(effects: ResolvedEffect[]): number {
+  return getAttackDamageBonus(effects, "melee");
 }
 
 export function restrictionAffectsCapability(
