@@ -12,7 +12,7 @@
     radial-gradient(circle at 92% 4%, color-mix(in srgb, var(--card-accent) 26%, transparent), transparent 24%),
     linear-gradient(150deg, var(--card-paper-strong), var(--card-paper));
   border: 1.2cqw solid var(--card-frame);
-  border-radius: 4.6cqw;
+  border-radius: var(--card-corner-outer);
   box-shadow:
     0 4.5cqw 10cqw rgba(7, 16, 21, 0.25),
     inset 0 0 0 0.6cqw var(--card-accent);
@@ -31,7 +31,7 @@
 .hero-card::before {
   inset: 2.2cqw;
   border: 0.22cqw solid color-mix(in srgb, var(--card-line) 78%, transparent);
-  border-radius: 2.7cqw;
+  border-radius: var(--card-corner-inner);
 }
 
 .hero-card::after {
@@ -151,7 +151,7 @@
   color: #fffdf5;
   background: var(--card-frame);
   border: 0.7cqw solid var(--card-accent);
-  border-radius: 2.8cqw;
+  border-radius: var(--card-corner-module);
   text-align: center;
   transform: rotate(2deg);
 }
@@ -186,7 +186,7 @@
   background:
     linear-gradient(145deg, color-mix(in srgb, var(--card-portrait-back) 80%, #fff), var(--card-portrait-back));
   border: 0.35cqw solid var(--card-frame);
-  border-radius: 2.4cqw;
+  border-radius: var(--card-corner-module);
   box-shadow: inset 0 0 0 0.55cqw color-mix(in srgb, var(--card-accent) 28%, transparent);
 }
 
@@ -244,7 +244,7 @@
   background: var(--card-paper-strong);
   border: 0.3cqw solid var(--card-line);
   border-left: 1.4cqw solid var(--card-secondary);
-  border-radius: 1.8cqw;
+  border-radius: var(--card-corner-module);
   box-shadow: 0 0.7cqw 0 color-mix(in srgb, var(--card-line) 45%, transparent);
 }
 
@@ -282,7 +282,7 @@
   margin: 0 5.2cqw;
   overflow: hidden;
   background: var(--card-frame);
-  border-radius: 2cqw;
+  border-radius: var(--card-corner-module);
   box-shadow: 0 0.7cqw 0 var(--card-accent);
 }
 
@@ -514,7 +514,7 @@
   position: absolute;
   inset: 0 auto auto 0;
   max-width: none;
-  border-radius: 16px;
+  border-radius: 7px;
   box-shadow: none;
   break-inside: avoid;
   transform: scale(0.7559055);
