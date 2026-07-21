@@ -13,6 +13,8 @@ const EQUIPMENT_SLOTS: EquipmentSlot[] = [
   "item2",
 ];
 
+const DEFAULT_HERO_PORTRAIT = `${import.meta.env.BASE_URL}assets/hero-knight.webp`;
+
 const SLOT_KEYS: Record<
   EquipmentSlot,
   "slotShortMain" | "slotShortOff" | "slotShortArmor" | "slotShortItem1" | "slotShortItem2"
@@ -127,7 +129,7 @@ export function renderHeroCard(
           ${
             portrait
               ? `<img src="${escapeHtml(portrait)}" alt="${escapeHtml(card.name)}" style="${portraitStyle(card)}" />`
-              : `<div class="hero-card-portrait-empty">${icon("user")}<span>${escapeHtml(t(locale, "portraitPlaceholder"))}</span></div>`
+              : `<img class="hero-card-default-portrait" src="${escapeHtml(DEFAULT_HERO_PORTRAIT)}" alt="" aria-hidden="true" />`
           }
           <span class="hero-card-portrait-grid" aria-hidden="true"></span>
         </div>

@@ -194,11 +194,12 @@ function renderBrand(locale: Locale): string {
   return `
     <button type="button" class="brand" data-action="app-mode" data-mode="builder">
       <span class="brand-emblem" aria-hidden="true">
-        <span></span><span></span><span></span><span></span>
+        ${icon("shield")}
       </span>
       <span class="brand-copy">
-        <strong>HOBT</strong>
-        <small>${escapeHtml(t(locale, "brandTitle"))}</small>
+        <strong>Heroes of</strong>
+        <b>Bricks &amp; Tactics</b>
+        <small>HOBT &middot; ${escapeHtml(t(locale, "brandTitle"))}</small>
       </span>
     </button>`;
 }
@@ -211,28 +212,13 @@ function renderHeader(state: AppState, teamCost: number): string {
   return `
     <header class="site-header no-print">
       ${renderBrand(locale)}
-      <div class="header-team">
-        <label>
-          <span>${escapeHtml(t(locale, "teamName"))}</span>
-          <input
-            type="text"
-            value="${escapeHtml(state.team.name)}"
-            maxlength="48"
-            data-action="team-name"
-          />
-        </label>
-      </div>
-      <div class="header-budget">
-        <div>
-          <span>${escapeHtml(t(locale, "teamBudget"))}</span>
-          <strong>${teamCost} / ${state.team.budget}</strong>
-        </div>
-        <div class="budget-track" aria-hidden="true"><span style="width:${ratio}%"></span></div>
-        <small class="${remaining < 0 ? "is-over" : ""}">
-          ${remaining >= 0 ? `${remaining} ${t(locale, "pointsReserve").toLowerCase()}` : `${Math.abs(remaining)} ${t(locale, "pointsOverBudget")}`}
-        </small>
-      </div>
+      ${renderNavigation(state)}
       <div class="header-actions">
+        <span class="header-budget-pill ${remaining < 0 ? "is-over" : ""}">
+          <small>${escapeHtml(t(locale, "teamBudget"))}</small>
+          <strong>${teamCost} / ${state.team.budget}</strong>
+          <i style="--budget-ratio:${ratio}%"></i>
+        </span>
         <label class="theme-select">
           <span>${icon("sparkle")}</span>
           <select data-action="card-theme" aria-label="${escapeHtml(t(locale, "teamTheme"))}">
@@ -694,6 +680,109 @@ function previousStep(step: EditorStep): EditorStep | null {
   return STEPS[index - 1]?.id ?? null;
 }
 
+function renderBuilderInfoPanel(
+  state: AppState,
+  resolved: ReturnType<typeof resolveCharacter>,
+  canSave: boolean,
+  existing: boolean,
+): string {
+  const locale = state.locale;
+  const polish = locale === "pl";
+  const teamResult = validateTeam(
+    state.team,
+    DEFAULT_RULESET,
+    catalogFor(state),
+  );
+  const budgetRatio = Math.min(
+    100,
+    Math.max(0, (teamResult.totalCost / state.team.budget) * 100),
+  );
+  const equipmentCount = Object.values(state.draft.equipment).filter(Boolean).length;
+  const rules = [
+    {
+      iconId: "heart" as const,
+      key: "HP",
+      title: polish ? "Punkty życia" : "Health points",
+      body: polish
+        ? "Gdy HP spadnie do zera, bohater zostaje pokonany."
+        : "When HP reaches zero, the hero is defeated.",
+    },
+    {
+      iconId: "shoe-prints" as const,
+      key: "MP",
+      title: polish ? "Punkty ruchu" : "Movement points",
+      body: polish
+        ? "Określają mobilność bohatera na polu bitwy."
+        : "Defines the hero's mobility across the battlefield.",
+    },
+    {
+      iconId: "shield" as const,
+      key: "AC",
+      title: polish ? "Klasa pancerza" : "Armor class",
+      body: polish
+        ? "Wyższy pancerz zwiększa odporność na trafienia."
+        : "Higher armor improves resistance to incoming hits.",
+    },
+  ];
+
+  return `
+    <aside class="builder-info-panel no-print">
+      <div class="info-tabs" role="tablist" aria-label="${polish ? "Informacje o zasadach" : "Rules information"}">
+        <button type="button" class="active">${polish ? "Podgląd zasad" : "Rules"}</button>
+        <button type="button">${polish ? "Podsumowanie" : "Summary"}</button>
+      </div>
+
+      <section class="info-card rules-card">
+        <span class="panel-kicker">${polish ? "Podgląd zasad" : "Rules preview"}</span>
+        <div class="rules-list">
+          ${rules
+            .map(
+              (rule) => `
+              <div class="rule-row">
+                <span class="rule-icon">${icon(rule.iconId)}</span>
+                <p><strong>${rule.key} <small>(${rule.title})</small></strong><span>${rule.body}</span></p>
+              </div>`,
+            )
+            .join("")}
+        </div>
+        <button type="button" class="panel-link" data-action="app-mode" data-mode="catalog">
+          ${polish ? "Zobacz pełne zasady" : "View full rules"}
+        </button>
+      </section>
+
+      <section class="info-card hero-summary-card">
+        <span class="panel-kicker">${polish ? "Podsumowanie bohatera" : "Hero summary"}</span>
+        <dl class="hero-summary-list">
+          <div><dt>${icon("user")}${polish ? "Bohater" : "Hero"}</dt><dd>${escapeHtml(state.draft.name || t(locale, "newCharacter"))}</dd></div>
+          <div><dt>${icon("shield")}${polish ? "Frakcja" : "Faction"}</dt><dd>${escapeHtml(state.draft.faction || (polish ? "Niezależni" : "Independent"))}</dd></div>
+          <div><dt>${icon("box-open")}${polish ? "Ekwipunek" : "Equipment"}</dt><dd>${equipmentCount} / 5</dd></div>
+          <div><dt>${icon("sparkle")}${polish ? "Talenty" : "Talents"}</dt><dd>${state.draft.talentIds.length} / 3</dd></div>
+          <div><dt>${icon("list")}${polish ? "Koszt postaci" : "Hero cost"}</dt><dd class="gold">${resolved.cost.total} ${escapeHtml(t(locale, "pointsShort"))}</dd></div>
+        </dl>
+      </section>
+
+      <section class="info-card team-budget-card">
+        <div class="team-budget-heading">
+          <span class="panel-kicker">${escapeHtml(t(locale, "teamBudget"))}</span>
+          <strong>${teamResult.totalCost} / ${state.team.budget}</strong>
+        </div>
+        <label class="team-name-field">
+          <span>${escapeHtml(t(locale, "teamName"))}</span>
+          <input type="text" value="${escapeHtml(state.team.name)}" maxlength="48" data-action="team-name" />
+        </label>
+        <div class="budget-track"><span style="width:${budgetRatio}%"></span></div>
+      </section>
+
+      <button type="button" class="button button-primary generate-card-button" data-action="add-to-team" ${canSave ? "" : "disabled"}>
+        ${icon("sparkle")}<span>${escapeHtml(existing ? t(locale, "updateInStash") : t(locale, "saveToTeam"))}</span>
+      </button>
+      <div class="panel-secondary-actions">
+        <button type="button" class="button button-ghost" data-action="app-mode" data-mode="collection">${icon("users")}${polish ? "Kolekcja" : "Collection"}</button>
+        <button type="button" class="button button-ghost" data-action="app-mode" data-mode="print">${icon("list")}${polish ? "Druk" : "Print"}</button>
+      </div>
+    </aside>`;
+}
+
 function renderBuilder(state: AppState): string {
   const locale = state.locale;
   const catalog = catalogFor(state);
@@ -729,23 +818,25 @@ function renderBuilder(state: AppState): string {
       </div>
 
       <div class="builder-layout mobile-${state.mobileBuilderView}">
-        ${renderStepRail(state, resolved)}
-        <section class="builder-editor no-print">
-          <div class="builder-editor-body">
-            ${renderActiveStep(state, resolved, catalog)}
-          </div>
-          <div class="step-actions">
-            ${
-              previous
-                ? `<button type="button" class="button button-ghost" data-action="goto-step" data-step="${previous}">← ${escapeHtml(t(locale, "previousStep"))}</button>`
-                : `<span></span>`
-            }
-            ${
-              next
-                ? `<button type="button" class="button button-secondary" data-action="goto-step" data-step="${next}">${escapeHtml(t(locale, "nextStep"))} →</button>`
-                : `<button type="button" class="button button-primary" data-action="add-to-team" ${canSave ? "" : "disabled"}>${icon("check")}<span>${escapeHtml(existing ? t(locale, "updateInStash") : t(locale, "saveToTeam"))}</span></button>`
-            }
-          </div>
+        <section class="builder-control-panel no-print">
+          ${renderStepRail(state, resolved)}
+          <section class="builder-editor">
+            <div class="builder-editor-body">
+              ${renderActiveStep(state, resolved, catalog)}
+            </div>
+            <div class="step-actions">
+              ${
+                previous
+                  ? `<button type="button" class="button button-ghost" data-action="goto-step" data-step="${previous}">← ${escapeHtml(t(locale, "previousStep"))}</button>`
+                  : `<span></span>`
+              }
+              ${
+                next
+                  ? `<button type="button" class="button button-secondary" data-action="goto-step" data-step="${next}">${escapeHtml(t(locale, "nextStep"))} →</button>`
+                  : `<button type="button" class="button button-primary" data-action="add-to-team" ${canSave ? "" : "disabled"}>${icon("check")}<span>${escapeHtml(existing ? t(locale, "updateInStash") : t(locale, "saveToTeam"))}</span></button>`
+              }
+            </div>
+          </section>
         </section>
         <aside class="card-preview-panel">
           <div class="preview-panel-heading no-print">
@@ -758,6 +849,7 @@ function renderBuilder(state: AppState): string {
           <div class="preview-stage">${renderHeroCard(locale, card, "preview")}</div>
           <p class="preview-note no-print">${icon("warn")}<span>${escapeHtml(t(locale, "printScaleHint"))}</span></p>
         </aside>
+        ${renderBuilderInfoPanel(state, resolved, canSave, existing)}
       </div>
     </section>`;
 }
@@ -1014,7 +1106,6 @@ export function renderApp(state: AppState): string {
   return `
     <main class="app-shell mode-${state.appMode}">
       ${renderHeader(state, teamResult.totalCost)}
-      ${renderNavigation(state)}
       <div class="app-content">${renderContent(state)}</div>
       <p class="app-toast hidden no-print" data-role="app-toast" aria-live="polite"></p>
     </main>`;
