@@ -5,7 +5,7 @@ import { defineConfig } from "vite";
 const rootDir = path.dirname(fileURLToPath(import.meta.url));
 
 export default defineConfig({
-  base: "/hobt/",
+  base: "/HOBT/",
   root: rootDir,
   resolve: {
     alias: {
